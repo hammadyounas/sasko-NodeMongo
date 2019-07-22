@@ -42,7 +42,7 @@ router.post('/brand', function (req, res, next) {
     }).catch(next)
 })
 // Updating Data
-router.put('/brand/:id', function (req, res, next) {
+router.put('/brand/:id',function (req, res, next) {
     Model.brandMod.findByIdAndUpdate({ _id: req.params.id }, req.body).then(function () {
         Model.brandMod.findOne({ _id: req.params.id }).then(function (ninja) {
             res.send(ninja)
