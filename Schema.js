@@ -1,18 +1,14 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const usersSchema = new Schema({
+const itemSchema = new Schema({
     name: {
         type: String,
-        required: [true, 'Name field is Required']
-    },
-    type: {
-        type: String,
-        required: [true, 'Type field is Required']
+        required: [true, 'name field is Required']
     }
 });
-const usersModel = mongoose.model('users', usersSchema);
+const itemModel = mongoose.model('item', itemSchema);
 
 module.exports = {
-    userMod: usersModel,
+    itemMod: itemModel,
 }
