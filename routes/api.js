@@ -29,4 +29,31 @@ router.delete('/items/:id', function (req, res, next) {
     });
 });
 
+// Get Data
+router.get('/brand', function (req, res, next) {
+    Model.brandMod.find().then((data) => {
+        res.send(data)
+    })
+})
+// Adding Data
+router.post('/brand', function (req, res, next) {
+    Model.brandMod.create(req.body).then(function (ninja) {
+        res.send(ninja)
+    }).catch(next)
+})
+// Updating Data
+router.put('/brand/:id', function (req, res, next) {
+    Model.brandMod.findByIdAndUpdate({ _id: req.params.id }, req.body).then(function () {
+        Model.brandMod.findOne({ _id: req.params.id }).then(function (ninja) {
+            res.send(ninja)
+        })
+    });
+})
+// Delete Data
+router.delete('/brand/:id', function (req, res, next) {
+    Model.brandMod.findByIdAndRemove({ _id: req.params.id }).then(function (ninja) {
+        res.send(ninja)
+    });
+});
+
 module.exports = router;

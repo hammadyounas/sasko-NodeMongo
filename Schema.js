@@ -4,11 +4,24 @@ const Schema = mongoose.Schema;
 const itemSchema = new Schema({
     name: {
         type: String,
-        required: [true, 'name field is Required']
+        required: [true, 'item name field is Required']
     }
 });
 const itemModel = mongoose.model('item', itemSchema);
 
+const brandSchema = new Schema({
+    name: {
+        type: String,
+        required: [true, 'brand name field is Required']
+    },
+    itemId: {
+        type: String,
+        required: [true, 'Item Id field is Required']
+    }
+});
+const brandModel = mongoose.model('brand', brandSchema);
+
 module.exports = {
     itemMod: itemModel,
+    brandMod: brandModel
 }
