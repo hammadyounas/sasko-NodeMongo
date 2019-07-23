@@ -77,7 +77,7 @@ router.put('/customer/:id',function (req, res, next) {
     });
 })
 // Delete Data
-router.delete('/customer/:id', function (req, res, next) {
+router.delete('/customer/:id',  function (req, res, next) {
     Model.custMod.findByIdAndRemove({ _id: req.params.id }).then(function (ninja) {
         res.send(ninja)
     });
