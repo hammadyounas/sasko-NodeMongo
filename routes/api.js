@@ -11,7 +11,7 @@ router.get('/items', function (req, res, next) {
 // Adding Data
 router.post('/items', function (req, res, next) {
     Model.itemMod.create(req.body).then(function (ninja) {
-        res.send(ninja)
+        res.send(ninja) 
     }).catch(next)
 })
 // Updating Data
