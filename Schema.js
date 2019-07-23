@@ -21,7 +21,15 @@ const brandSchema = new Schema({
 });
 const brandModel = mongoose.model('brand', brandSchema);
 
+const customerSchema = new Schema({
+    name: {
+        type: String,
+        required: [true, 'brand name field is Required']
+    }
+});
+const customerModel = mongoose.model('customer', customerSchema);
 module.exports = {
     itemMod: itemModel,
-    brandMod: brandModel
+    brandMod: brandModel,
+    custMod: customerModel
 }

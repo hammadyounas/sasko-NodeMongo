@@ -56,4 +56,31 @@ router.delete('/brand/:id', function (req, res, next) {
     });
 });
 
+// Get Data
+router.get('/customer', function (req, res, next) {
+    Model.custMod.find().then((data) => {
+        res.send(data)
+    })
+})
+// Adding Data
+router.post('/customer', function (req, res, next) {
+    Model.custMod.create(req.body).then(function (ninja) {
+        res.send(ninja)
+    }).catch(next)
+})
+// Updating Data
+router.put('/customer/:id',function (req, res, next) {
+    Model.custMod.findByIdAndUpdate({ _id: req.params.id }, req.body).then(function () {
+        Model.custMod.findOne({ _id: req.params.id }).then(function (ninja) {
+            res.send(ninja)
+        })
+    });
+})
+// Delete Data
+router.delete('/customer/:id', function (req, res, next) {
+    Model.custMod.findByIdAndRemove({ _id: req.params.id }).then(function (ninja) {
+        res.send(ninja)
+    });
+});
+
 module.exports = router;
