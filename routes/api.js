@@ -14,7 +14,7 @@ router.post('/items', function (req, res, next) {
         res.send(ninja) 
     }).catch(next)
 })
-// Updating Data
+// Updating Data 
 router.put('/items/:id', function (req, res, next) {
     Model.itemMod.findByIdAndUpdate({ _id: req.params.id }, req.body).then(function () {
         Model.itemMod.findOne({ _id: req.params.id }).then(function (ninja) {
