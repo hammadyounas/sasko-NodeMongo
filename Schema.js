@@ -28,8 +28,64 @@ const customerSchema = new Schema({
     }
 });
 const customerModel = mongoose.model('customer', customerSchema);
+
+const invoiceSchema = new Schema({
+    date: {
+        type: Date,
+        required: [true, 'Date field is Required']
+    },
+    customerId: {
+        type: String,
+        required: [true, 'Customer Id field is Required']
+    },
+    manualBook: {
+        type: Number,
+        required: [true, 'Manual Book field is Required']
+    },
+    totalQuantity: {
+        type: Number,
+        required: [true, 'Total Quantity field is Required']
+    },
+    totalNetCost: {
+        type: Number,
+        required: [true, 'Total Net Cost field is Required']
+    },
+    postedStatus: {
+        type: Number,
+        required: [true, 'Posted Status field is Required'],
+        default: 0
+    }
+});
+const invoiceModel = mongoose.model('invoice', invoiceSchema);
+
+const stockSchema = new Schema({
+    date: {
+        type: Date,
+        required: [true, 'Date field is Required']
+    },
+    totalQuantity: {
+        type: Number,
+        required: [true, 'Total Quantity field is Required']
+    },
+    totalDamageQuantity: {
+        type: Number,
+        required: [true, 'Total Damage Quantity field is Required']
+    },
+    netCost: {
+        type: Number,
+        required: [true, 'Net Cost field is Required'],
+    },
+    netQuantity: {
+        type: Number,
+        required: [true, 'Net Quantity field is Required']
+    }
+});
+const stockModel = mongoose.model('stock', stockSchema);
+
 module.exports = {
     itemMod: itemModel,
     brandMod: brandModel,
-    custMod: customerModel
+    custMod: customerModel,
+    invMod: invoiceModel,
+    stocMod:stockModel
 }

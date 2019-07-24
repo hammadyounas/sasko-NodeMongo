@@ -6,7 +6,7 @@ var cors = require('cors')
 const app=express();
 
 mongoose.Promise = require('bluebird');
-mongoose.connect('mongodb://AAK:abc123@ds135003.mlab.com:35003/restapi')
+mongoose.connect('mongodb://AAK:abc123@ds135003.mlab.com:35003/restapi',{ useNewUrlParser: true })
 
     .then(() => {
       console.log('Start');
