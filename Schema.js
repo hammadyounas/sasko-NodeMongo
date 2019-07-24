@@ -79,7 +79,7 @@ const stockSchema = new Schema({
         type: Number,
         required: [true, 'Total Damage Quantity field is Required']
     },
-    netCost: {
+    netCost: { 
         type: Number,
         required: [true, 'Net Cost field is Required'],
     },
