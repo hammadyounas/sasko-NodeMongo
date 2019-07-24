@@ -17,6 +17,14 @@ const brandSchema = new Schema({
     itemId: {
         type: String,
         required: [true, 'Item Id  field is Required']
+    },
+    createdDate:{
+        type: Date,
+        required: [true, 'Created Date field is Required']
+    },
+    updatedDate:{
+        type: Date,
+        required: [true, 'Updated Date field is Required']
     }
 });
 const brandModel = mongoose.model('brand', brandSchema);
