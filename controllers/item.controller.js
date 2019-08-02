@@ -1,8 +1,12 @@
 const User = require('../models/item.model')
 
 module.exports.getTeam = (req, res) => {
-  User.find().then(users => {
-    res.status(200).json({ "wow": users })
+  console.log("get");
+  
+  User.find().then(Items => {
+    res.status(200).json({ Items })
+  }).catch(error => {
+    res.status(200).json({ "wow": error })
   })
 }
 module.exports.addItem = (req, res) => {

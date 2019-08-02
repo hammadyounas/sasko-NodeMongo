@@ -8,9 +8,11 @@ module.exports = () => {
   const PORT = process.env.PORT || 3005
 
   mongoose
-    .connect(process.env.MONGO_URL)
+    .connect(process.env.MONGO_URL, { useNewUrlParser: true })
     .then(data => {
-      console.log('Connected')
+      console.log('Connected');
+      // mongoose.close();
+
     })
     .catch(err => {
       console.log('Error')

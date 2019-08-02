@@ -7,5 +7,4 @@ const brand = mongoose.Schema({
     updatedAt: { type: Date, default: Date.now },
 })
 
-
 module.exports = mongoose.model('brand', brand)

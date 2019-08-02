@@ -29,5 +29,4 @@ const invoice = new Schema({
     }
 });
 
-
 module.exports = mongoose.model('invoice', invoice)
