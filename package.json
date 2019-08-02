@@ -1,11 +1,12 @@
 {
-  "name": "rotiapp",
+  "name": "sascoapp",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-   "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
   },
   "author": "Ali",
   "license": "MIT",
@@ -25,5 +26,8 @@
     "nodemailer": "^4.6.4",
     "nodemailer-smtp-transport": "^2.7.4",
     "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
   }
 }
