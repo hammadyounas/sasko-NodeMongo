@@ -1,10 +1,10 @@
 const mongoose = require('mongoose')
 
-const user = mongoose.Schema({
+const Items = mongoose.Schema({
   
   name: { type: String, required: true },
   
 })
 
 
-module.exports = mongoose.model('item', user)
+module.exports = mongoose.model('item', Items)
