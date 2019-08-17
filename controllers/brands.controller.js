@@ -39,7 +39,7 @@ module.exports.addBrands = async (req, res) => {
                     data: req.body.data
                 }
             }, { useFindAndModify: false }).exec().then(data => {
-                res.send(data);
+                res.send(req.body);
             }).catch(error => {
                 res.status(500).json({
                     stack: error.stack,
