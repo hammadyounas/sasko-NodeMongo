@@ -51,109 +51,49 @@ module.exports.addBrands = async (req, res) => {
 
 }
 
-module.exports.eeditBrands = (req, res) => {
+
+module.exports.editBrands = async (req, res) => {
+    let searchBrands = await Brands.findOne({ "data._id": req.body.brandId });
+    
+    searchBrands.data.map(x => {
+        if (x._id == req.body.brandId) {
+            x.BrandName = req.body.BrandName;
+            x.updatedAt = Date.now();
+        }
+    })
 
     Brands.findOneAndUpdate(
-        { "name": req.body.name },
+        { "data._id": req.body.brandId },
         {
             $set: {
-                data: req.body.data
+                data: searchBrands.data
             }
-        }, { useFindAndModify: false }).exec().then(data => {
+        }, { useFindAndModify: false }).exec(data => {
+
+            res.send(req.body);
+        })
+}
+
+
+
+
+
+
+module.exports.deleteBrands = async (req, res) => {
+   
+    let searchBrands = await Brands.findOne({ "data._id": req.params.brandId });
+    if(searchBrands != null) { 
+    searchBrands.data = searchBrands.data.filter(item => item._id != req.params.brandId)
+    Brands.findOneAndUpdate(
+        { "data._id": req.params.brandId },
+        {
+            $set: {
+                data: searchBrands.data
+            }
+        }).exec(data => {
             res.send(data);
-        }).catch(error => {
-            res.status(500).json({
-                stack: error.stack,
-                code: error.code,
-                message: error.message
-            })
         })
-}
-
-
-module.exports.editBrands = (req, res) => {
-
-
-
-
-    Brands.find(
-        { "data._id": req.body._id },
-
-    )
-        .then(data => {
-            // console.log(data);
-            // res.send(data)
-            let brands = data[0].data;
-            // console.log(brands);
-
-            brands.map((x, index) => {
-
-                if (x._id == req.body._id) {
-                    brands[index] = req.body
-                    console.log(index);
-
-                    // res.send(brands);
-                    Brands.findOneAndUpdate(
-                        { "data._id": req.body._id },
-                        {
-                            $set: { "asd": "asd" }
-                        }, { useFindAndModify: false }).exec().then(data => {
-                            res.send(data);
-                        }).catch(error => {
-                            res.status(500).json({
-                                stack: error.stack,
-                                code: error.code,
-                                message: error.message
-                            })
-                        })
-                }
-            })
-            // console.log(a);
-
-            // newData.save({
-            //     "itemId": "12345",
-            //     "BrandName": "Editttttttttt"
-            // })
-        }).catch(error => {
-            res.status(500).json({
-                stack: error.stack,
-                code: error.code,
-                message: error.message
-            })
-        })
-
-
-    // Brands.findOneAndUpdate(
-    //     { "data._id": req.body._id },
-    //     {
-    //         $set: {
-    //             "data.itemId": "12345",
-    //             "data.BrandName": "Editttttttttt"
-    //         }
-    //     }, { useFindAndModify: false }).exec().then(data => {
-    //         res.send(data);
-    //     }).catch(error => {
-    //         res.status(500).json({
-    //             stack: error.stack,
-    //             code: error.code,
-    //             message: error.message
-    //         })
-    //     })
-}
-
-
-
-
-
-module.exports.deleteBrands = (req, res) => {
-
-    Brands.remove({}).then(function (ninja) {
-        res.send(ninja)
-    }).catch(error => {
-        res.status(500).json({
-            stack: error.stack,
-            code: error.code,
-            message: error.message
-        })
-    })
+    } else {
+        res.send({"Error" : "Id not fount"});
+    }
 }

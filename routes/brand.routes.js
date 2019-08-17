@@ -9,6 +9,6 @@ console.log("Item Route Loaded");
 routes.get('/', brandController.getBrands)
 routes.post('/', brandController.addBrands)
 routes.put('/', brandController.editBrands)
-routes.delete('/', brandController.deleteBrands)
+routes.delete('/:brandId', brandController.deleteBrands)
 
 module.exports = routes
