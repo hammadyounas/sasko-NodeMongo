@@ -1,12 +1,12 @@
 const Items = require('../models/item.model')
 
 module.exports.getItems = (req, res) => {
-  // console.log("get");
+  console.log("get");
 
   Items.find().then(Items => {
-    res.send(200).json({ Items })
+    res.send(Items)
   }).catch(error => {
-    res.send(200).json({ "wow": error })
+    res.send(error)
   })
 }
 
@@ -14,9 +14,9 @@ module.exports.getItems = (req, res) => {
 module.exports.deleteItems = (req, res) => {
 
   Items.remove({_id :req.params.id}).then(Items => {
-    res.send(200).json({ Items })
+    res.send(Items )
   }).catch(error => {
-    res.send(200).json({ "wow": error })
+    res.send( error)
   })
 }
 
@@ -25,9 +25,9 @@ module.exports.editItems = (req, res) => {
 
 
   Items.update({_id :req.body.id}, { name: req.body.name } ).then(Items => {
-    res.send(200).json({ Items })
+    res.send(Items)
   }).catch(error => {
-    res.send(200).json({ "wow": error })
+    res.send(error)
   })
 }
 
