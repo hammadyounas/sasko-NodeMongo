@@ -14,7 +14,7 @@ module.exports.getItems = (req, res) => {
 module.exports.deleteItems = (req, res) => {
 
   Items.remove({_id :req.params.id}).then(Items => {
-    res.send(Items )
+    res.send(Items)
   }).catch(error => {
     res.send( error)
   })

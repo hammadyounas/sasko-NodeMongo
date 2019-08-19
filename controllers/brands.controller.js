@@ -5,7 +5,7 @@ const Items = require('../models/item.model');
 module.exports.getBrands = (req, res) => {
 
     Brands.find().then(Brands => {
-        res.status(200).json({ Brands })
+        res.send(Brands)
     }).catch(error => {
         res.status(200).json({ "wow": error })
     })
