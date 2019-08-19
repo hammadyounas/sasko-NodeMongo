@@ -7,7 +7,7 @@ module.exports.getBrands = (req, res) => {
     Brands.find().then(Brands => {
         res.send(Brands)
     }).catch(error => {
-        res.status(200).json({ "wow": error })
+        res.send(error)
     })
 }
 module.exports.addBrands = async (req, res) => {
