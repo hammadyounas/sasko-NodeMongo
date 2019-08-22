@@ -4,7 +4,7 @@ const routes = express.Router()
 const brandController = require('../controllers/brands.controller')
 
 
-console.log("Item Route Loaded");
+console.log("Brand Route Loaded");
 
 routes.get('/', brandController.getBrands)
 routes.post('/', brandController.addBrands)
