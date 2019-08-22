@@ -9,7 +9,7 @@ console.log("Stock-Details Route Loaded");
 routes.get('/', stockDetails.getStockDetails);
 routes.post('/', stockDetails.addStockDetailsWithStock);
 routes.delete('/:id', stockDetails.deleteStockDetails);
-routes.put('/', stockDetails.editStockDetails);
+routes.put('/:id', stockDetails.editStockDetails);
 
 
 
