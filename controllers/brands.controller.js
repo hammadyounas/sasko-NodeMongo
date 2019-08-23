@@ -97,3 +97,15 @@ module.exports.deleteBrands = async (req, res) => {
         res.send({"Error" : "Id not fount"});
     }
 }
+
+module.exports.getItemBrands = async (req,res)=>{
+    try{
+        // console.log("req body ->",req.body);
+    let getItemBrands = await Brands.find({itemId:req.body.itemId});
+    // console.log("getItemBrands",getItemBrands);
+    res.status(200).send(getItemBrands[0].data);
+    }catch(error) {
+        res.status(500).send(error)
+        //  Block of code to handle errors
+      }
+}
