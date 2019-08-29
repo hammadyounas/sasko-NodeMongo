@@ -10,8 +10,8 @@ routes.get('/', stockDetails.getStockDetails);
 routes.post('/', stockDetails.addStockDetailsWithStock);
 routes.delete('/:id', stockDetails.deleteStockDetails);
 routes.put('/:id', stockDetails.editStockDetails);
-
-
-
+routes.get('/stockSecondReport',stockDetails.getStockSecondReport);
+routes.get('/getStockSummary',stockDetails.getStockSummary);
+routes.get('/getDamageStock',stockDetails.getDamageStock);
 
 module.exports = routes

@@ -20,7 +20,6 @@ module.exports.deleteStock = (req, res) => {
   })
 }
 
-
 module.exports.editStock = (req, res) => {
 
 
@@ -30,8 +29,6 @@ module.exports.editStock = (req, res) => {
     res.send(error)
   })
 }
-
-
 
 module.exports.addStock = (req, res) => {
   Stock.create(req.body).then(function (ninja) {

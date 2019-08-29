@@ -75,10 +75,6 @@ module.exports.editBrands = async (req, res) => {
 }
 
 
-
-
-
-
 module.exports.deleteBrands = async (req, res) => {
    
     let searchBrands = await Brands.findOne({ "data._id": req.params.brandId });
