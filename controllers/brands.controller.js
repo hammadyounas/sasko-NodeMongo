@@ -11,6 +11,8 @@ module.exports.getBrands = async (req, res) => {
             itemQuery = Items.findById({ "_id": brandDetails['itemId'] }).exec().then(data => {
                 if (data != null) {
                     brandDetails.itemName = data.name;
+                } else {
+                    brandDetails.itemName = "Item is deleted";
                 }
             })
         })
