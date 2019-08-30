@@ -98,14 +98,19 @@ module.exports.getStockSecondReport = async (req, res) => {
 
 module.exports.getStockSummary = async (req, res) => {
   try {
-    let stockSummery = await StockDetails.find(
+    let stockSummary = await StockDetails.find(
       {},
       { itemName: 1, brandName: 1, date: 1 }
     )
-    if (!stockSummery.length) {
+    if (!stockSummary.length) {
       res.status(404).send({ msg: 'No data found' })
     } else {
-      res.status(200).send(stockSummery);
+      let newStockSummary = stockSummary.map(obj => ({
+        itemName: obj.itemName,
+        brandName: obj.brandName,
+        date: obj.date
+      }));
+      res.status(200).send(newStockSummary);
     }
   } catch (err) {
     res.status(500).send({ msg: 'internal server error' })
@@ -118,7 +123,13 @@ module.exports.getDamageStock = async (req, res) => {
     if (!damageStock.length) {
       res.status(404).send({ msg: 'No data found' })
     } else {
-      res.status(200).send(damageStock);
+      let newDamageStock = damageStock.map(obj => ({
+        brandName: obj.brandName,
+        damageQty: obj.damageQty,
+        date: obj.date
+      }));
+      res.status(200).send(newDamageStock);
+      console.log(damageStock);
     }
   } catch (err) {
     res.status(500).send({ msg: 'Internal Server Error' });
