@@ -41,10 +41,8 @@ module.exports.editStockDetails = (req, res) => {
 }
 
 module.exports.addStockDetailsWithStock = (req, res) => {
-  console.log('check add stock', req.body)
-
+//   console.log('check add stock', req.body)
   req.body.stock['_id'] = new mongoose.Types.ObjectId()
-
   const stock = new Stock(req.body.stock)
   stock.save().then(result => {
     if (!result) {
@@ -74,12 +72,14 @@ module.exports.addStockDetailsWithOutStock = async (req, res) => {
 
 module.exports.getStockSecondReport = async (req, res) => {
   try {
-    let report = await StockDetails.find({}, { itemName: 1, actualQty: 1 })
-    if(!report.length){
-        res.status(404).send({msg:'No data found'})
-    }else{
-        res.status(200).send(report);
-    }
+    let report = await StockDetails.find({}, { itemId: 1, actualQty: 1 })
+    console.log("report =>",report);
+    
+    // if(!report.length){
+    //     res.status(404).send({msg:'No data found'})
+    // }else{
+    //     res.status(200).send(report);
+    // }
   } catch (err) {
     res.status(500).send({ msg: 'internal server error' })
   }
