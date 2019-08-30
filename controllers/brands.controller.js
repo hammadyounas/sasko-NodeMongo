@@ -2,13 +2,24 @@ const Brands = require('../models/brand.model');
 const Items = require('../models/item.model');
 
 
-module.exports.getBrands = (req, res) => {
+module.exports.getBrands = async (req, res) => {
 
-    Brands.find().then(Brands => {
-        res.send(Brands)
-    }).catch(error => {
-        res.send(error)
+    let Brand = await Brands.find();
+    let itemQuery;
+    Brand.map((brands, index) => {
+        brands.data.map(brandDetails => {
+            itemQuery = Items.findById({ "_id": brandDetails['itemId'] }).exec().then(data => {
+                if (data != null) {
+                    brandDetails.itemName = data.name;
+                }
+            })
+        })
     })
+
+    Promise.all([itemQuery]).then(data => {
+        res.send({ 'brands': Brand })
+    })
+
 }
 module.exports.addBrands = async (req, res) => {
 
@@ -54,7 +65,7 @@ module.exports.addBrands = async (req, res) => {
 
 module.exports.editBrands = async (req, res) => {
     let searchBrands = await Brands.findOne({ "data._id": req.body.brandId });
-    
+
     searchBrands.data.map(x => {
         if (x._id == req.body.brandId) {
             x.BrandName = req.body.BrandName;
@@ -76,32 +87,32 @@ module.exports.editBrands = async (req, res) => {
 
 
 module.exports.deleteBrands = async (req, res) => {
-   
+
     let searchBrands = await Brands.findOne({ "data._id": req.params.brandId });
-    if(searchBrands != null) { 
-    searchBrands.data = searchBrands.data.filter(item => item._id != req.params.brandId)
-    Brands.findOneAndUpdate(
-        { "data._id": req.params.brandId },
-        {
-            $set: {
-                data: searchBrands.data
-            }
-        }).exec(data => {
-            res.send(data);
-        })
+    if (searchBrands != null) {
+        searchBrands.data = searchBrands.data.filter(item => item._id != req.params.brandId)
+        Brands.findOneAndUpdate(
+            { "data._id": req.params.brandId },
+            {
+                $set: {
+                    data: searchBrands.data
+                }
+            }).exec(data => {
+                res.send(data);
+            })
     } else {
-        res.send({"Error" : "Id not fount"});
+        res.send({ "Error": "Id not fount" });
     }
 }
 
-module.exports.getItemBrands = async (req,res)=>{
-    try{
+module.exports.getItemBrands = async (req, res) => {
+    try {
         // console.log("req body ->",req.body);
-    let getItemBrands = await Brands.find({itemId:req.body.itemId});
-    // console.log("getItemBrands",getItemBrands);
-    res.status(200).send(getItemBrands[0].data);
-    }catch(error) {
+        let getItemBrands = await Brands.find({ itemId: req.body.itemId });
+        // console.log("getItemBrands",getItemBrands);
+        res.status(200).send(getItemBrands[0].data);
+    } catch (error) {
         res.status(500).send(error)
         //  Block of code to handle errors
-      }
+    }
 }
