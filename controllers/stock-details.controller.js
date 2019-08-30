@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const StockDetails = require('../models/stock-details.model')
 const Stock = require('../models/stock.model')
+const Item = require('../models/item.model')
 
 let errorHandler = error => {
   return {
@@ -41,7 +42,7 @@ module.exports.editStockDetails = (req, res) => {
 }
 
 module.exports.addStockDetailsWithStock = (req, res) => {
-//   console.log('check add stock', req.body)
+  //   console.log('check add stock', req.body)
   req.body.stock['_id'] = new mongoose.Types.ObjectId()
   const stock = new Stock(req.body.stock)
   stock.save().then(result => {
@@ -73,13 +74,23 @@ module.exports.addStockDetailsWithOutStock = async (req, res) => {
 module.exports.getStockSecondReport = async (req, res) => {
   try {
     let report = await StockDetails.find({}, { itemId: 1, actualQty: 1 })
-    console.log("report =>",report);
-    
-    // if(!report.length){
-    //     res.status(404).send({msg:'No data found'})
-    // }else{
-    //     res.status(200).send(report);
-    // }
+    console.log("report =>", report);
+
+    if (!report.length) {
+      res.status(404).send({ msg: 'No data found' })
+    } else {
+      let myArray = [];
+      let myPromise;
+      report.map(obj => {
+        myPromise = Item.findOne({ _id: obj['itemId'] }).then(res => {
+          myArray.push({ itemName: res.name, actualQty: obj['actualQty'] });
+        })
+      });
+
+      Promise.all([myPromise]).then(() => {
+        res.status(200).send(myArray);
+      });
+    }
   } catch (err) {
     res.status(500).send({ msg: 'internal server error' })
   }
@@ -91,10 +102,10 @@ module.exports.getStockSummary = async (req, res) => {
       {},
       { itemName: 1, brandName: 1, date: 1 }
     )
-    if(!stockSummery.length){
-        res.status(404).send({msg:'No data found'})
-    }else{
-        res.status(200).send(stockSummery);
+    if (!stockSummery.length) {
+      res.status(404).send({ msg: 'No data found' })
+    } else {
+      res.status(200).send(stockSummery);
     }
   } catch (err) {
     res.status(500).send({ msg: 'internal server error' })
@@ -102,14 +113,14 @@ module.exports.getStockSummary = async (req, res) => {
 }
 
 module.exports.getDamageStock = async (req, res) => {
-    try{
-        let damageStock = await StockDetails.find({},{ brandName: 1, damageQty: 1, date: 1 });
-        if(!damageStock.length){
-            res.status(404).send({msg:'No data found'})
-        }else{
-            res.status(200).send(damageStock);
-        }
-    }catch(err){
-        res.status(500).send({msg:'Internal Server Error'});
+  try {
+    let damageStock = await StockDetails.find({}, { brandName: 1, damageQty: 1, date: 1 });
+    if (!damageStock.length) {
+      res.status(404).send({ msg: 'No data found' })
+    } else {
+      res.status(200).send(damageStock);
     }
+  } catch (err) {
+    res.status(500).send({ msg: 'Internal Server Error' });
+  }
 }
