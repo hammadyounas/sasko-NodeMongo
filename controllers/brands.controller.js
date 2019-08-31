@@ -17,64 +17,25 @@ module.exports.getBrands = async (req, res) => {
 
     let Brand = await Brands.find();
     let itemQuery;
-    Brand.map((brands, index) => {
-        brands.data.map(brandDetails => {
-            itemQuery = Items.findById({ "_id": brandDetails['itemId'] }).exec().then(data => {
-                if (data != null) {
-                    brandDetails.itemName = data.name;
-                } else {
-                    brandDetails.itemName = "Item is deleted";
-                }
-            })
+    itemQuery = Brand.map((brandDetails, index) => {
+
+         return Items.findById({ "_id": brandDetails['itemId'] }).exec().then(data => {
+
+
+            if (data != null) {
+                brandDetails['itemName'] = data.name;
+            } else {
+                brandDetails['itemName'] = "Item is deleted";   
+            }
         })
+
     })
 
-    Promise.all([itemQuery]).then(data => {
+    Promise.all(itemQuery).then(data => {
         res.send({ 'brands': Brand })
     })
 
 }
-// module.exports.addBrands = async (req, res) => {
-
-//     let searchBrands = await Brands.findOne({ "itemId": req.body.itemId })
-//     let Item = await Items.findOne({ "_id": req.body.itemId });
-//     console.log(Item);
-//     req.body.data.map(x => {
-//         x['itemName'] = Item.name;
-//     })
-
-//     if (searchBrands == null) {
-//         Brands.create(req.body).then(function (ninja) {
-//             res.send(ninja)
-//         }).catch(error => {
-//             res.status(500).json({
-//                 stack: error.stack,
-//                 code: error.code,
-//                 message: error.message
-//             })
-//         })
-//     } else {
-
-//         console.log(req.body.data);
-//         await Brands.findOneAndUpdate(
-//             { "itemId": req.body.itemId },
-//             {
-//                 $push: {
-//                     data: req.body.data
-//                 }
-//             }, { useFindAndModify: false }).exec().then(data => {
-//                 res.send(req.body);
-//             }).catch(error => {
-//                 res.status(500).json({
-//                     stack: error.stack,
-//                     code: error.code,
-//                     message: error.message
-//                 })
-//             })
-//     }
-
-// }
-
 
 module.exports.addBrands = (req, res) => {
     Brands.create(req.body).then(function (brands) {
@@ -83,28 +44,6 @@ module.exports.addBrands = (req, res) => {
         res.status(500).json(errorHandler(error))
     })
 }
-
-// module.exports.editBrands = async (req, res) => {
-//     let searchBrands = await Brands.findOne({ "data._id": req.body.brandId });
-
-//     searchBrands.data.map(x => {
-//         if (x._id == req.body.brandId) {
-//             x.BrandName = req.body.BrandName;
-//             x.updatedAt = Date.now();
-//         }
-//     })
-
-//     Brands.findOneAndUpdate(
-//         { "data._id": req.body.brandId },
-//         {
-//             $set: {
-//                 data: searchBrands.data
-//             }
-//         }, { useFindAndModify: false }).exec(data => {
-
-//             res.send(req.body);
-//         })
-// }
 
 module.exports.editBrands = (req, res) => {
 
@@ -119,31 +58,11 @@ module.exports.editBrands = (req, res) => {
 
 
 
-// module.exports.deleteBrands = async (req, res) => {
-
-//     let searchBrands = await Brands.findOne({ "data._id": req.params.brandId });
-//     if (searchBrands != null) {
-//         searchBrands.data = searchBrands.data.filter(item => item._id != req.params.brandId)
-//         Brands.findOneAndUpdate(
-//             { "data._id": req.params.brandId },
-//             {
-//                 $set: {
-//                     data: searchBrands.data
-//                 }
-//             }).exec(data => {
-//                 res.send(data);
-//             })
-//     } else {
-//         res.send({ "Error": "Id not fount" });
-//     }
-// }
-
-
 module.exports.deleteBrands = async (req, res) => {
     Brands.remove({ _id: req.params.id }).then(brands => {
         res.send(brands)
     }).catch(error => {
-        res.send(error)
+        res.status(500).json(errorHandler(error))
     })
 }
 
