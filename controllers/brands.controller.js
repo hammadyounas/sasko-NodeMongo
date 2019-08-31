@@ -19,13 +19,13 @@ module.exports.getBrands = async (req, res) => {
     let itemQuery;
     itemQuery = Brand.map((brandDetails, index) => {
 
-         return Items.findById({ "_id": brandDetails['itemId'] }).exec().then(data => {
+        return Items.findById({ "_id": brandDetails['itemId'] }).exec().then(data => {
 
 
             if (data != null) {
                 brandDetails['itemName'] = data.name;
             } else {
-                brandDetails['itemName'] = "Item is deleted";   
+                brandDetails['itemName'] = "Item is deleted";
             }
         })
 
@@ -69,12 +69,25 @@ module.exports.deleteBrands = async (req, res) => {
 
 module.exports.getItemBrands = async (req, res) => {
     try {
-        // console.log("req body ->",req.body);
         let getItemBrands = await Brands.find({ itemId: req.body.itemId });
-        // console.log("getItemBrands",getItemBrands);
-        res.status(200).send(getItemBrands);
+        // res.status(200).send(getItemBrands);
+        let itemQuery;
+        itemQuery = getItemBrands.map((brandDetails, index) => {
+            return Items.findById({ "_id": brandDetails['itemId'] }).exec().then(data => {
+                if (data != null) {
+                    brandDetails['itemName'] = data.name;
+                } else {
+                    brandDetails['itemName'] = "Item is deleted";
+                }
+            })
+        })
+
+        Promise.all(itemQuery).then(data => {
+            res.send({ 'brands': getItemBrands })
+        })
+
+
     } catch (error) {
         res.status(500).send(error)
-        //  Block of code to handle errors
     }
 }
