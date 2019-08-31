@@ -1,6 +1,6 @@
 const Brands = require('../models/brand.model');
 const Items = require('../models/item.model');
-
+const utilFunction = require('../utils/ReplaceName');
 
 
 let errorHandler = error => {
@@ -14,26 +14,15 @@ let errorHandler = error => {
 
 
 module.exports.getBrands = async (req, res) => {
-
     let Brand = await Brands.find();
     let itemQuery;
-    itemQuery = Brand.map((brandDetails, index) => {
 
-        return Items.findById({ "_id": brandDetails['itemId'] }).exec().then(data => {
-
-
-            if (data != null) {
-                brandDetails['itemName'] = data.name;
-            } else {
-                brandDetails['itemName'] = "Item is deleted";
-            }
+    utilFunction.replace(Brand,Items)
+        .then(data => {
+            console.log(data);
+            res.send({ 'brands': data })
         })
-
-    })
-
-    Promise.all(itemQuery).then(data => {
-        res.send({ 'brands': Brand })
-    })
+        .catch(error => res.status(500).json(errorHandler(error)))
 
 }
 
@@ -70,22 +59,11 @@ module.exports.deleteBrands = async (req, res) => {
 module.exports.getItemBrands = async (req, res) => {
     try {
         let getItemBrands = await Brands.find({ itemId: req.body.itemId });
-        // res.status(200).send(getItemBrands);
-        let itemQuery;
-        itemQuery = getItemBrands.map((brandDetails, index) => {
-            return Items.findById({ "_id": brandDetails['itemId'] }).exec().then(data => {
-                if (data != null) {
-                    brandDetails['itemName'] = data.name;
-                } else {
-                    brandDetails['itemName'] = "Item is deleted";
-                }
-            })
+        utilFunction.replace(getItemBrands, Items).then(data => {
+            res.send(data);
+        }).catch(error => {
+            res.status(500).json(errorHandler(error))
         })
-
-        Promise.all(itemQuery).then(data => {
-            res.send({ 'brands': getItemBrands })
-        })
-
 
     } catch (error) {
         res.status(500).send(error)
