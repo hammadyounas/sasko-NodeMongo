@@ -10,6 +10,6 @@ routes.get('/', brandController.getBrands);
 routes.post('/getItemBrands',brandController.getItemBrands)
 routes.post('/', brandController.addBrands);
 routes.put('/', brandController.editBrands);
-routes.delete('/:brandId', brandController.deleteBrands);
+routes.delete('/:id', brandController.deleteBrands);
 
 module.exports = routes
