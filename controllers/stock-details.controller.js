@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const StockDetails = require('../models/stock-details.model')
 const Stock = require('../models/stock.model')
 const Item = require('../models/item.model')
+const Brands = require('../models/brand.model')
 
 let errorHandler = error => {
   return {
@@ -11,14 +12,25 @@ let errorHandler = error => {
   }
 }
 
-module.exports.getStockDetails = (req, res) => {
-  StockDetails.find()
-    .then(StockDetails => {
-      res.send(StockDetails)
+module.exports.getStockDetails = async (req, res) => {
+  try {
+    let stockDetails = await StockDetails.find()
+    let arr = []
+    Promise.all(
+      stockDetails.map(async detail => {
+        let item = await Item.findOne({ _id: detail.itemId })
+        let brand = await Brands.findOne({ _id: detail.brandId })
+        let itemName = item.name
+        let brandName = brand.brandName
+        const temp = { ...detail._doc, itemName, brandName }
+        arr.push(temp)
+      })
+    ).then(result => {
+      res.status(200).send(arr)
     })
-    .catch(error => {
-      res.send(error)
-    })
+  } catch (err) {
+    res.status(500).send({ msg: 'Internal Server Error' })
+  }
 }
 
 module.exports.deleteStockDetails = (req, res) => {
@@ -74,22 +86,22 @@ module.exports.addStockDetailsWithOutStock = async (req, res) => {
 module.exports.getStockSecondReport = async (req, res) => {
   try {
     let report = await StockDetails.find({}, { itemId: 1, actualQty: 1 })
-    console.log("report =>", report);
+    console.log('report =>', report)
 
     if (!report.length) {
       res.status(404).send({ msg: 'No data found' })
     } else {
-      let myArray = [];
-      let myPromise;
+      let myArray = []
+      let myPromise
       report.map(obj => {
         myPromise = Item.findOne({ _id: obj['itemId'] }).then(res => {
-          myArray.push({ itemName: res.name, actualQty: obj['actualQty'] });
+          myArray.push({ itemName: res.name, actualQty: obj['actualQty'] })
         })
-      });
+      })
 
       Promise.all([myPromise]).then(() => {
-        res.status(200).send(myArray);
-      });
+        res.status(200).send(myArray)
+      })
     }
   } catch (err) {
     res.status(500).send({ msg: 'internal server error' })
@@ -100,17 +112,24 @@ module.exports.getStockSummary = async (req, res) => {
   try {
     let stockSummary = await StockDetails.find(
       {},
-      { itemName: 1, brandName: 1, date: 1 }
+      { itemId: 1, brandId: 1, date: 1 }
     )
     if (!stockSummary.length) {
       res.status(404).send({ msg: 'No data found' })
     } else {
-      let newStockSummary = stockSummary.map(obj => ({
-        itemName: obj.itemName,
-        brandName: obj.brandName,
-        date: obj.date
-      }));
-      res.status(200).send(newStockSummary);
+      let arr = []
+      Promise.all(
+        stockSummary.map(async stock => {
+          let item = await Item.findOne({ _id: stock.itemId })
+          let brand = await Brands.findOne({ _id: stock.brandId })
+          let itemName = item.name
+          let brandName = brand.brandName
+          const temp = { ...stock._doc, itemName, brandName }
+          arr.push(temp)
+        })
+      ).then(result => {
+        res.status(200).send(arr)
+      })
     }
   } catch (err) {
     res.status(500).send({ msg: 'internal server error' })
@@ -119,19 +138,26 @@ module.exports.getStockSummary = async (req, res) => {
 
 module.exports.getDamageStock = async (req, res) => {
   try {
-    let damageStock = await StockDetails.find({}, { brandName: 1, damageQty: 1, date: 1 });
+    let damageStock = await StockDetails.find(
+      {},
+      { brandId: 1, damageQty: 1, date: 1 }
+    )
     if (!damageStock.length) {
       res.status(404).send({ msg: 'No data found' })
     } else {
-      let newDamageStock = damageStock.map(obj => ({
-        brandName: obj.brandName,
-        damageQty: obj.damageQty,
-        date: obj.date
-      }));
-      res.status(200).send(newDamageStock);
-      console.log(damageStock);
+      let arr = []
+      Promise.all(
+        damageStock.map(async stock => {
+          let brand = await Brands.findOne({ _id: stock.brandId })
+          let brandName = brand.brandName
+          const temp = { ...stock._doc, brandName }
+          arr.push(temp)
+        })
+      ).then(result => {
+        res.status(200).send(arr)
+      })
     }
   } catch (err) {
-    res.status(500).send({ msg: 'Internal Server Error' });
+    res.status(500).send({ msg: 'Internal Server Error' })
   }
 }

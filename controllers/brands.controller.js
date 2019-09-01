@@ -1,71 +1,97 @@
-const Brands = require('../models/brand.model');
-const Items = require('../models/item.model');
-const utilFunction = require('../utils/ReplaceName');
-
+const Brands = require('../models/brand.model')
+const Items = require('../models/item.model')
+const utilFunction = require('../utils/ReplaceName')
 
 let errorHandler = error => {
-    return {
-        stack: error.stack,
-        code: error.code,
-        message: error.message
-    }
+  return {
+    stack: error.stack,
+    code: error.code,
+    message: error.message
+  }
 }
 
-
+module.exports.getBrandsWithItems = async (req, res) => {
+  try {
+    let brands = await Brands.find()
+    let arr = []
+    Promise.all(
+      brands.map(async obj => {
+        let item = await Items.findOne({ _id: obj.itemId })
+        let tempObj = {
+          brandName: obj.brandName,
+          _id: obj._id,
+          itemId: obj.itemId,
+          createdAt: obj.createdAt,
+          updatedAt: obj.updatedAt,
+          itemName: item.name
+        }
+        arr.push(tempObj)
+      })
+    ).then(result => {
+      res.status(200).send(arr)
+    })
+  } catch (err) {
+    res.status(500).send({ msg: 'internal server error' })
+  }
+}
 
 module.exports.getBrands = async (req, res) => {
-    let Brand = await Brands.find();
-    let itemQuery;
+  let Brand = await Brands.find()
+  res.status(200).send(Brand)
+  // let itemQuery;
 
-    utilFunction.replace(Brand,Items)
-        .then(data => {
-            console.log(data);
-            res.send({ 'brands': data })
-        })
-        .catch(error => res.status(500).json(errorHandler(error)))
-
+  // utilFunction.replace(Brand,Items)
+  //     .then(data => {
+  //         console.log(data);
+  //         res.send({ 'brands': data })
+  //     })
+  //     .catch(error => res.status(500).json(errorHandler(error)))
 }
 
 module.exports.addBrands = (req, res) => {
-    Brands.create(req.body).then(function (brands) {
-        res.send(brands)
-    }).catch(error => {
-        res.status(500).json(errorHandler(error))
+  Brands.create(req.body)
+    .then(function (brands) {
+      res.send(brands)
+    })
+    .catch(error => {
+      res.status(500).json(errorHandler(error))
     })
 }
 
 module.exports.editBrands = (req, res) => {
+  Brands.findByIdAndUpdate(
+    { _id: req.body._id },
+    { brandName: req.body.brandName },
+    { new: true }
+  ).exec((error, doc) => {
+    if (error) res.status(500).json(errorHandler(error))
 
-    Brands.findByIdAndUpdate({ _id: req.body._id }, { brandName: req.body.brandName }, { new: true }).exec((error, doc) => {
-        if (error)
-            res.status(500).json(errorHandler(error))
-
-        res.send(doc)
-    })
-
+    res.send(doc)
+  })
 }
-
-
 
 module.exports.deleteBrands = async (req, res) => {
-    Brands.remove({ _id: req.params.id }).then(brands => {
-        res.send(brands)
-    }).catch(error => {
-        res.status(500).json(errorHandler(error))
+  Brands.remove({ _id: req.params.id })
+    .then(brands => {
+      res.send(brands)
+    })
+    .catch(error => {
+      res.status(500).json(errorHandler(error))
     })
 }
 
-
 module.exports.getItemBrands = async (req, res) => {
-    try {
-        let getItemBrands = await Brands.find({ itemId: req.body.itemId });
-        utilFunction.replace(getItemBrands, Items).then(data => {
-            res.send(data);
-        }).catch(error => {
-            res.status(500).json(errorHandler(error))
-        })
-
-    } catch (error) {
-        res.status(500).send(error)
-    }
+  try {
+    let getItemBrands = await Brands.find({ itemId: req.body.itemId })
+    utilFunction
+      .replace(getItemBrands, Items)
+      .then(data => {
+        res.send(data)
+      })
+      .catch(error => {
+        res.status(500).json(errorHandler(error))
+      })
+  } catch (error) {
+    res.status(500).send(error)
+  }
 }

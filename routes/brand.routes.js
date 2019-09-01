@@ -11,5 +11,6 @@ routes.post('/getItemBrands',brandController.getItemBrands)
 routes.post('/', brandController.addBrands);
 routes.put('/', brandController.editBrands);
 routes.delete('/:id', brandController.deleteBrands);
+routes.get('/getBrandsWithItems',brandController.getBrandsWithItems);
 
 module.exports = routes
