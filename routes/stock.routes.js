@@ -10,6 +10,7 @@ routes.get('/', stockController.getStock);
 routes.post('/', stockController.addStock);
 routes.delete('/:id', stockController.deleteStock);
 routes.put('/', stockController.editStock);
+routes.post('/getStockWithStockDetails',stockController.getStockWithStockDetails)
 
 
 
