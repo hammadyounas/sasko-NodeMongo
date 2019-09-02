@@ -1,5 +1,5 @@
-const mongoose = require('mongoose')
-
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 const invoice = new Schema({
     date: {
@@ -10,11 +10,11 @@ const invoice = new Schema({
         type: String,
         required: true
     },
-    manualBook: {
+    manualBookNo: {
         type: Number,
         required: true
     },
-    totalQuantity: {
+    totalQty: {
         type: Number,
         required: true
     },
@@ -23,10 +23,25 @@ const invoice = new Schema({
         required: true
     },
     postedStatus: {
+        type: Boolean,
+        default: false
+    },
+    balance: {
         type: Number,
-        required: true,
-        default: 0
+        required: true
+    },
+    status: {
+        type: Boolean,
+        default: true
+    },
+    createdAt: { 
+        type: Date, 
+        default: Date.now 
+    },
+    updatedAt: { 
+        type: Date, 
+        default: Date.now 
     }
 });
 
-module.exports = mongoose.model('invoice', invoice)
+module.exports = mongoose.model('invoice', invoice);
