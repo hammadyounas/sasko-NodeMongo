@@ -61,7 +61,7 @@ module.exports.addBrands = (req, res) => {
 module.exports.editBrands = (req, res) => {
   Brands.findByIdAndUpdate(
     { _id: req.body._id },
-    { brandName: req.body.brandName },
+    { brandName: req.body.brandName,itemId:req.body.itemId },
     { new: true }
   ).exec((error, doc) => {
     if (error) res.status(500).json(errorHandler(error))
@@ -92,6 +92,6 @@ module.exports.getItemBrands = async (req, res) => {
         res.status(500).json(errorHandler(error))
       })
   } catch (error) {
-    res.status(500).send(error)
+    res.status(500).send(errorHandler(error))
   }
 }
