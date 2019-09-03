@@ -43,15 +43,28 @@ module.exports.deleteStockDetails = (req, res) => {
     })
 }
 
-module.exports.editStockDetails = (req, res) => {
-  StockDetails.findByIdAndUpdate({ _id: req.params.id }, req.body, {
-    new: true
-  }).exec((error, doc) => {
-    if (error) res.send(error)
-
-    res.send(doc)
-  })
-}
+module.exports.editStockDetails = async (req, res) => {
+  try {
+    let updatedArray = [];
+    const stock = await Stock.findByIdAndUpdate({ _id: req.body.stock._id }, req.body.stock);
+    Promise.all(
+      req.body.stockDetails.map(async stock => {
+        const stockDetails = await StockDetails.findByIdAndUpdate({ _id: stock._id }, stock);
+      })).then(async () => {
+        const newStock = await Stock.findOne({ _id: req.body.stock._id });
+        Promise.all(
+          req.body.stockDetails.map(async stock => {
+            const newStockDetails = await StockDetails.findOne({ _id: stock._id });
+            updatedArray.push(newStockDetails);
+          })
+        ).then(() => {
+          res.status(200).send({ ...newStock._doc, updatedArray });
+        });
+      });
+  } catch (err) {
+    res.status(500).send({ msg: 'Internal Server Error' });
+  }
+};
 
 module.exports.addStockDetailsWithStock = (req, res) => {
   //   console.log('check add stock', req.body)
