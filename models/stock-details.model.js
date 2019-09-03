@@ -15,7 +15,7 @@ const stockDetails = new Schema({
     actualQty: { type: Number, require: true },
     unitCost: { type: Number, require: true },
     totalCost: { type: Number, require: true },
-    date:{type:String,require:true},
+    date: { type: String, require: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 }, {

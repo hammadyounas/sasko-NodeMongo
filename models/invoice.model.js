@@ -6,12 +6,12 @@ const invoice = new Schema({
         type: Date,
         required: true
     },
-    customerId: {
-        type: String,
-        required: true
+    customerId: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'customer' 
     },
     manualBookNo: {
-        type: Number,
+        type: String,
         required: true
     },
     totalQty: {
@@ -34,14 +34,18 @@ const invoice = new Schema({
         type: Boolean,
         default: true
     },
-    createdAt: { 
-        type: Date, 
-        default: Date.now 
+    createdAt: {
+        type: Date,
+        default: Date.now
     },
-    updatedAt: { 
-        type: Date, 
-        default: Date.now 
+    updatedAt: {
+        type: Date,
+        default: Date.now
     }
-});
+},
+    {
+        timestamps: { createdAt: true, updatedAt: true }
+    }
+);
 
 module.exports = mongoose.model('invoice', invoice);
