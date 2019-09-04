@@ -10,7 +10,7 @@ module.exports.getCustomer = (req, res) => {
 };
 
 module.exports.getCustomerById = (req, res) => {
-    Customer.find({ _id: req.params.id, status: true }).then(customer => {
+    Customer.findById({ _id: req.params.id, status: true }).then(customer => {
         res.status(200).send(customer)
     }).catch(err => {
         res.status(500).json(errorHandler(err));
