@@ -1,10 +1,11 @@
 const Invoice = require('../models/invoice.model');
 const Customer = require('../models/customer.model');
 const errorHandler = require('../utils/errorHandler');
+const getInvoiceNumber = require('../utils/invoiceNumberGenerator');
 
 module.exports.getInvoice = (req, res) => {
     Invoice.find({ status: true }).then(invoices => {
-        res.status(200).send(invoices)
+            res.status(200).send(getInvoiceNumber(invoices));
     }).catch(err => {
         res.status(500).json(errorHandler(err));
     });

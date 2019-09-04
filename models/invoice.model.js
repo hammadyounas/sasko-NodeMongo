@@ -10,6 +10,9 @@ const invoice = new Schema({
         type: Schema.Types.ObjectId, 
         ref: 'customer' 
     },
+    invoiceNo: {
+        type: String
+    },
     manualBookNo: {
         type: String,
         required: true
