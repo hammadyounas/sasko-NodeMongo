@@ -6,6 +6,8 @@ const stockDetails = require('./stock-details.routes');
 const customer = require('./customer.routes');
 const invoice = require('./invoice.routes');
 const invoiceDetails = require('./invoice-details.routes');
+const bank = require('./bank.routes');
+const paymentReceive = require('./payment-receive.routes');
 
 const routes = express.Router();
 console.log("iteeeemmms");
@@ -17,5 +19,7 @@ routes.use('/stockDetails', stockDetails);
 routes.use('/customer', customer);
 routes.use('/invoice', invoice);
 routes.use('/invoiceDetails', invoiceDetails);
+routes.use('/bank', bank);
+routes.use('/paymentReceive', paymentReceive);
 
 module.exports = routes;
