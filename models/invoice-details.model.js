@@ -4,8 +4,8 @@ const Schema = mongoose.Schema;
 const invoiceDetails = new Schema({
     invoiceId: { type: Schema.Types.ObjectId, ref: 'invoice' },
     stockDetailId: { type: Schema.Types.ObjectId, ref: 'stockDetails' },
-    itemName: { type: String, required: true },
-    brandName: { type: String, required: true },
+    itemId: { type: Schema.Types.ObjectId, ref: 'item' },
+    brandId: { type: Schema.Types.ObjectId, ref: 'brand' },
     model: { type: String, required: true },
     pieceQty: { type: Number, required: true },
     discount: { type: Number, required: true },
