@@ -1,4 +1,5 @@
 const Invoice = require('../models/invoice.model');
+const Customer = require('../models/customer.model');
 const errorHandler = require('../utils/errorHandler');
 
 module.exports.getInvoice = (req, res) => {
@@ -36,6 +37,14 @@ module.exports.deleteInvoice = (req, res) => {
         }).catch(err => {
             res.status(500).json(errorHandler(err));
         });
+    }).catch(err => {
+        res.status(500).json(errorHandler(err));
+    });
+};
+
+module.exports.getCustomers = (req, res) => {
+    Customer.find({}, {_id: 1, clientName: 1}).then(customers => {
+        res.status(200).send(customers);
     }).catch(err => {
         res.status(500).json(errorHandler(err));
     });
