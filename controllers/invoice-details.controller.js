@@ -54,7 +54,7 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
                         updatedArray.push(newInvoiceDetails);
                     })
                 ).then(() => {
-                    res.status(200).send({ ...newInvoice._doc, updatedArray });
+                    res.status(200).send({ invoice: newInvoice._doc, invoiceDetails: updatedArray });
                 });
             });
     } catch (err) {
