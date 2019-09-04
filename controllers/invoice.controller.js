@@ -11,6 +11,14 @@ module.exports.getInvoice = (req, res) => {
     });
 };
 
+module.exports.getInvoiceById = (req, res) => {
+    Invoice.findById({ _id: req.params.id, status: true }).then(invoice => {
+        res.status(200).send(invoice);
+    }).catch(err => {
+        res.status(500).json(errorHandler(err));
+    });
+};
+
 module.exports.setInvoice = (req, res) => {
     Invoice.create(req.body).then(invoice => {
         res.status(200).send(invoice);

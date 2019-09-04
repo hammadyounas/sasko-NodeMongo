@@ -7,6 +7,7 @@ const invoiceController = require('../controllers/invoice.controller');
 console.log("Invoice Route Loaded");
 
 routes.get('/', invoiceController.getInvoice);
+routes.get('/:id', invoiceController.getInvoiceById);
 routes.get('/getCustomers', invoiceController.getCustomers);
 routes.post('/', invoiceController.setInvoice);
 routes.put('/', invoiceController.editInvoice);
