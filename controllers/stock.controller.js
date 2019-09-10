@@ -1,7 +1,7 @@
 const Stock = require('../models/stock.model')
 const StockDetails = require('../models/stock-details.model')
-const Item = require('../models/item.model');
-const Brands = require('../models/brand.model');
+const Item = require('../models/item.model')
+const Brands = require('../models/brand.model')
 
 let errorHandler = error => {
   return {
@@ -72,7 +72,7 @@ module.exports.getStockWithStockDetails = async (req, res) => {
         stockDetailsArray.push(temp)
       })
     ).then(result => {
-      const obj = {stockDetailsArray, stock }
+      const obj = { stockDetailsArray, stock }
       res.status(200).send(obj)
     })
     // res.status(200).send(obj)
@@ -80,3 +80,5 @@ module.exports.getStockWithStockDetails = async (req, res) => {
     res.status(500).send(errorHandler(err))
   }
 }
+
+

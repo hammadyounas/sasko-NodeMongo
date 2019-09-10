@@ -7,6 +7,7 @@ const bankController = require('../controllers/bank.controller');
 console.log("Bank Route Loaded");
 
 routes.get('/', bankController.getBank);
+routes.get('/:id', bankController.getBankById);
 routes.post('/', bankController.setBank);
 routes.put('/', bankController.editBank);
 routes.delete('/:id', bankController.deleteBank);

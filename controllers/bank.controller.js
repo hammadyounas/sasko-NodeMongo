@@ -3,6 +3,7 @@ const errorHandler = require('../utils/errorHandler');
 
 module.exports.getBank = (req, res) => {
     Bank.find({ status: true }).then(banks => {
+        console.log("banks =>",banks)
         res.status(200).send(banks)
     }).catch(err => {
         res.status(500).json(errorHandler(err));
@@ -24,6 +25,14 @@ module.exports.editBank = (req, res) => {
         }).catch(err => {
             res.status(500).json(errorHandler(err));
         });
+    }).catch(err => {
+        res.status(500).json(errorHandler(err));
+    });
+};
+
+module.exports.getBankById = (req, res) => {
+    Bank.findById({ _id: req.params.id, status: true }).then(bank => {
+        res.status(200).send(bank)
     }).catch(err => {
         res.status(500).json(errorHandler(err));
     });

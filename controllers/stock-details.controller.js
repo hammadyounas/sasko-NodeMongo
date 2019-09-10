@@ -48,8 +48,15 @@ module.exports.editStockDetails = async (req, res) => {
     let updatedArray = [];
     const stock = await Stock.findByIdAndUpdate({ _id: req.body.stock._id }, req.body.stock);
     Promise.all(
-      req.body.stockDetails.map(async stock => {
-        const stockDetails = await StockDetails.findByIdAndUpdate({ _id: stock._id }, stock);
+      req.body.stockDetails.map(async stockDetail => {
+        console.log("stock ->",stock);
+        if(stockDetail._id){
+          const stockDetails = await StockDetails.findByIdAndUpdate({ _id: stockDetail._id }, stockDetail);
+        }else{
+          stockDetail['stock'] = stock._id;
+          const newStockDetail = new StockDetails(stockDetail);
+          const stockDetails = await newStockDetail.save();
+        }
       })).then(async () => {
         const newStock = await Stock.findOne({ _id: req.body.stock._id });
         Promise.all(
@@ -75,7 +82,6 @@ module.exports.addStockDetailsWithStock = (req, res) => {
       return error
     } else {
       req.body.stockDetails.map(x => (x['stock'] = stock._id))
-
       StockDetails.insertMany(req.body.stockDetails)
         .then(data => {
           console.log(data)
@@ -173,4 +179,37 @@ module.exports.getDamageStock = async (req, res) => {
   } catch (err) {
     res.status(500).send({ msg: 'Internal Server Error' })
   }
+}
+
+
+module.exports.getItemsInStockDetails = (req, res) => {
+  StockDetails.find({},{initialQty:1}).populate('itemId','name').exec().then(result =>{
+    res.status(200).send(result);
+  }).catch(error => {
+    res.status(500).send(error)
+  })
+}
+
+module.exports.getBrandsOfItemsInStockDetails = (req,res)=>{
+  StockDetails.find({itemId:req.body.itemId},{modelNumber:1}).populate('brandId','brandName').exec().then(result=>{
+    res.status(200).send(result);
+  }).catch(error => {
+    res.status(500).send(error)
+  })
+}
+
+module.exports.getModelsOfItemsAndBrands = (req,res)=>{
+  StockDetails.find({itemId:req.body.itemId,brandId:req.body.brandId},{modelNumber:1}).exec().then(result=>{
+    res.status(200).send(result);
+  }).catch(error => {
+    res.status(500).send(error)
+  })
+}
+
+module.exports.getColorsOfModelsItemsAndBrands = (req,res)=>{
+  StockDetails.find({itemId:req.body.itemId,brandId:req.body.brandId,modelNumber:req.body.modelNumber},{color:1}).exec().then(result=>{
+    res.status(200).send(result);
+  }).catch(error => {
+    res.status(500).send(error)
+  })
 }

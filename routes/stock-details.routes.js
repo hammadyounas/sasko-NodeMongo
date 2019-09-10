@@ -13,5 +13,8 @@ routes.put('/', stockDetails.editStockDetails);
 routes.get('/stockSecondReport',stockDetails.getStockSecondReport);
 routes.get('/getStockSummary',stockDetails.getStockSummary);
 routes.get('/getDamageStock',stockDetails.getDamageStock);
-
+routes.get('/getItemsInStockDetails',stockDetails.getItemsInStockDetails);
+routes.post('/getBrandsOfItemsInStockDetails',stockDetails.getBrandsOfItemsInStockDetails);
+routes.post('/getModelsOfItemsAndBrands',stockDetails.getModelsOfItemsAndBrands);
+routes.post('/getColorsOfModelsItemsAndBrands',stockDetails.getColorsOfModelsItemsAndBrands);
 module.exports = routes

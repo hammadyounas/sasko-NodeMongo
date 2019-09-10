@@ -1,12 +1,12 @@
 const mongoose = require('mongoose')
-const Schema = mongoose.Schema;
+const Schema = mongoose.Schema
 
-
-const stockDetails = new Schema({
+const stockDetails = new Schema(
+  {
     stock: { type: Schema.Types.ObjectId, ref: 'stock' },
+    itemId: { type: Schema.Types.ObjectId, ref: 'item' },
+    brandId: { type: Schema.Types.ObjectId, ref: 'brand' },
     stockId: { type: String, require: true },
-    itemId: { type: String, required: true },
-    brandId: { type: String, required: true },
     modelNumber: { type: String, require: true },
     color: { type: String, require: true },
     size: { type: String, require: true },
@@ -17,9 +17,11 @@ const stockDetails = new Schema({
     totalCost: { type: Number, require: true },
     date: { type: String, require: true },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
-}, {
-        timestamps: { createdAt: true, updatedAt: true }
-    });
+    updatedAt: { type: Date, default: Date.now }
+  },
+  {
+    timestamps: { createdAt: true, updatedAt: true }
+  }
+)
 
-module.exports = mongoose.model('stockDetails', stockDetails);
+module.exports = mongoose.model('stockDetails', stockDetails)
