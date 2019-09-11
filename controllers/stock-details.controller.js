@@ -15,19 +15,22 @@ let errorHandler = error => {
 module.exports.getStockDetails = async (req, res) => {
   try {
     let stockDetails = await StockDetails.find()
-    let arr = []
-    Promise.all(
-      stockDetails.map(async detail => {
-        let item = await Item.findOne({ _id: detail.itemId })
-        let brand = await Brands.findOne({ _id: detail.brandId })
-        let itemName = item.name
-        let brandName = brand.brandName
-        const temp = { ...detail._doc, itemName, brandName }
-        arr.push(temp)
-      })
-    ).then(result => {
-      res.status(200).send(arr)
-    })
+      .populate('itemId')
+      .populate('brandId')
+    res.status(200).send(stockDetails)
+    // let arr = []
+    // Promise.all(
+    //   stockDetails.map(async detail => {
+    //     let item = await Item.findOne({ _id: detail.itemId })
+    //     let brand = await Brands.findOne({ _id: detail.brandId })
+    //     let itemName = item.name
+    //     let brandName = brand.brandName
+    //     const temp = { ...detail._doc, itemName, brandName }
+    //     arr.push(temp)
+    //   })
+    // ).then(result => {
+    //   res.status(200).send(arr)
+    // })
   } catch (err) {
     res.status(500).send({ msg: 'Internal Server Error' })
   }
@@ -45,33 +48,40 @@ module.exports.deleteStockDetails = (req, res) => {
 
 module.exports.editStockDetails = async (req, res) => {
   try {
-    let updatedArray = [];
-    const stock = await Stock.findByIdAndUpdate({ _id: req.body.stock._id }, req.body.stock);
+    let updatedArray = []
+    const stock = await Stock.findByIdAndUpdate(
+      { _id: req.body.stock._id },
+      req.body.stock
+    )
     Promise.all(
       req.body.stockDetails.map(async stockDetail => {
-        console.log("stock ->",stock);
-        if(stockDetail._id){
-          const stockDetails = await StockDetails.findByIdAndUpdate({ _id: stockDetail._id }, stockDetail);
-        }else{
-          stockDetail['stock'] = stock._id;
-          const newStockDetail = new StockDetails(stockDetail);
-          const stockDetails = await newStockDetail.save();
+        console.log('stock ->', stock)
+        if (stockDetail._id) {
+          const stockDetails = await StockDetails.findByIdAndUpdate(
+            { _id: stockDetail._id },
+            stockDetail
+          )
+        } else {
+          stockDetail['stock'] = stock._id
+          const newStockDetail = new StockDetails(stockDetail)
+          const stockDetails = await newStockDetail.save()
         }
-      })).then(async () => {
-        const newStock = await Stock.findOne({ _id: req.body.stock._id });
-        Promise.all(
-          req.body.stockDetails.map(async stock => {
-            const newStockDetails = await StockDetails.findOne({ _id: stock._id });
-            updatedArray.push(newStockDetails);
-          })
-        ).then(() => {
-          res.status(200).send({ ...newStock._doc, updatedArray });
-        });
-      });
+      })
+    ).then(async () => {
+      const newStock = await Stock.findOne({ _id: req.body.stock._id })
+      Promise.all(
+        req.body.stockDetails.map(async stock => {
+          const newStockDetails = await StockDetails.findOne({ _id: stock._id })
+          updatedArray.push(newStockDetails)
+        })
+      ).then(() => {
+        res.status(200).send({ ...newStock._doc, updatedArray })
+      })
+    })
   } catch (err) {
-    res.status(500).send(err.message);
+    res.status(500).send(err.message)
   }
-};
+}
 
 module.exports.addStockDetailsWithStock = (req, res) => {
   //   console.log('check add stock', req.body)
@@ -181,35 +191,58 @@ module.exports.getDamageStock = async (req, res) => {
   }
 }
 
-
 module.exports.getItemsInStockDetails = (req, res) => {
-  StockDetails.find({},{initialQty:1}).populate('itemId','name').exec().then(result =>{
-    res.status(200).send(result);
-  }).catch(error => {
-    res.status(500).send(error)
-  })
+  StockDetails.find({}, { initialQty: 1 })
+    .populate('itemId', 'name')
+    .exec()
+    .then(result => {
+      res.status(200).send(result)
+    })
+    .catch(error => {
+      res.status(500).send(error)
+    })
 }
 
-module.exports.getBrandsOfItemsInStockDetails = (req,res)=>{
-  StockDetails.find({itemId:req.body.itemId},{modelNumber:1}).populate('brandId','brandName').exec().then(result=>{
-    res.status(200).send(result);
-  }).catch(error => {
-    res.status(500).send(error)
-  })
+module.exports.getBrandsOfItemsInStockDetails = (req, res) => {
+  StockDetails.find({ itemId: req.body.itemId }, { modelNumber: 1 })
+    .populate('brandId', 'brandName')
+    .exec()
+    .then(result => {
+      res.status(200).send(result)
+    })
+    .catch(error => {
+      res.status(500).send(error)
+    })
 }
 
-module.exports.getModelsOfItemsAndBrands = (req,res)=>{
-  StockDetails.find({itemId:req.body.itemId,brandId:req.body.brandId},{modelNumber:1}).exec().then(result=>{
-    res.status(200).send(result);
-  }).catch(error => {
-    res.status(500).send(error)
-  })
+module.exports.getModelsOfItemsAndBrands = (req, res) => {
+  StockDetails.find(
+    { itemId: req.body.itemId, brandId: req.body.brandId },
+    { modelNumber: 1 }
+  )
+    .exec()
+    .then(result => {
+      res.status(200).send(result)
+    })
+    .catch(error => {
+      res.status(500).send(error)
+    })
 }
 
-module.exports.getColorsOfModelsItemsAndBrands = (req,res)=>{
-  StockDetails.find({itemId:req.body.itemId,brandId:req.body.brandId,modelNumber:req.body.modelNumber},{color:1}).exec().then(result=>{
-    res.status(200).send(result);
-  }).catch(error => {
-    res.status(500).send(error)
-  })
+module.exports.getColorsOfModelsItemsAndBrands = (req, res) => {
+  StockDetails.find(
+    {
+      itemId: req.body.itemId,
+      brandId: req.body.brandId,
+      modelNumber: req.body.modelNumber
+    },
+    { color: 1 }
+  )
+    .exec()
+    .then(result => {
+      res.status(200).send(result)
+    })
+    .catch(error => {
+      res.status(500).send(error)
+    })
 }
