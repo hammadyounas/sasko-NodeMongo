@@ -53,7 +53,7 @@ module.exports.addBrands = (req, res) => {
 module.exports.editBrands = (req, res) => {
   Brands.findByIdAndUpdate(
     { _id: req.body._id },
-    { brandName: req.body.brandName,itemId:req.body.itemId },
+    { brandName: req.body.brandName,itemId:req.body.itemId._id },
     { new: true }
   ).exec((error, doc) => {
     if (error) res.status(500).json(errorHandler(error))
