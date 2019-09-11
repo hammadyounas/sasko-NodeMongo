@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const brand = mongoose.Schema(
   {
-    itemId: { type: String, required: true },
+    itemId: { type: Schema.Types.ObjectId, ref: 'item' },
     brandName: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }

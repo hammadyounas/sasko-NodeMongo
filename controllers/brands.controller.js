@@ -36,16 +36,8 @@ module.exports.getBrandsWithItems = async (req, res) => {
 }
 
 module.exports.getBrands = async (req, res) => {
-  let Brand = await Brands.find()
-  res.status(200).send(Brand)
-  // let itemQuery;
-
-  // utilFunction.replace(Brand,Items)
-  //     .then(data => {
-  //         console.log(data);
-  //         res.send({ 'brands': data })
-  //     })
-  //     .catch(error => res.status(500).json(errorHandler(error)))
+  let brands = await Brands.find().populate('itemId')
+  res.status(200).send(brands);
 }
 
 module.exports.addBrands = (req, res) => {
