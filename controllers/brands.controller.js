@@ -37,23 +37,37 @@ module.exports.getBrandsWithItems = async (req, res) => {
 
 module.exports.getBrands = async (req, res) => {
   let brands = await Brands.find().populate('itemId')
-  res.status(200).send(brands);
+  res.status(200).send(brands)
 }
 
 module.exports.addBrands = (req, res) => {
-  Brands.create(req.body)
-    .then(function (brands) {
-      res.send(brands)
+  let brands = req.body
+  let addBrands = []
+  Promise.all(
+    brands.map(async obj => {
+      let resp = await Brands.findOne({
+        itemId: obj.itemId,
+        brandName: obj.brandName
+      })
+      if (!resp) {
+        addBrands.push(obj)
+      }
     })
-    .catch(error => {
-      res.status(500).json(errorHandler(error))
-    })
+  ).then(result => {
+    Brands.create(addBrands)
+      .then(function (brands) {
+        res.send(brands)
+      })
+      .catch(error => {
+        res.status(500).json(errorHandler(error))
+      })
+  })
 }
 
 module.exports.editBrands = (req, res) => {
   Brands.findByIdAndUpdate(
     { _id: req.body._id },
-    { brandName: req.body.brandName,itemId:req.body.itemId._id },
+    { brandName: req.body.brandName, itemId: req.body.itemId._id },
     { new: true }
   ).exec((error, doc) => {
     if (error) res.status(500).json(errorHandler(error))
