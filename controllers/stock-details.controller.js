@@ -18,19 +18,6 @@ module.exports.getStockDetails = async (req, res) => {
       .populate('itemId')
       .populate('brandId')
     res.status(200).send(stockDetails)
-    // let arr = []
-    // Promise.all(
-    //   stockDetails.map(async detail => {
-    //     let item = await Item.findOne({ _id: detail.itemId })
-    //     let brand = await Brands.findOne({ _id: detail.brandId })
-    //     let itemName = item.name
-    //     let brandName = brand.brandName
-    //     const temp = { ...detail._doc, itemName, brandName }
-    //     arr.push(temp)
-    //   })
-    // ).then(result => {
-    //   res.status(200).send(arr)
-    // })
   } catch (err) {
     res.status(500).send({ msg: 'Internal Server Error' })
   }
@@ -138,31 +125,18 @@ module.exports.getStockSecondReport = async (req, res) => {
 }
 
 module.exports.getStockSummary = async (req, res) => {
-  try {
-    let stockSummary = await StockDetails.find(
-      {},
-      { itemId: 1, brandId: 1, date: 1 }
-    )
-    if (!stockSummary.length) {
-      res.status(404).send({ msg: 'No data found' })
-    } else {
-      let arr = []
-      Promise.all(
-        stockSummary.map(async stock => {
-          let item = await Item.findOne({ _id: stock.itemId })
-          let brand = await Brands.findOne({ _id: stock.brandId })
-          let itemName = item.name
-          let brandName = brand.brandName
-          const temp = { ...stock._doc, itemName, brandName }
-          arr.push(temp)
-        })
-      ).then(result => {
-        res.status(200).send(arr)
+  StockDetails.find({}, { date: 1, initialQty: 1 })
+    .populate('itemId', 'name')
+    .populate('brandId', 'brandName')
+    .then(async result => {
+      let arr = result.reduce((acculator,current)=>{
+        return 
       })
-    }
-  } catch (err) {
-    res.status(500).send({ msg: 'internal server error' })
-  }
+      res.status(200).send(result);
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
 }
 
 module.exports.getDamageStock = async (req, res) => {

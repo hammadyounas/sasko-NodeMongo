@@ -2,6 +2,7 @@ const Stock = require('../models/stock.model')
 const StockDetails = require('../models/stock-details.model')
 const Item = require('../models/item.model')
 const Brands = require('../models/brand.model')
+const sixDigits = require('../utils/sixDigits')
 
 let errorHandler = error => {
   return {
@@ -12,7 +13,7 @@ let errorHandler = error => {
 }
 
 module.exports.getStock = (req, res) => {
-  console.log('get')
+  // console.log('get')
 
   Stock.find()
     .then(Stock => {
@@ -21,6 +22,15 @@ module.exports.getStock = (req, res) => {
     .catch(error => {
       res.send(error)
     })
+}
+
+module.exports.getStockId = (req,res)=>{
+  Stock.count().then(length =>{
+    let id = sixDigits((length+1).toString())
+    res.status(200).send({stockId:id});
+}).catch(err => {
+    res.status(500).json(errorHandler(err));
+});
 }
 
 module.exports.deleteStock = (req, res) => {
