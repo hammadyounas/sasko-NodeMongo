@@ -64,16 +64,24 @@ module.exports.addBrands = (req, res) => {
   })
 }
 
-module.exports.editBrands = (req, res) => {
-  Brands.findByIdAndUpdate(
-    { _id: req.body._id },
-    { brandName: req.body.brandName, itemId: req.body.itemId._id },
-    { new: true }
-  ).exec((error, doc) => {
-    if (error) res.status(500).json(errorHandler(error))
-
-    res.send(doc)
+module.exports.editBrands = async (req, res) => {
+  obj = req.body;
+  let resp = await Brands.findOne({
+    itemId: obj.itemId,
+    brandName: obj.brandName
   })
+  if (!resp) {
+    Brands.findByIdAndUpdate(
+      { _id: req.body._id },
+      { brandName: req.body.brandName, itemId: req.body.itemId._id },
+      { new: true }
+    ).exec((error, doc) => {
+      if (error) res.status(500).json(errorHandler(error))
+      res.send(doc)
+    })
+  }else{
+    res.status(409).send({msg:'conflict with same item name and brand name'});
+  }
 }
 
 module.exports.deleteBrands = async (req, res) => {
