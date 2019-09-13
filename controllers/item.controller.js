@@ -23,15 +23,29 @@ module.exports.deleteItems = (req, res) => {
 }
 
 module.exports.editItems = (req, res) => {
-  Items.findByIdAndUpdate(
-    { _id: req.body._id },
-    { name: req.body.name },
-    { new: true }
-  ).exec((error, doc) => {
-    if (error) res.send(error)
+  Items.findOne({ name: req.body.name })
+    .then(result => {
+      if (!result) {
+        Items.findByIdAndUpdate(
+          { _id: req.body._id },
+          { name: req.body.name },
+          { new: true }
+        ).exec((error, doc) => {
+          if (error) res.send(error)
 
-    res.send(doc)
-  })
+          res.send(doc)
+        })
+      } else {
+        res.status(409).send({ msg: 'item already exist' })
+      }
+    })
+    .catch(error => {
+      res.send(500).json({
+        stack: error.stack,
+        code: error.code,
+        message: error.message
+      })
+    })
 }
 
 module.exports.addItems = (req, res) => {
