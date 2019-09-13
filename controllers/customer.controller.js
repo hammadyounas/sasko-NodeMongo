@@ -45,15 +45,31 @@ module.exports.setCustomer = (req, res) => {
 }
 
 module.exports.editCustomer = (req, res) => {
-  Customer.findByIdAndUpdate({ _id: req.body._id, status: true }, req.body)
-    .then(() => {
-      Customer.findById({ _id: req.body._id })
-        .then(customer => {
-          res.status(200).send(customer)
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+  Customer.findOne({
+    clientName: req.body.clientName,
+    companyName: req.body.companyName
+  })
+    .then(result => {
+      if (!result) {
+        Customer.findByIdAndUpdate(
+          { _id: req.body._id, status: true },
+          req.body
+        )
+          .then(() => {
+            Customer.findById({ _id: req.body._id })
+              .then(customer => {
+                res.status(200).send(customer)
+              })
+              .catch(err => {
+                res.status(500).json(errorHandler(err))
+              })
+          })
+          .catch(err => {
+            res.status(500).json(errorHandler(err))
+          })
+      } else {
+        res.status(409).send({ msg: 'customer already exist' })
+      }
     })
     .catch(err => {
       res.status(500).json(errorHandler(err))
