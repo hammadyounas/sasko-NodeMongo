@@ -6,12 +6,12 @@ const Items = require('../models/stock-details.model');
 const stock = new Schema({
     _id: Schema.Types.ObjectId,
     stockId: { type: String, require: true },
-    date: { type: String, required: true },  
     totalQuantity: { type: Number, required: true },
     totalDamageQuantity: { type: Number, required: true },
     netCost: { type: Number, required: true },
     netQuantity: { type: Number, required: true },
-    // stockDetails: [{ type: Schema.Types.ObjectId, ref: 'stockDetails' }],
+    date: { type: String, required: true },
+    status: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     }, {

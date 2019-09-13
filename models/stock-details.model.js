@@ -3,10 +3,10 @@ const Schema = mongoose.Schema
 
 const stockDetails = new Schema(
   {
+    _id: Schema.Types.ObjectId,
     stock: { type: Schema.Types.ObjectId, ref: 'stock' },
     itemId: { type: Schema.Types.ObjectId, ref: 'item' },
     brandId: { type: Schema.Types.ObjectId, ref: 'brand' },
-    stockId: { type: String, require: true },
     modelNumber: { type: String, require: true },
     color: { type: String, require: true },
     size: { type: String, require: true },
@@ -15,6 +15,7 @@ const stockDetails = new Schema(
     actualQty: { type: Number, require: true },
     unitCost: { type: Number, require: true },
     totalCost: { type: Number, require: true },
+    soldQty: { type: Number, require: true },
     date: { type: String, require: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
