@@ -139,7 +139,6 @@ module.exports.getStockSummary = async (req, res) => {
     .populate('itemId', 'name')
     .populate('brandId', 'brandName')
     .then(async result => {
-      // let array = [];
 
       res.status(200).send(result)
     })
