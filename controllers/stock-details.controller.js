@@ -17,7 +17,11 @@ module.exports.getStockDetails = async (req, res) => {
     let stockDetails = await StockDetails.find()
       .populate('itemId')
       .populate('brandId')
-    res.status(200).send(stockDetails)
+      if(stockDetails.length){
+        res.status(200).send(stockDetails)
+      }else{
+        res.status(404).send({msg:'No Data Found'})
+      }
   } catch (err) {
     res.status(500).send({ msg: 'Internal Server Error' })
   }
@@ -120,14 +124,18 @@ module.exports.getStockSecondReport = async (req, res) => {
         if (sum) {
           obj.actualQty = sum
           arr.push(obj)
-          // console.log("filter->",current)
         }
         result = result.filter(object => {
           return object.itemId._id != obj.itemId._id
         })
       })
     ).then(() => {
-      res.status(200).send(arr)
+      if(arr.length){
+        res.status(200).send(arr)
+      }else{
+        res.status(404).send({msg:'No Data Found'})
+      }
+      
     })
   } catch (err) {
     res.status(500).send({ msg: 'internal server error', err: err })
@@ -139,8 +147,11 @@ module.exports.getStockSummary = async (req, res) => {
     .populate('itemId', 'name')
     .populate('brandId', 'brandName')
     .then(async result => {
-
-      res.status(200).send(result)
+      if(result.length){
+        res.status(200).send(result)
+      }else{
+        res.status(404).send({msg:'No Data Found'})
+      }
     })
     .catch(error => {
       res.status(500).send(error)
@@ -165,7 +176,12 @@ module.exports.getDamageStock = async (req, res) => {
           arr.push(temp)
         })
       ).then(result => {
-        res.status(200).send(arr)
+        // res.status(200).send(arr)
+        if(arr.length){
+          res.status(200).send(arr)
+        }else{
+          res.status(404).send({msg:'No Data Found'})
+        }
       })
     }
   } catch (err) {
@@ -178,7 +194,12 @@ module.exports.getItemsInStockDetails = (req, res) => {
     .populate('itemId', 'name')
     .exec()
     .then(result => {
-      res.status(200).send(result)
+      if(result.length){
+        res.status(200).send(result)
+      }else{
+        res.status(404).send({msg:'No Data Found'})
+      }
+      // res.status(200).send(result)
     })
     .catch(error => {
       res.status(500).send(error)
@@ -186,11 +207,16 @@ module.exports.getItemsInStockDetails = (req, res) => {
 }
 
 module.exports.getBrandsOfItemsInStockDetails = (req, res) => {
-  StockDetails.find({ itemId: req.body.itemId }, { modelNumber: 1 })
+  StockDetails.find({ itemId: req.params.itemId }, { modelNumber: 1 })
     .populate('brandId', 'brandName')
     .exec()
     .then(result => {
-      res.status(200).send(result)
+      if(result.length){
+        res.status(200).send(result)
+      }else{
+        res.status(404).send({msg:'No Data Found'})
+      }
+      // res.status(200).send(result)
     })
     .catch(error => {
       res.status(500).send(error)
@@ -204,7 +230,12 @@ module.exports.getModelsOfItemsAndBrands = (req, res) => {
   )
     .exec()
     .then(result => {
-      res.status(200).send(result)
+      if(result.length){
+        res.status(200).send(result)
+      }else{
+        res.status(404).send({msg:'No Data Found'})
+      }
+      // res.status(200).send(result)
     })
     .catch(error => {
       res.status(500).send(error)

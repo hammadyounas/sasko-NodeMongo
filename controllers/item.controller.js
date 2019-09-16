@@ -1,14 +1,24 @@
 const Items = require('../models/item.model')
 
-module.exports.getItems = (req, res) => {
-  console.log('get')
+let errorHandler = error => {
+  return {
+    stack: error.stack,
+    code: error.code,
+    message: error.message
+  }
+}
 
+module.exports.getItems = (req, res) => {
   Items.find()
     .then(Items => {
-      res.send(Items)
+      if(Items.length){
+        res.status(200).send(Items)
+      }else{
+        res.status(404).send({msg:'No Data Found'})
+      }
     })
     .catch(error => {
-      res.send(error)
+      res.status(500).json(errorHandler(error));
     })
 }
 

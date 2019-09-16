@@ -36,8 +36,16 @@ module.exports.getBrandsWithItems = async (req, res) => {
 }
 
 module.exports.getBrands = async (req, res) => {
-  let brands = await Brands.find().populate('itemId')
-  res.status(200).send(brands)
+  try {
+    let brands = await Brands.find().populate('itemId')
+    if (brands.length) {
+      res.status(200).send(brands)
+    }else{
+      res.status(404).send({msg:'No Data Found'})
+    }
+  } catch (err) {
+    res.status(500).send({ msg: 'internal server error' })
+  }
 }
 
 module.exports.addBrands = (req, res) => {
@@ -65,7 +73,7 @@ module.exports.addBrands = (req, res) => {
 }
 
 module.exports.editBrands = async (req, res) => {
-  obj = req.body;
+  obj = req.body
   let resp = await Brands.findOne({
     itemId: obj.itemId,
     brandName: obj.brandName
@@ -79,8 +87,8 @@ module.exports.editBrands = async (req, res) => {
       if (error) res.status(500).json(errorHandler(error))
       res.send(doc)
     })
-  }else{
-    res.status(409).send({msg:'conflict with same item name and brand name'});
+  } else {
+    res.status(409).send({ msg: 'conflict with same item name and brand name' })
   }
 }
 

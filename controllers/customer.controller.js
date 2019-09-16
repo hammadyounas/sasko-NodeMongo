@@ -4,7 +4,11 @@ const errorHandler = require('../utils/errorHandler')
 module.exports.getCustomer = (req, res) => {
   Customer.find({ status: true })
     .then(customers => {
-      res.status(200).send(customers)
+      if(customers.length){
+        res.status(200).send(customers)
+      }else{
+        res.status(404).send({msg:'No Data Found'})
+      }
     })
     .catch(err => {
       res.status(500).json(errorHandler(err))

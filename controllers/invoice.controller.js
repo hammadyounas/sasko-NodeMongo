@@ -2,6 +2,7 @@ const Invoice = require('../models/invoice.model');
 const Customer = require('../models/customer.model');
 const errorHandler = require('../utils/errorHandler');
 const getInvoiceNumber = require('../utils/invoiceNumberGenerator');
+const sixDigits = require('../utils/sixDigits')
 
 module.exports.getInvoice = (req, res) => {
     Invoice.find({ status: true }).then(invoices => {
@@ -10,6 +11,15 @@ module.exports.getInvoice = (req, res) => {
         res.status(500).json(errorHandler(err));
     });
 };
+
+module.exports.getInvoiceId = (req,res)=>{
+    Invoice.count().then(length =>{
+        let id = sixDigits((length+1).toString())
+        res.status(200).send({invoiceId:id});
+    }).catch(err => {
+        res.status(500).json(errorHandler(err));
+    });
+}
 
 module.exports.getInvoiceById = (req, res) => {
     Invoice.findById({ _id: req.params.id, status: true }).then(invoice => {
