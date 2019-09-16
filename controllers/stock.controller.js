@@ -13,8 +13,6 @@ let errorHandler = error => {
 }
 
 module.exports.getStock = (req, res) => {
-  // console.log('get')
-
   Stock.find()
     .then(Stock => {
       res.send(Stock)

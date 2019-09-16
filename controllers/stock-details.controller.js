@@ -14,14 +14,14 @@ let errorHandler = error => {
 
 module.exports.getStockDetails = async (req, res) => {
   try {
-    let stockDetails = await StockDetails.find()
-      .populate('itemId')
-      .populate('brandId')
-      if(stockDetails.length){
-        res.status(200).send(stockDetails)
-      }else{
-        res.status(404).send({msg:'No Data Found'})
-      }
+    let stockDetails = await StockDetails.find({stock:req.params.id})
+      .populate('itemId','name')
+      .populate('brandId','brandName')
+    if (stockDetails.length) {
+      res.status(200).send(stockDetails)
+    } else {
+      res.status(404).send({ msg: 'No Data Found' })
+    }
   } catch (err) {
     res.status(500).send({ msg: 'Internal Server Error' })
   }
@@ -118,10 +118,11 @@ module.exports.getStockSecondReport = async (req, res) => {
         let filter = result.filter(object => {
           return object.itemId._id == obj.itemId._id
         })
+        if(filter.length){
         let sum = filter.reduce((ac, cu) => {
           return cu.itemId._id == obj.itemId._id ? ac + cu.actualQty : ac
         }, 0)
-        if (sum) {
+        // if (sum >= 0) {
           obj.actualQty = sum
           arr.push(obj)
         }
@@ -130,12 +131,11 @@ module.exports.getStockSecondReport = async (req, res) => {
         })
       })
     ).then(() => {
-      if(arr.length){
+      if (arr.length) {
         res.status(200).send(arr)
-      }else{
-        res.status(404).send({msg:'No Data Found'})
+      } else {
+        res.status(404).send({ msg: 'No Data Found' })
       }
-      
     })
   } catch (err) {
     res.status(500).send({ msg: 'internal server error', err: err })
@@ -147,11 +147,30 @@ module.exports.getStockSummary = async (req, res) => {
     .populate('itemId', 'name')
     .populate('brandId', 'brandName')
     .then(async result => {
-      if(result.length){
-        res.status(200).send(result)
-      }else{
-        res.status(404).send({msg:'No Data Found'})
-      }
+      let arr = []
+      Promise.all(
+        result.map(obj => {
+          let filter = result.filter(object => {
+            return object.brandId._id == obj.brandId._id
+          })
+          if (filter.length) {
+            let sum = filter.reduce((ac, cu) => {
+              return cu.brandId._id == obj.brandId._id ? ac + cu.initialQty : ac
+            }, 0)
+              obj.initialQty = sum
+              arr.push(obj)
+          }
+          result = result.filter(object => {
+            return object.brandId._id != obj.brandId._id
+          })
+        })
+      ).then(() => {
+        if (arr.length) {
+          res.status(200).send(arr)
+        } else {
+          res.status(404).send({ msg: 'No Data Found' })
+        }
+      })
     })
     .catch(error => {
       res.status(500).send(error)
@@ -159,34 +178,67 @@ module.exports.getStockSummary = async (req, res) => {
 }
 
 module.exports.getDamageStock = async (req, res) => {
-  try {
-    let damageStock = await StockDetails.find(
-      {},
-      { brandId: 1, damageQty: 1, date: 1 }
-    )
-    if (!damageStock.length) {
-      res.status(404).send({ msg: 'No data found' })
-    } else {
+  StockDetails.find({}, { date: 1, damageQty: 1 })
+    .populate('brandId', 'brandName')
+    .then(async result => {
       let arr = []
       Promise.all(
-        damageStock.map(async stock => {
-          let brand = await Brands.findOne({ _id: stock.brandId })
-          let brandName = brand.brandName
-          const temp = { ...stock._doc, brandName }
-          arr.push(temp)
+        result.map(obj => {
+          let filter = result.filter(object => {
+            return object.brandId._id == obj.brandId._id
+          })
+          if(filter.length){
+          let sum = filter.reduce((ac, cu) => {
+            return cu.brandId._id == obj.brandId._id ? ac + cu.damageQty : ac
+          }, 0)
+          // if (sum) {
+            obj.damageQty = sum
+            arr.push(obj)
+          }
+          result = result.filter(object => {
+            return object.brandId._id != obj.brandId._id
+          })
         })
-      ).then(result => {
-        // res.status(200).send(arr)
-        if(arr.length){
+      ).then(() => {
+        if (arr.length) {
           res.status(200).send(arr)
-        }else{
-          res.status(404).send({msg:'No Data Found'})
+        } else {
+          res.status(404).send({ msg: 'No Data Found' })
         }
       })
-    }
-  } catch (err) {
-    res.status(500).send({ msg: 'Internal Server Error' })
-  }
+    })
+    .catch(error => {
+      res.status(500).send(error)
+    })
+
+  // try {
+  //   let damageStock = await StockDetails.find(
+  //     {},
+  //     { brandId: 1, damageQty: 1, date: 1 }
+  //   )
+  //   if (!damageStock.length) {
+  //     res.status(404).send({ msg: 'No data found' })
+  //   } else {
+  //     let arr = []
+  //     Promise.all(
+  //       damageStock.map(async stock => {
+  //         let brand = await Brands.findOne({ _id: stock.brandId })
+  //         let brandName = brand.brandName
+  //         const temp = { ...stock._doc, brandName }
+  //         arr.push(temp)
+  //       })
+  //     ).then(result => {
+  //       // res.status(200).send(arr)
+  //       if (arr.length) {
+  //         res.status(200).send(arr)
+  //       } else {
+  //         res.status(404).send({ msg: 'No Data Found' })
+  //       }
+  //     })
+  //   }
+  // } catch (err) {
+  //   res.status(500).send({ msg: 'Internal Server Error' })
+  // }
 }
 
 module.exports.getItemsInStockDetails = (req, res) => {
@@ -194,10 +246,10 @@ module.exports.getItemsInStockDetails = (req, res) => {
     .populate('itemId', 'name')
     .exec()
     .then(result => {
-      if(result.length){
+      if (result.length) {
         res.status(200).send(result)
-      }else{
-        res.status(404).send({msg:'No Data Found'})
+      } else {
+        res.status(404).send({ msg: 'No Data Found' })
       }
       // res.status(200).send(result)
     })
@@ -211,10 +263,10 @@ module.exports.getBrandsOfItemsInStockDetails = (req, res) => {
     .populate('brandId', 'brandName')
     .exec()
     .then(result => {
-      if(result.length){
+      if (result.length) {
         res.status(200).send(result)
-      }else{
-        res.status(404).send({msg:'No Data Found'})
+      } else {
+        res.status(404).send({ msg: 'No Data Found' })
       }
       // res.status(200).send(result)
     })
@@ -230,10 +282,10 @@ module.exports.getModelsOfItemsAndBrands = (req, res) => {
   )
     .exec()
     .then(result => {
-      if(result.length){
+      if (result.length) {
         res.status(200).send(result)
-      }else{
-        res.status(404).send({msg:'No Data Found'})
+      } else {
+        res.status(404).send({ msg: 'No Data Found' })
       }
       // res.status(200).send(result)
     })
