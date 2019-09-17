@@ -21,7 +21,7 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
                 return error;
             } else {
                 invoiceVar = result;
-                req.body.invoiceDetails.map(x => (x['invoice'] = invoice._id));
+                req.body.invoiceDetails.map(x => (x['invoiceId'] = invoice._id));
                 const promise = InvoiceDetails.insertMany(req.body.invoiceDetails).then(data => {
                     invoiceDetailsArray = data;
                 }).catch(err => {

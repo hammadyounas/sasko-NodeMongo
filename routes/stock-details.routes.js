@@ -6,7 +6,7 @@ const stockDetails = require('../controllers/stock-details.controller')
 
 console.log("Stock-Details Route Loaded");
 
-routes.get('/:id', stockDetails.getStockDetails);
+routes.get('/getStockDetails/:id', stockDetails.getStockDetails);
 routes.post('/', stockDetails.addStockDetailsWithStock);
 routes.delete('/:id', stockDetails.deleteStockDetails);
 routes.put('/', stockDetails.editStockDetails);
@@ -17,4 +17,5 @@ routes.get('/getItemsInStockDetails',stockDetails.getItemsInStockDetails);
 routes.get('/getBrandsOfItemsInStockDetails/:itemId',stockDetails.getBrandsOfItemsInStockDetails);
 routes.post('/getModelsOfItemsAndBrands',stockDetails.getModelsOfItemsAndBrands);
 routes.post('/getColorsOfModelsItemsAndBrands',stockDetails.getColorsOfModelsItemsAndBrands);
+routes.post('/getStockOfColorModelItemAndBrand',stockDetails.getStockOfColorModelItemAndBrand);
 module.exports = routes

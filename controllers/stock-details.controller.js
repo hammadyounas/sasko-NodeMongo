@@ -14,9 +14,9 @@ let errorHandler = error => {
 
 module.exports.getStockDetails = async (req, res) => {
   try {
-    let stockDetails = await StockDetails.find({stock:req.params.id})
-      .populate('itemId','name')
-      .populate('brandId','brandName')
+    let stockDetails = await StockDetails.find({ stock: req.params.id })
+      .populate('itemId', 'name')
+      .populate('brandId', 'brandName')
     if (stockDetails.length) {
       res.status(200).send(stockDetails)
     } else {
@@ -96,15 +96,15 @@ module.exports.addStockDetailsWithStock = (req, res) => {
   })
 }
 
-module.exports.addStockDetailsWithOutStock = async (req, res) => {
-  let stock = await Stock.findOne({ stockId: req.body.stockDetails[0].itemId })
-  req.body.stockDetails.map(x => (x['stock'] = stock._id))
-  StockDetails.insertMany(req.body.stockDetails, (error, docs) => {
-    if (error) res.send(500).json(errorHandler(error))
+// module.exports.addStockDetailsWithOutStock = async (req, res) => {
+//   let stock = await Stock.findOne({ stockId: req.body.stockDetails[0].itemId })
+//   req.body.stockDetails.map(x => (x['stock'] = stock._id))
+//   StockDetails.insertMany(req.body.stockDetails, (error, docs) => {
+//     if (error) res.send(500).json(errorHandler(error))
 
-    res.send((200).json({ data: docs }))
-  })
-}
+//     res.send((200).json({ data: docs }))
+//   })
+// }
 
 module.exports.getStockSecondReport = async (req, res) => {
   try {
@@ -118,11 +118,11 @@ module.exports.getStockSecondReport = async (req, res) => {
         let filter = result.filter(object => {
           return object.itemId._id == obj.itemId._id
         })
-        if(filter.length){
-        let sum = filter.reduce((ac, cu) => {
-          return cu.itemId._id == obj.itemId._id ? ac + cu.actualQty : ac
-        }, 0)
-        // if (sum >= 0) {
+        if (filter.length) {
+          let sum = filter.reduce((ac, cu) => {
+            return cu.itemId._id == obj.itemId._id ? ac + cu.actualQty : ac
+          }, 0)
+          // if (sum >= 0) {
           obj.actualQty = sum
           arr.push(obj)
         }
@@ -157,8 +157,8 @@ module.exports.getStockSummary = async (req, res) => {
             let sum = filter.reduce((ac, cu) => {
               return cu.brandId._id == obj.brandId._id ? ac + cu.initialQty : ac
             }, 0)
-              obj.initialQty = sum
-              arr.push(obj)
+            obj.initialQty = sum
+            arr.push(obj)
           }
           result = result.filter(object => {
             return object.brandId._id != obj.brandId._id
@@ -187,11 +187,11 @@ module.exports.getDamageStock = async (req, res) => {
           let filter = result.filter(object => {
             return object.brandId._id == obj.brandId._id
           })
-          if(filter.length){
-          let sum = filter.reduce((ac, cu) => {
-            return cu.brandId._id == obj.brandId._id ? ac + cu.damageQty : ac
-          }, 0)
-          // if (sum) {
+          if (filter.length) {
+            let sum = filter.reduce((ac, cu) => {
+              return cu.brandId._id == obj.brandId._id ? ac + cu.damageQty : ac
+            }, 0)
+            // if (sum) {
             obj.damageQty = sum
             arr.push(obj)
           }
@@ -210,35 +210,6 @@ module.exports.getDamageStock = async (req, res) => {
     .catch(error => {
       res.status(500).send(error)
     })
-
-  // try {
-  //   let damageStock = await StockDetails.find(
-  //     {},
-  //     { brandId: 1, damageQty: 1, date: 1 }
-  //   )
-  //   if (!damageStock.length) {
-  //     res.status(404).send({ msg: 'No data found' })
-  //   } else {
-  //     let arr = []
-  //     Promise.all(
-  //       damageStock.map(async stock => {
-  //         let brand = await Brands.findOne({ _id: stock.brandId })
-  //         let brandName = brand.brandName
-  //         const temp = { ...stock._doc, brandName }
-  //         arr.push(temp)
-  //       })
-  //     ).then(result => {
-  //       // res.status(200).send(arr)
-  //       if (arr.length) {
-  //         res.status(200).send(arr)
-  //       } else {
-  //         res.status(404).send({ msg: 'No Data Found' })
-  //       }
-  //     })
-  //   }
-  // } catch (err) {
-  //   res.status(500).send({ msg: 'Internal Server Error' })
-  // }
 }
 
 module.exports.getItemsInStockDetails = (req, res) => {
@@ -306,6 +277,31 @@ module.exports.getColorsOfModelsItemsAndBrands = (req, res) => {
     .exec()
     .then(result => {
       res.status(200).send(result)
+    })
+    .catch(error => {
+      res.status(500).send(error)
+    })
+}
+
+module.exports.getStockOfColorModelItemAndBrand = (req, res) => {
+  StockDetails.find({
+    itemId: req.body.itemId,
+    brandId: req.body.brandId,
+    modelNumber: req.body.modelNumber,
+    color: req.body.color
+  },{initialQty:1,totalCost:1})
+    .exec()
+    .then(result => {
+      // let final = result.reduce((ac,cu/)=>{return ac.totalCost += current.totalCost})
+      let final = result.reduce((ac,cu)=>{
+        ac.initialQty += cu.initialQty
+        ac.totalCost += cu.totalCost
+       return ac
+       }).toObject()
+       final['stock'] = final.initialQty;
+       final['avgCost'] = final.totalCost/final.initialQty;
+
+      res.status(200).send(final)
     })
     .catch(error => {
       res.status(500).send(error)

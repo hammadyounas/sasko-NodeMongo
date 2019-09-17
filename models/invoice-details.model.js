@@ -8,6 +8,7 @@ const invoiceDetails = new Schema({
     brandId: { type: Schema.Types.ObjectId, ref: 'brand' },
     model: { type: String, required: true },
     color: { type: String, required: true },
+    rate: { type: Number, required: true },
     pieceQty: { type: Number, required: true },
     discount: { type: Number, required: true },
     afterDiscount: { type: Number, required: true },
