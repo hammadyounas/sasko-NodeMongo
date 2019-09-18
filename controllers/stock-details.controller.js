@@ -218,7 +218,13 @@ module.exports.getItemsInStockDetails = (req, res) => {
     .exec()
     .then(result => {
       if (result.length) {
-        res.status(200).send(result)
+        let finalResult = result.reduce((unique, o) => {
+          if(!unique.some(obj => obj.itemId._id == o.itemId._id)) {
+            unique.push(o);
+          }
+          return unique;
+      },[]);
+        res.status(200).send(finalResult)
       } else {
         res.status(404).send({ msg: 'No Data Found' })
       }
@@ -235,7 +241,13 @@ module.exports.getBrandsOfItemsInStockDetails = (req, res) => {
     .exec()
     .then(result => {
       if (result.length) {
-        res.status(200).send(result)
+        let finalResult = result.reduce((unique, o) => {
+          if(!unique.some(obj => obj.brandId._id == o.brandId._id)) {
+            unique.push(o);
+          }
+          return unique;
+      },[]);
+        res.status(200).send(finalResult)
       } else {
         res.status(404).send({ msg: 'No Data Found' })
       }
@@ -254,7 +266,13 @@ module.exports.getModelsOfItemsAndBrands = (req, res) => {
     .exec()
     .then(result => {
       if (result.length) {
-        res.status(200).send(result)
+        let finalResult = result.reduce((unique, o) => {
+          if(!unique.some(obj => obj.modelNumber == o.modelNumber)) {
+            unique.push(o);
+          }
+          return unique;
+      },[]);
+        res.status(200).send(finalResult)
       } else {
         res.status(404).send({ msg: 'No Data Found' })
       }
@@ -276,7 +294,18 @@ module.exports.getColorsOfModelsItemsAndBrands = (req, res) => {
   )
     .exec()
     .then(result => {
-      res.status(200).send(result)
+      if (result.length) {
+        let finalResult = result.reduce((unique, o) => {
+          if(!unique.some(obj => obj.color == o.color)) {
+            unique.push(o);
+          }
+          return unique;
+      },[]);
+        res.status(200).send(finalResult)
+      } else {
+        res.status(404).send({ msg: 'No Data Found' })
+      }
+      // res.status(200).send(result)
     })
     .catch(error => {
       res.status(500).send(error)
@@ -296,7 +325,7 @@ module.exports.getStockOfColorModelItemAndBrand = (req, res) => {
       let final = result.reduce((ac,cu)=>{
         ac.initialQty += cu.initialQty
         ac.totalCost += cu.totalCost
-       return ac
+       return ac  
        }).toObject()
        final['stock'] = final.initialQty;
        final['avgCost'] = final.totalCost/final.initialQty;
