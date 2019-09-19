@@ -14,7 +14,7 @@ let errorHandler = error => {
 
 module.exports.getStockDetails = async (req, res) => {
   try {
-    let stockDetails = await StockDetails.find({ stock: req.params.id })
+    let stockDetails = await StockDetails.find()
       .populate('itemId', 'name')
       .populate('brandId', 'brandName')
     if (stockDetails.length) {
