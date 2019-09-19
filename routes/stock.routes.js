@@ -11,7 +11,7 @@ routes.get('/getStockId',stockController.getStockId)
 routes.post('/', stockController.addStock);
 routes.delete('/:id', stockController.deleteStock);
 routes.put('/', stockController.editStock);
-routes.post('/getStockWithStockDetails',stockController.getStockWithStockDetails)
+routes.get('/getStockWithStockDetails/:id',stockController.getStockWithStockDetails)
 
 
 

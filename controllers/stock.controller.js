@@ -67,8 +67,8 @@ module.exports.addStock = (req, res) => {
 
 module.exports.getStockWithStockDetails = async (req, res) => {
   try {
-    let stock = await Stock.findOne({ _id: req.body.stock })
-    let stockDetails = await StockDetails.find({ stock: req.body.stock })
+    let stock = await Stock.findOne({ stock: req.params.id })
+    let stockDetails = await StockDetails.find({ stock: req.params.id })
     let stockDetailsArray = []
     Promise.all(
       stockDetails.map(async detail => {
