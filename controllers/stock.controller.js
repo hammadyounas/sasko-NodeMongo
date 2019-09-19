@@ -73,8 +73,8 @@ module.exports.getStockWithStockDetails = async (req, res) => {
     let stockDetails = await StockDetails.find({
       stock: req.params.id
     }).populate('itemId', 'name').populate('brandId','brandName');
-    let arr = [stock,stockDetails];
-      res.status(200).send(arr)
+    let obj = {stock,stockDetails};
+      res.status(200).send(obj)
   } catch (err) {
     res.status(500).send(errorHandler(err))
   }
