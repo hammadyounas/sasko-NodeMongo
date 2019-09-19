@@ -17,6 +17,7 @@ module.exports.getStockDetails = async (req, res) => {
     let stockDetails = await StockDetails.find()
       .populate('itemId', 'name')
       .populate('brandId', 'brandName')
+      .populate('stock','stockId')
     if (stockDetails.length) {
       res.status(200).send(stockDetails)
     } else {
