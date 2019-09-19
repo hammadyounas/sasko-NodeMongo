@@ -22,13 +22,15 @@ module.exports.getStock = (req, res) => {
     })
 }
 
-module.exports.getStockId = (req,res)=>{
-  Stock.count().then(length =>{
-    let id = sixDigits((length+1).toString())
-    res.status(200).send({stockId:id});
-}).catch(err => {
-    res.status(500).json(errorHandler(err));
-});
+module.exports.getStockId = (req, res) => {
+  Stock.count()
+    .then(length => {
+      let id = sixDigits((length + 1).toString())
+      res.status(200).send({ stockId: id })
+    })
+    .catch(err => {
+      res.status(500).json(errorHandler(err))
+    })
 }
 
 module.exports.deleteStock = (req, res) => {
@@ -67,26 +69,13 @@ module.exports.addStock = (req, res) => {
 
 module.exports.getStockWithStockDetails = async (req, res) => {
   try {
-    let stock = await Stock.findOne({ stock: req.params.id })
-    let stockDetails = await StockDetails.find({ stock: req.params.id })
-    let stockDetailsArray = []
-    Promise.all(
-      stockDetails.map(async detail => {
-        let item = await Item.findOne({ _id: detail.itemId })
-        let brand = await Brands.findOne({ _id: detail.brandId })
-        let itemName = item.name
-        let brandName = brand.brandName
-        const temp = { ...detail._doc, itemName, brandName }
-        stockDetailsArray.push(temp)
-      })
-    ).then(result => {
-      const obj = { stockDetailsArray, stock }
-      res.status(200).send(obj)
-    })
-    // res.status(200).send(obj)
+    let stock = await Stock.findOne({ _id: req.params.id })
+    let stockDetails = await StockDetails.find({
+      stock: req.params.id
+    }).populate('itemId', 'name').populate('brandId','brandName');
+    let arr = [stock,stockDetails];
+      res.status(200).send(arr)
   } catch (err) {
     res.status(500).send(errorHandler(err))
   }
 }
-
-
