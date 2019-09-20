@@ -6,7 +6,7 @@ const invoiceDetails = new Schema({
     stockDetailId: { type: Schema.Types.ObjectId, ref: 'stockDetails' },
     itemId: { type: Schema.Types.ObjectId, ref: 'item' },
     brandId: { type: Schema.Types.ObjectId, ref: 'brand' },
-    model: { type: String, required: true },
+    modelNumber: { type: String, required: true },
     color: { type: String, required: true },
     rate: { type: Number, required: true },
     pieceQty: { type: Number, required: true },
