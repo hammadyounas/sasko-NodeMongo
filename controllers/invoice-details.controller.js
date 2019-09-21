@@ -23,7 +23,7 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
       if (!result) {
         return error
       } else {
-        invoiceVar = result;
+        invoiceVar = result
         req.body.invoiceDetails.map(x => (x['invoiceId'] = invoice._id))
         Promise.all(
           req.body.invoiceDetails.map(async detail => {
@@ -98,7 +98,7 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
       req.body.invoice
     )
     Promise.all(
-      req.body.invoiceDetails.map(async invoiceDetail =>{
+      req.body.invoiceDetails.map(async invoiceDetail => {
         let stockDetails = await StockDetails.find(
           {
             itemId: invoiceDetail.itemId,
@@ -108,55 +108,68 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
           },
           { actualQty: 1, soldQty: 1, date: 1 }
         )
-        if(invoiceDetail._id){
-          let oldInvoiceDetail = await InvoiceDetails.findOne({_id:invoiceDetail._id});
-          if(oldInvoiceDetail.pieceQty > invoiceDetail.pieceQty){
-            let pieceQty = oldInvoiceDetail.pieceQty - invoiceDetail.pieceQty;
-            let updateStockDetails = await decreaseSoldQtyStockDetails(stockDetails,pieceQty)
-          }else if(oldInvoiceDetail.pieceQty <= invoiceDetail.pieceQty){
-            let pieceQty = invoiceDetail.pieceQty - oldInvoiceDetail.pieceQty;
-            let updateStockDetails = await increaseSoldQtyStockDetails(stockDetails,pieceQty)
+        if (invoiceDetail._id) {
+          let oldInvoiceDetail = await InvoiceDetails.findOne({
+            _id: invoiceDetail._id
+          })
+          if (oldInvoiceDetail.pieceQty > invoiceDetail.pieceQty) {
+            let pieceQty = oldInvoiceDetail.pieceQty - invoiceDetail.pieceQty
+            let updateStockDetails = await decreaseSoldQtyStockDetails(
+              stockDetails,
+              pieceQty
+            )
+          } else if (oldInvoiceDetail.pieceQty <= invoiceDetail.pieceQty) {
+            let pieceQty = invoiceDetail.pieceQty - oldInvoiceDetail.pieceQty
+            let updateStockDetails = await increaseSoldQtyStockDetails(
+              stockDetails,
+              pieceQty
+            )
           }
           let updateInvoiceDetail = await InvoiceDetails.findOneAndUpdate(
             { _id: invoiceDetail._id },
             invoiceDetail
           )
           // let upadatePieceQty = invoiceDetail.pieceQty - oldInvoiceDetail.pieceQty
-        }else{
-          let pieceQty = invoiceDetail.pieceQty;
-          let updateStockDetails = await increaseSoldQtyStockDetails(stockDetails,pieceQty)
+        } else {
+          let pieceQty = invoiceDetail.pieceQty
+          let updateStockDetails = await increaseSoldQtyStockDetails(
+            stockDetails,
+            pieceQty
+          )
           invoiceDetail['invoiceId'] = invoice._id
           const newInvoiceDetail = new InvoiceDetails(invoiceDetail)
           const newAddedInvoiceDetail = await newInvoiceDetail.save()
         }
       })
-    ).then(()=>{
-      res.status(200).send({msg:"invoice updated"});
+    ).then(() => {
+      res.status(200).send({ msg: 'invoice updated' })
     })
   } catch (err) {
     res.status(500).send(err.message)
   }
 }
 
-async function decreaseSoldQtyStockDetails(stockDetails,pieceQty){
-  stockDetails.sort(function (a, b) {
-    return new Date(a.date) - new Date(b.date)
-  }).reverse()
+async function decreaseSoldQtyStockDetails (stockDetails, pieceQty) {
+  stockDetails
+    .sort(function (a, b) {
+      return new Date(a.date) - new Date(b.date)
+    })
+    .reverse()
   Promise.all(
     stockDetails.map(async (obj, index) => {
       if (pieceQty != 0 && obj.soldQty > 0) {
         if (obj.soldQty < pieceQty) {
-          obj.actualQty += obj.soldQty;
-          pieceQty -= obj.soldQty;
-          obj.soldQty = 0;
+          obj.actualQty += obj.soldQty
+          pieceQty -= obj.soldQty
+          obj.soldQty = 0
         } else if (obj.soldQty > pieceQty) {
           obj.actualQty += pieceQty
           obj.soldQty -= pieceQty
-          pieceQty = 0;
+          pieceQty = 0
         } else if (obj.actualQty == pieceQty) {
           obj.soldQty = 0
           obj.actualQty += pieceQty
-          pieceQty = 0;
+          pieceQty = 0
         }
         stockDetails[index] = obj
         let update = await StockDetails.updateOne(
@@ -165,12 +178,12 @@ async function decreaseSoldQtyStockDetails(stockDetails,pieceQty){
         )
       }
     })
-  ).then(()=>{
-    return true;
+  ).then(() => {
+    return true
   })
 }
 
-async function increaseSoldQtyStockDetails(stockDetails,pieceQty){
+async function increaseSoldQtyStockDetails (stockDetails, pieceQty) {
   stockDetails.sort(function (a, b) {
     return new Date(a.date) - new Date(b.date)
   })
@@ -197,8 +210,8 @@ async function increaseSoldQtyStockDetails(stockDetails,pieceQty){
         )
       }
     })
-  ).then(()=>{
-    return true;
+  ).then(() => {
+    return true
   })
 }
 
@@ -215,6 +228,40 @@ module.exports.deleteInvoiceDetails = (req, res) => {
         .catch(err => {
           res.status(500).json(errorHandler(err))
         })
+    })
+    .catch(err => {
+      res.status(500).json(errorHandler(err))
+    })
+}
+
+module.exports.modelColorWiseSale = async (req, res) => {
+  InvoiceDetails.find({ status: true },{model:1,color:1,rate:1,totalCost:1})
+    .populate('itemId', 'name')
+    .populate('brandId', 'brandName')
+    .populate({
+      path: 'invoiceId',
+      select: 'invoiceNo totalQty date',
+      populate: { path: 'customerId', select: 'clientName' }
+    }).lean()
+    .then(invoiceDetails => {
+      Promise.all(
+      invoiceDetails.map((invoiceDetail,i) =>{
+        invoiceDetails[i]['itemName'] = invoiceDetail.itemId.name;
+        invoiceDetails[i]['brandName'] = invoiceDetail.brandId.brandName;
+        invoiceDetails[i]['invoiceNo'] = invoiceDetail.invoiceId.invoiceNo;
+        invoiceDetails[i]['totalQty'] = invoiceDetail.invoiceId.totalQty;
+        invoiceDetails[i]['date'] = invoiceDetail.invoiceId.date;
+        invoiceDetails[i]['brandName'] = invoiceDetail.brandId.brandName;
+        invoiceDetails[i]['customerName'] = invoiceDetail.invoiceId.customerId.clientName;
+        delete invoiceDetails[i]['itemId'];
+        delete invoiceDetails[i]['brandId'];
+        delete invoiceDetails[i].invoiceId;
+      })
+      ).then(()=>{
+        res.status(200).send(invoiceDetails)
+
+      })
+      // let result = invoiceDetails.toObje
     })
     .catch(err => {
       res.status(500).json(errorHandler(err))

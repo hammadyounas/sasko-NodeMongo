@@ -10,5 +10,6 @@ routes.get('/', invoiceDetailsController.getInvoiceDetails);
 routes.post('/', invoiceDetailsController.addInvoiceDetailsWithInvoice);
 routes.put('/', invoiceDetailsController.editInvoiceDetailsWithInvoice);
 routes.delete('/:id', invoiceDetailsController.deleteInvoiceDetails);
+routes.get('/modelColorWiseSale',invoiceDetailsController.modelColorWiseSale)
 
 module.exports = routes;

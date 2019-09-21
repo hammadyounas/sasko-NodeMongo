@@ -6,7 +6,7 @@ const getInvoiceNumber = require('../utils/invoiceNumberGenerator');
 const sixDigits = require('../utils/sixDigits')
 
 module.exports.getInvoice = (req, res) => {
-    Invoice.find({ status: true }).then(invoices => {
+    Invoice.find({ status: true }).populate('customerId','clientName').then(invoices => {
             res.status(200).send(getInvoiceNumber(invoices));
     }).catch(err => {
         res.status(500).json(errorHandler(err));
