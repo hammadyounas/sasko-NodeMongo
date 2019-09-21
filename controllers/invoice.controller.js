@@ -36,6 +36,7 @@ module.exports.getInvoiceWithInvoiceDetails = async (req, res) => {
       let invoiceDetails = await InvoiceDetails.find({
         invoiceId: req.params.id
       }).populate('itemId', 'name').populate('brandId','brandName');
+      
       let obj = {invoice,invoiceDetails};
         res.status(200).send(obj)
     } catch (err) {
