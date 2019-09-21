@@ -261,7 +261,6 @@ module.exports.modelColorWiseSale = async (req, res) => {
         res.status(200).send(invoiceDetails)
 
       })
-      // let result = invoiceDetails.toObje
     })
     .catch(err => {
       res.status(500).json(errorHandler(err))
