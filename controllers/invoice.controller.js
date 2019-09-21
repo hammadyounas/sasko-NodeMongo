@@ -1,4 +1,5 @@
 const Invoice = require('../models/invoice.model');
+const InvoiceDetails = require('../models/invoice-details.model');
 const Customer = require('../models/customer.model');
 const errorHandler = require('../utils/errorHandler');
 const getInvoiceNumber = require('../utils/invoiceNumberGenerator');
@@ -28,6 +29,19 @@ module.exports.getInvoiceById = (req, res) => {
         res.status(500).json(errorHandler(err));
     });
 };
+
+module.exports.getInvoiceWithInvoiceDetails = async (req, res) => {
+    try {
+      let invoice = await Invoice.findOne({ _id: req.params.id })
+      let invoiceDetails = await InvoiceDetails.find({
+        invoiceId: req.params.id
+      }).populate('itemId', 'name').populate('brandId','brandName');
+      let obj = {invoice,invoiceDetails};
+        res.status(200).send(obj)
+    } catch (err) {
+      res.status(500).send(errorHandler(err))
+    }
+  }
 
 module.exports.setInvoice = (req, res) => {
     Invoice.create(req.body).then(invoice => {

@@ -133,28 +133,6 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
     ).then(()=>{
       res.status(200).send({msg:"invoice updated"});
     })
-    // Promise.all(
-    //   req.body.invoiceDetails.map(async invoice => {
-    //     const invoiceDetails = await InvoiceDetails.findByIdAndUpdate(
-    //       { _id: invoice._id },
-    //       invoice
-    //     )
-    //   })
-    // ).then(async () => {
-    //   const newInvoice = await Invoice.findOne({ _id: req.body.invoice._id })
-    //   Promise.all(
-    //     req.body.invoiceDetails.map(async invoice => {
-    //       const newInvoiceDetails = await InvoiceDetails.findOne({
-    //         _id: invoice._id
-    //       })
-    //       updatedArray.push(newInvoiceDetails)
-    //     })
-    //   ).then(() => {
-    //     res
-    //       .status(200)
-    //       .send({ invoice: newInvoice._doc, invoiceDetails: updatedArray })
-    //   })
-    // })
   } catch (err) {
     res.status(500).send(err.message)
   }
