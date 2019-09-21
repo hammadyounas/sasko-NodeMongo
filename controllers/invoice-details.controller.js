@@ -101,10 +101,10 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
       req.body.invoiceDetails.map(async invoiceDetail =>{
         let stockDetails = await StockDetails.find(
           {
-            itemId: detail.itemId,
-            brandId: detail.brandId,
-            modelNumber: detail.modelNumber,
-            color: detail.color
+            itemId: invoiceDetail.itemId,
+            brandId: invoiceDetail.brandId,
+            modelNumber: invoiceDetail.modelNumber,
+            color: invoiceDetail.color
           },
           { actualQty: 1, soldQty: 1, date: 1 }
         )
@@ -117,13 +117,13 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
             let pieceQty = invoiceDetail.pieceQty - oldInvoiceDetail.pieceQty;
             let updateStockDetails = await increaseSoldQtyStockDetails(stockDetails,pieceQty)
           }
-          let updateInvoiceDetail = await InvoiceDetails.findByIdAndUpdate(
+          let updateInvoiceDetail = await InvoiceDetails.findOneAndUpdate(
             { _id: invoiceDetail._id },
             invoiceDetail
           )
           // let upadatePieceQty = invoiceDetail.pieceQty - oldInvoiceDetail.pieceQty
         }else{
-          let pieceQty = detail.pieceQty;
+          let pieceQty = invoiceDetail.pieceQty;
           let updateStockDetails = await increaseSoldQtyStockDetails(stockDetails,pieceQty)
           invoiceDetail['invoiceId'] = invoice._id
           const newInvoiceDetail = new InvoiceDetails(invoiceDetail)
@@ -160,7 +160,7 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
   }
 }
 
-function decreaseSoldQtyStockDetails(stockDetails,pieceQty){
+async function decreaseSoldQtyStockDetails(stockDetails,pieceQty){
   stockDetails.sort(function (a, b) {
     return new Date(a.date) - new Date(b.date)
   }).reverse()
@@ -187,10 +187,12 @@ function decreaseSoldQtyStockDetails(stockDetails,pieceQty){
         )
       }
     })
-  )
+  ).then(()=>{
+    return true;
+  })
 }
 
-function increaseSoldQtyStockDetails(stockDetails,pieceQty){
+async function increaseSoldQtyStockDetails(stockDetails,pieceQty){
   stockDetails.sort(function (a, b) {
     return new Date(a.date) - new Date(b.date)
   })
@@ -217,7 +219,9 @@ function increaseSoldQtyStockDetails(stockDetails,pieceQty){
         )
       }
     })
-  )
+  ).then(()=>{
+    return true;
+  })
 }
 
 module.exports.deleteInvoiceDetails = (req, res) => {
