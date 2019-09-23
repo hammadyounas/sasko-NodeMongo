@@ -262,7 +262,7 @@ module.exports.deleteInvoiceDetails = (req, res) => {
 module.exports.modelColorWiseSale = async (req, res) => {
   InvoiceDetails.find(
     { status: true },
-    { model: 1, color: 1, rate: 1, totalCost: 1 }
+    { modelNumber: 1, color: 1, rate: 1, totalCost: 1 }
   )
     .populate('itemId', 'name')
     .populate('brandId', 'brandName')
