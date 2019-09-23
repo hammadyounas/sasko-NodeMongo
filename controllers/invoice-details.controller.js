@@ -266,3 +266,5 @@ module.exports.modelColorWiseSale = async (req, res) => {
       res.status(500).json(errorHandler(err))
     })
 }
+
+
