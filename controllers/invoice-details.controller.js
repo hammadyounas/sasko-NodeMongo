@@ -112,6 +112,26 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
           let oldInvoiceDetail = await InvoiceDetails.findOne({
             _id: invoiceDetail._id
           })
+          if(invoiceDetail.itemId != oldInvoiceDetail.itemId ||
+            invoiceDetail.brandId != oldInvoiceDetail.brandId ||
+            invoiceDetail.modelNumber != oldInvoiceDetail.modelNumber ||
+            invoiceDetail.color != oldInvoiceDetail.color 
+            ){
+              let pieceQty = oldInvoiceDetail.pieceQty  ;
+              let oldStockDetails = await StockDetails.find(
+                {
+                  itemId: oldInvoiceDetail.itemId,
+                  brandId: oldInvoiceDetail.brandId,
+                  modelNumber: oldInvoiceDetail.modelNumber,
+                  color: oldInvoiceDetail.color
+                },
+                { actualQty: 1, soldQty: 1, date: 1 }
+              )
+              let updateStockDetails = await decreaseSoldQtyStockDetails(
+                oldStockDetails,
+                pieceQty
+              )
+            }
           if (oldInvoiceDetail.pieceQty > invoiceDetail.pieceQty) {
             let pieceQty = oldInvoiceDetail.pieceQty - invoiceDetail.pieceQty
             let updateStockDetails = await decreaseSoldQtyStockDetails(
