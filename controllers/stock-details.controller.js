@@ -75,7 +75,6 @@ module.exports.editStockDetails = async (req, res) => {
 }
 
 module.exports.addStockDetailsWithStock = (req, res) => {
-  //   console.log('check add stock', req.body)
   req.body.stock['_id'] = new mongoose.Types.ObjectId()
   const stock = new Stock(req.body.stock)
   stock.save().then(result => {
@@ -89,23 +88,15 @@ module.exports.addStockDetailsWithStock = (req, res) => {
       })
       StockDetails.insertMany(req.body.stockDetails)
         .then(data => {
-          // console.log(data)
           res.status(200).send(data)
         })
-        .catch(error => console.log(error))
+        .catch(error => {
+          res.status(500).send({ msg: 'internal server error', err: err })
+
+        })
     }
   })
 }
-
-// module.exports.addStockDetailsWithOutStock = async (req, res) => {
-//   let stock = await Stock.findOne({ stockId: req.body.stockDetails[0].itemId })
-//   req.body.stockDetails.map(x => (x['stock'] = stock._id))
-//   StockDetails.insertMany(req.body.stockDetails, (error, docs) => {
-//     if (error) res.send(500).json(errorHandler(error))
-
-//     res.send((200).json({ data: docs }))
-//   })
-// }
 
 module.exports.getStockSecondReport = async (req, res) => {
   try {
