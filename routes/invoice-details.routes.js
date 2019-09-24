@@ -7,6 +7,7 @@ const invoiceDetailsController = require('../controllers/invoice-details.control
 console.log("Invoice Details Route Loaded");
 
 routes.get('/', invoiceDetailsController.getInvoiceDetails);
+routes.get('/getInvoiceDetailWithInvoice/:id',invoiceDetailsController.getInvoiceDetailWithInvoice)
 routes.post('/', invoiceDetailsController.addInvoiceDetailsWithInvoice);
 routes.put('/', invoiceDetailsController.editInvoiceDetailsWithInvoice);
 routes.delete('/:id', invoiceDetailsController.deleteInvoiceDetails);

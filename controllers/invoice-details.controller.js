@@ -14,6 +14,21 @@ module.exports.getInvoiceDetails = (req, res) => {
     })
 }
 
+module.exports.getInvoiceDetailWithInvoice =(req,res)=>{
+  InvoiceDetails.findOne({status:true,_id:req.params.id}).populate('invoiceId').lean().then(result=>{
+    if(result){
+      let obj = {invoice : result.invoiceId};
+      delete result['invoiceId'];
+      obj['invoiceDetail'] = result;
+      res.status(200).send(obj)
+    }else{
+      res.status(404).send({msg:"data not found"})
+    }
+  }).catch(err => {
+      res.status(500).json(errorHandler(err))
+    })
+}
+
 module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
   try {
     let invoiceDetailsArray, invoiceVar
