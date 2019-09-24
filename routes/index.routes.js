@@ -9,6 +9,7 @@ const invoiceDetails = require('./invoice-details.routes');
 const bank = require('./bank.routes');
 const paymentReceive = require('./payment-receive.routes');
 const pettyCash = require('./petty-cash.routes');
+const returnInvoice = require('./return-invoice.routes');
 
 const routes = express.Router();
 console.log("iteeeemmms");
@@ -22,6 +23,7 @@ routes.use('/invoice', invoice);
 routes.use('/invoiceDetails', invoiceDetails);
 routes.use('/bank', bank);
 routes.use('/paymentReceive', paymentReceive);
-routes.use('/pettyCash',pettyCash)
+routes.use('/pettyCash',pettyCash);
+routes.use('/returnInvoice',returnInvoice);
 
 module.exports = routes;
