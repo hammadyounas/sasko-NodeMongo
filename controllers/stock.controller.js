@@ -72,20 +72,21 @@ module.exports.getStockWithStockDetails = async (req, res) => {
     let stock = await Stock.findOne({ _id: req.params.id })
     let stockDetails = await StockDetails.find({
       stock: req.params.id
-    }).populate('itemId', 'name').populate('brandId','brandName').lean();
+    })
+      .populate('itemId', 'name')
+      .populate('brandId', 'brandName')
+      .lean()
     Promise.all(
-      stockDetails.map((stockDetail,i) =>{
-        stockDetails[i]['itemName'] = stockDetail.itemId.name;
-        stockDetails[i]['brandName'] = stockDetail.brandId.brandName;
-        delete stockDetails[i]['itemId'];
-        delete stockDetails[i]['brandId'];
+      stockDetails.map((stockDetail, i) => {
+        stockDetails[i]['itemName'] = stockDetail.itemId.name
+        stockDetails[i]['brandName'] = stockDetail.brandId.brandName
+        stockDetails[i]['itemId'] = stockDetail.itemId._id
+        stockDetails[i]['brandId'] = stockDetail.brandId._id
       })
-      ).then(()=>{
-        // res.status(200).send(invoiceDetails)
-    let obj = {stock,stockDetails};
-    res.status(200).send(obj)
-
-      })
+    ).then(() => {
+      let obj = { stock, stockDetails }
+      res.status(200).send(obj)
+    })
   } catch (err) {
     res.status(500).send(errorHandler(err))
   }

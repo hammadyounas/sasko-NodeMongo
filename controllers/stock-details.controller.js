@@ -135,7 +135,7 @@ module.exports.getStockSecondReport = async (req, res) => {
 }
 
 module.exports.getStockSummary = async (req, res) => {
-  StockDetails.find({}, { date: 1, initialQty: 1 })
+  StockDetails.find({}, { date: 1, actualQty: 1 })
     .populate('itemId', 'name')
     .populate('brandId', 'brandName')
     .then(async result => {
@@ -147,9 +147,9 @@ module.exports.getStockSummary = async (req, res) => {
           })
           if (filter.length) {
             let sum = filter.reduce((ac, cu) => {
-              return cu.brandId._id == obj.brandId._id ? ac + cu.initialQty : ac
+              return cu.brandId._id == obj.brandId._id ? ac + cu.actualQty : ac
             }, 0)
-            obj.initialQty = sum
+            obj.actualQty = sum
             arr.push(obj)
           }
           result = result.filter(object => {
