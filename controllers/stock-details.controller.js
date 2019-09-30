@@ -310,16 +310,16 @@ module.exports.getStockOfColorModelItemAndBrand = (req, res) => {
     brandId: req.body.brandId,
     modelNumber: req.body.modelNumber,
     color: req.body.color
-  },{initialQty:1,totalCost:1})
+  },{actualQty:1,totalCost:1,initialQty:1})
     .exec()
     .then(result => {
-      // let final = result.reduce((ac,cu/)=>{return ac.totalCost += current.totalCost})
       let final = result.reduce((ac,cu)=>{
+        ac.actualQty += cu.actualQty
         ac.initialQty += cu.initialQty
         ac.totalCost += cu.totalCost
        return ac  
        }).toObject()
-       final['stock'] = final.initialQty;
+       final['stock'] = final.actualQty;
        final['avgCost'] = final.totalCost/final.initialQty;
 
       res.status(200).send(final)
