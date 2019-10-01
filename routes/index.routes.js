@@ -11,6 +11,7 @@ const paymentReceive = require('./payment-receive.routes');
 const pettyCash = require('./petty-cash.routes');
 const returnInvoice = require('./return-invoice.routes');
 const uploadPdf = require('./uploadPdf.routes');
+const userInfo = require('./users.routes')
 
 const routes = express.Router();
 console.log("iteeeemmms");
@@ -27,5 +28,6 @@ routes.use('/paymentReceive', paymentReceive);
 routes.use('/pettyCash',pettyCash);
 routes.use('/returnInvoice',returnInvoice);
 routes.use('/uploadPdf',uploadPdf);
+routes.use('/userInfo',userInfo);
 
 module.exports = routes;
