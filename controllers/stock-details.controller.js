@@ -59,15 +59,7 @@ module.exports.editStockDetails = async (req, res) => {
         }
       })
     ).then(async () => {
-      // let newStock = await Stock.findOne({ _id: req.body.stock._id })
-      // Promise.all(
-      //   req.body.stockDetails.map(async stock => {
-      //     const newStockDetails = await StockDetails.findOne({ _id: stock._id })
-      //     updatedArray.push(newStockDetails)
-      //   })
-      // ).then(() => {
-      res.status(200).send({ msg: 'updated' })
-      // })
+      res.status(200).send({ msg: 'updated' });
     })
   } catch (err) {
     res.status(500).send(err.message)
@@ -114,7 +106,6 @@ module.exports.getStockSecondReport = async (req, res) => {
           let sum = filter.reduce((ac, cu) => {
             return cu.itemId._id == obj.itemId._id ? ac + cu.actualQty : ac
           }, 0)
-          // if (sum >= 0) {
           obj.actualQty = sum
           arr.push(obj)
         }
@@ -183,7 +174,6 @@ module.exports.getDamageStock = async (req, res) => {
             let sum = filter.reduce((ac, cu) => {
               return cu.brandId._id == obj.brandId._id ? ac + cu.damageQty : ac
             }, 0)
-            // if (sum) {
             obj.damageQty = sum
             arr.push(obj)
           }
@@ -220,7 +210,6 @@ module.exports.getItemsInStockDetails = (req, res) => {
       } else {
         res.status(404).send({ msg: 'No Data Found' })
       }
-      // res.status(200).send(result)
     })
     .catch(error => {
       res.status(500).send(error)
@@ -243,7 +232,6 @@ module.exports.getBrandsOfItemsInStockDetails = (req, res) => {
       } else {
         res.status(404).send({ msg: 'No Data Found' })
       }
-      // res.status(200).send(result)
     })
     .catch(error => {
       res.status(500).send(error)
@@ -268,7 +256,6 @@ module.exports.getModelsOfItemsAndBrands = (req, res) => {
       } else {
         res.status(404).send({ msg: 'No Data Found' })
       }
-      // res.status(200).send(result)
     })
     .catch(error => {
       res.status(500).send(error)
@@ -297,7 +284,6 @@ module.exports.getColorsOfModelsItemsAndBrands = (req, res) => {
       } else {
         res.status(404).send({ msg: 'No Data Found' })
       }
-      // res.status(200).send(result)
     })
     .catch(error => {
       res.status(500).send(error)
