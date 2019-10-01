@@ -158,6 +158,7 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
                 pieceQty
               )
             } else if (oldInvoiceDetail.pieceQty <= invoiceDetail.pieceQty) {
+              
               let pieceQty = invoiceDetail.pieceQty - oldInvoiceDetail.pieceQty
               let updateStockDetails = await increaseSoldQtyStockDetails(
                 stockDetails,
