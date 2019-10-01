@@ -14,17 +14,32 @@ module.exports.getInvoiceDetails = (req, res) => {
     })
 }
 
-module.exports.getInvoiceDetailWithInvoice =(req,res)=>{
-  InvoiceDetails.findOne({status:true,_id:req.params.id}).populate('invoiceId').lean().then(result=>{
-    if(result){
-      let obj = {invoice : result.invoiceId};
-      delete result['invoiceId'];
-      obj['invoiceDetail'] = result;
-      res.status(200).send(obj)
-    }else{
-      res.status(404).send({msg:"data not found"})
-    }
-  }).catch(err => {
+module.exports.getInvoiceDetailWithInvoice = (req, res) => {
+  InvoiceDetails.findOne({ status: true, _id: req.params.id })
+    .populate('brandId', 'brandName')
+    .populate('itemId', 'name')
+    .populate({
+      path: 'invoiceId',
+      populate: { path: 'customerId', select: 'clientName' }
+    })
+    .lean()
+    .then(result => {
+      if (result) {
+        let obj = { invoice: result.invoiceId }
+        obj.invoice['customerName'] = obj.invoice.customerId.clientName;
+        delete obj.invoice['customerId'];
+        result['brandName'] = result.brandId.brandName
+        result.brandId = result.brandId._id
+        result['itemName'] = result.itemId.name
+        result.itemId = result.itemId._id
+        delete result['invoiceId']
+        obj['invoiceDetail'] = result
+        res.status(200).send(obj)
+      } else {
+        res.status(404).send({ msg: 'data not found' })
+      }
+    })
+    .catch(err => {
       res.status(500).json(errorHandler(err))
     })
 }
@@ -158,7 +173,6 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
                 pieceQty
               )
             } else if (oldInvoiceDetail.pieceQty <= invoiceDetail.pieceQty) {
-              
               let pieceQty = invoiceDetail.pieceQty - oldInvoiceDetail.pieceQty
               let updateStockDetails = await increaseSoldQtyStockDetails(
                 stockDetails,
