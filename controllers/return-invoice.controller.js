@@ -6,9 +6,21 @@ const StockDetails = require('../models/stock-details.model');
 const ReturnInvoiceDetail = require('../models/return-invoice.model');
 
 module.exports.getReturnInvoice = (req, res) => {
-  ReturnInvoice.find({ status: true })
+  ReturnInvoice.find({ status: true }).populate({
+    path: 'invoiceDetailId',
+    populate: { path: 'invoiceId', select: 'invoiceNo manualBookNo  date' }
+  }).lean()
     .then(invoices => {
       if(invoices){
+        invoices.map((obj,i) =>{
+            obj['invoiceNo'] = obj.invoiceDetailId.invoiceId.invoiceNo;
+            obj['manualBookNo'] = obj.invoiceDetailId.invoiceId.manualBookNo;
+            obj['invoiceDate'] = obj.invoiceDetailId.invoiceId.date;
+            obj['invoiceId'] = obj.invoiceDetailId.invoiceId._id;
+            obj['invoiceDetailId'] = obj.invoiceDetailId._id;
+            delete obj['invoiceDetailId'];
+            invoices[i] = obj;
+        })
         res.status(200).send(invoices)
       }else{
         res.status(404).send({msg:'return invoices not found'});
