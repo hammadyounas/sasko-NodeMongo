@@ -8,7 +8,11 @@ const ReturnInvoiceDetail = require('../models/return-invoice.model');
 module.exports.getReturnInvoice = (req, res) => {
   ReturnInvoice.find({ status: true })
     .then(invoices => {
-      res.status(200).send(invoices)
+      if(invoices){
+        res.status(200).send(invoices)
+      }else{
+        res.status(404).send({msg:'return invoices not found'});
+      }
     })
     .catch(err => {
       res.status(500).json(errorHandler(err))
