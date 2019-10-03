@@ -49,44 +49,6 @@ module.exports.getUploadPdf = (req, res) => {
         })
 }
 
-// module.exports.getPettyCashById = (req, res) => {
-//     PettyCash.findOne({ _id: req.params.id })
-//         .then(result => {
-//             res.status(200).send(result)
-//         })
-//         .catch(err => {
-//             res.status(500).json(errorHandler(err))
-//         })
-// }
-
-// module.exports.updatePettyCash = (req, res) => {
-//     PettyCash.findOne({
-//         date: req.body.date,
-//         pettyCashName: req.body.pettyCashName,
-//         cash: req.body.cash
-//     }).then(response => {
-//         if (!response) {
-//             PettyCash.findByIdAndUpdate({ _id: req.body._id }, req.body)
-//                 .then(() => {
-//                     PettyCash.findById({ _id: req.body._id })
-//                         .then(updatePettyCash => {
-//                             res.status(200).send(updatePettyCash)
-//                         })
-//                         .catch(err => {
-//                             res.status(500).json(errorHandler(err))
-//                         })
-//                 })
-//                 .catch(err => {
-//                     res.status(500).json(errorHandler(err))
-//                 })
-//         } else {
-//             res
-//                 .status(409)
-//                 .send({ msg: 'this data is already exist on another petty cash' })
-//         }
-//     })
-// }
-
 module.exports.deleteUploadedPdf = (req, res) => {
     UploadPdf.findByIdAndRemove({ _id: req.params.id })
         .then(resp => {
