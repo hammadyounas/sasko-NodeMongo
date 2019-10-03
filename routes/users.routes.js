@@ -8,6 +8,7 @@ const UserController = require('../controllers/users.controller')
 
 // routes.get('/getPettyCashTransactionId',PettyCashController.getPettyCashTransactionId);
 routes.get('/', UserController.getUser);
+routes.get('/auth', UserController.getAuth);
 
 // routes.get('/:id', PettyCashController.getPettyCashById);
 routes.post('/', UserController.setUser );
