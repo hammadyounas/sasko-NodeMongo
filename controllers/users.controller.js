@@ -1,5 +1,8 @@
 const mongoose = require('mongoose')
-const UserInfo = require('../models/users.model')
+const User = require('../models/users.model')
+const jwt = require('jsonwebtoken')
+const bcryptService = require('./../services/bcrypt.service');
+
 
 let errorHandler = error => {
     return {
@@ -10,17 +13,50 @@ let errorHandler = error => {
 }
 
 module.exports.setUser = (req, res) => {
-    UserInfo.create(req.body)
-        .then(user => {
-            res.status(200).send(user)
-        })
-        .catch(err => {
-            res.status(500).json(errorHandler(err))
-        })
+    User.findOne({userName:req.body.userName}).then(userExist =>{
+        if(userExist != null){
+            res.status(409).send({msg:'user with this user name already exists'});
+        }else{
+            let obj = { password: req.body.password }
+            const hash = bcryptService().password(obj);
+            req.body['password'] = hash 
+            User.create(req.body).then(userCreated =>{
+                const JWTToken = jwt.sign(
+                    {
+                        userName: userCreated.userName,
+                        _id: userCreated._id,
+                        role:userCreated.role
+                    },
+                    'secretOfSasscoTraders',
+                    {
+                      expiresIn: '2h'
+                    }
+                  )
+                  res.status(200).json({
+                    success: 'New user has been created',
+                    token: JWTToken
+                  })
+            }).catch(error => {
+                res.status(500).json({
+                  stack: error.stack,
+                  code: error.code,
+                  message: error.message
+                })
+              })
+        }
+    })
+    // User.create(req.body)
+    //     .then(user => {
+    //         res.status(200).send(user)
+    //     })
+    //     .catch(err => {
+    //         res.status(500).json(errorHandler(err))
+    //     })
 }
 
 module.exports.getUser = (req, res) => {
-    UserInfo.find()
+    
+    User.find()
         .then(user => {
             if (user.length > 0) {
                 res.status(200).send(user)
@@ -42,7 +78,7 @@ module.exports.getAuth = (req, res) => {
         '&redirect_uri=' + encodeURIComponent('https://404app.000webhostapp.com/'));
 }
 // module.exports.deleteUploadedPdf = (req, res) => {
-//     UserInfo.findByIdAndRemove({ _id: req.params.id })
+//     User.findByIdAndRemove({ _id: req.params.id })
 //         .then(resp => {
 //             res.status(200).send(resp)
 //         })

@@ -28,6 +28,6 @@ routes.use('/paymentReceive', paymentReceive);
 routes.use('/pettyCash',pettyCash);
 routes.use('/returnInvoice',returnInvoice);
 routes.use('/uploadPdf',uploadPdf);
-routes.use('/userInfo',userInfo);
+routes.use('/users',userInfo);
 
 module.exports = routes;
