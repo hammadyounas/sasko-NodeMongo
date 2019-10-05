@@ -49,7 +49,21 @@ module.exports.setUser = (req, res) => {
 }
 
 module.exports.getUser = (req, res) => {
-  User.find()
+  User.find({ status: true }, { password: 0 })
+    .then(user => {
+      if (user.length > 0) {
+        res.status(200).send(user)
+      } else {
+        res.status(404).send({ msg: 'No Data Found' })
+      }
+    })
+    .catch(err => {
+      res.status(500).json(errorHandler(err))
+    })
+}
+
+module.exports.getUserNameList = (req, res) => {
+    User.find({ status: true }, { userName: 1 })
     .then(user => {
       if (user.length > 0) {
         res.status(200).send(user)
