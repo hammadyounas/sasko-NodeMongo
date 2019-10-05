@@ -12,7 +12,7 @@ routes.get('/', UserController.getUser);
 
 // routes.get('/:id', PettyCashController.getPettyCashById);
 routes.post('/', UserController.setUser );
-// routes.put('/', PettyCashController.updatePettyCash);
+routes.put('/',UserController.updateUser );
 // routes.delete('/:id', PettyCashController.deletePettyCash);
 
 module.exports = routes;

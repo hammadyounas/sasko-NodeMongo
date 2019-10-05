@@ -38,7 +38,8 @@ module.exports.getPaymentDetailById = (req, res) => {
 module.exports.editPaymentReceive = (req, res) => {
     PaymentReceive.findByIdAndUpdate({ _id: req.body._id, status: true }, req.body).then(() => {
         PaymentReceive.findById({ _id: req.body._id }).then(payment_receive => {
-            res.status(200).send(payment_receive);
+            res.status(200
+                ).send(payment_receive);
         }).catch(err => {
             res.status(500).json(errorHandler(err));
         });
