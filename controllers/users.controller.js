@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const User = require('../models/users.model')
 const jwt = require('jsonwebtoken')
 const bcryptService = require('./../services/bcrypt.service')
+const UserRoles = require('./../models/user-roles.model')
 
 let errorHandler = error => {
   return {
@@ -21,20 +22,23 @@ module.exports.setUser = (req, res) => {
       req.body['password'] = hash
       User.create(req.body)
         .then(userCreated => {
-          const JWTToken = jwt.sign(
-            {
-              userName: userCreated.userName,
-              _id: userCreated._id,
-              role: userCreated.role
-            },
-            'secretOfSasscoTraders',
-            {
-              expiresIn: '2h'
-            }
-          )
-          res.status(200).json({
-            success: 'New user has been created',
-            token: JWTToken
+          let obj = { userId: userCreated._id }
+          UserRoles.create(obj).then(rolesCreated => {
+            const JWTToken = jwt.sign(
+              {
+                userName: userCreated.userName,
+                _id: userCreated._id,
+                role: userCreated.role
+              },
+              'secretOfSasscoTraders',
+              {
+                expiresIn: '2h'
+              }
+            )
+            res.status(200).json({
+              success: 'New user has been created',
+              token: JWTToken
+            })
           })
         })
         .catch(error => {
@@ -63,7 +67,7 @@ module.exports.getUser = (req, res) => {
 }
 
 module.exports.getUserNameList = (req, res) => {
-    User.find({ status: true }, { userName: 1 })
+  User.find({ status: true }, { userName: 1 })
     .then(user => {
       if (user.length > 0) {
         res.status(200).send(user)
