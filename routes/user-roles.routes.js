@@ -8,6 +8,6 @@ const UserRolesController = require('../controllers/user-roles.controller');
 routes.get('/:userId', UserRolesController.getUserRoles);
 // routes.get('/getUserNameList', UserController.getUserNameList);
 // routes.post('/', UserController.setUser );
-// routes.put('/',UserController.updateUser );
+routes.put('/',UserRolesController.updateUserRoles);
 
 module.exports = routes;
