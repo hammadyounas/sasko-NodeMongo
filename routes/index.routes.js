@@ -13,6 +13,7 @@ const returnInvoice = require('./return-invoice.routes');
 const uploadPdf = require('./uploadPdf.routes');
 const userInfo = require('./users.routes');
 const userRoles = require('./user-roles.routes');
+const authRoutes = require('./auth.routes');
 
 const routes = express.Router();
 console.log("iteeeemmms");
@@ -31,6 +32,6 @@ routes.use('/returnInvoice',returnInvoice);
 routes.use('/uploadPdf',uploadPdf);
 routes.use('/users',userInfo);
 routes.use('/usersRoles',userRoles);
-
+routes.use('/auth',authRoutes);
 
 module.exports = routes;

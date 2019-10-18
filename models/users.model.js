@@ -8,6 +8,7 @@ const user = mongoose.Schema(
     password: { type: String, required: true },
     role: { type: String, required: true },
     status: { type: Boolean, default: true },
+    userRoles: { type: Schema.Types.ObjectId, ref: 'userRoles' },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
   },

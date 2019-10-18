@@ -13,10 +13,13 @@ let errorHandler = error => {
 }
 
 module.exports.getUserRoles = (req, res) => {
-  UserRoles.findOne({ userId: req.params.userId })
+  User.findOne({ _id: req.params.userId }).populate('userRoles').lean()
     .then(roles => {
       if (roles != null) {
-        res.status(200).send(roles)
+        let userRoles = roles.userRoles;
+        userRoles['userId'] = req.params.userId;
+
+        res.status(200).send(userRoles)
       }else{
         res.status(404).send({msg:'roles not found'})
       }
@@ -26,7 +29,7 @@ module.exports.getUserRoles = (req, res) => {
 }
 
 module.exports.updateUserRoles = (req, res) => {
-  UserRoles.findOneAndUpdate({ userId: req.body.userId }, req.body)
+  UserRoles.findOneAndUpdate({ _id: req.body._id }, req.body)
     .then(updatedUserRoles => {
       res.status(200).send(updatedUserRoles)
     })

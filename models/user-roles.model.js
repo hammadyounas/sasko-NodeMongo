@@ -3,7 +3,6 @@ const Schema = mongoose.Schema
 
 const userRoles = mongoose.Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: 'user' },
     addStock: { type: Boolean, default: false },
     viewStock: { type: Boolean, default: false },
     stockSummery: { type: Boolean, default: false },

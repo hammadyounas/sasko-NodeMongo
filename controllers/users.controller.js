@@ -20,10 +20,13 @@ module.exports.setUser = (req, res) => {
       let obj = { password: req.body.password }
       const hash = bcryptService().password(obj)
       req.body['password'] = hash
+      UserRoles.create({}).then(rolesCreated => {
+        // debugger
+      req.body['userRoles'] = rolesCreated._id;
       User.create(req.body)
         .then(userCreated => {
-          let obj = { userId: userCreated._id }
-          UserRoles.create(obj).then(rolesCreated => {
+          // let obj = { userId: userCreated._id }
+          // UserRoles.create(obj).then(rolesCreated => {
             const JWTToken = jwt.sign(
               {
                 userName: userCreated.userName,
@@ -39,7 +42,7 @@ module.exports.setUser = (req, res) => {
               success: 'New user has been created',
               token: JWTToken
             })
-          })
+          // })
         })
         .catch(error => {
           res.status(500).json({
@@ -48,6 +51,7 @@ module.exports.setUser = (req, res) => {
             message: error.message
           })
         })
+      })
     }
   })
 }
