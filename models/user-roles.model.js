@@ -3,6 +3,9 @@ const Schema = mongoose.Schema
 
 const userRoles = mongoose.Schema(
   {
+    addAndViewItem:{ type: Boolean, default: false },
+    addAndCreateBrand:{ type: Boolean, default: false },
+    brandListing:{ type: Boolean, default: false },
     addStock: { type: Boolean, default: false },
     viewStock: { type: Boolean, default: false },
     stockSummery: { type: Boolean, default: false },
