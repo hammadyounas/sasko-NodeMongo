@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const bank = mongoose.Schema(
   {
@@ -12,6 +12,6 @@ const bank = mongoose.Schema(
   {
     timestamps: { createdAt: true, updatedAt: true }
   }
-);
+)
 
-module.exports = mongoose.model('bank', bank);
+module.exports = mongoose.model('bank', bank)

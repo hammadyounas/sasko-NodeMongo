@@ -3,6 +3,8 @@ const Invoice = require('../models/invoice.model')
 const InvoiceDetails = require('../models/invoice-details.model')
 const errorHandler = require('../utils/errorHandler')
 const StockDetails = require('../models/stock-details.model')
+const LedgerReport = require('../models/ledger-report.model')
+const Customer = require('../models/customer.model')
 
 module.exports.getInvoiceDetails = (req, res) => {
   InvoiceDetails.find({ status: true })
@@ -26,8 +28,8 @@ module.exports.getInvoiceDetailWithInvoice = (req, res) => {
     .then(result => {
       if (result) {
         let obj = { invoice: result.invoiceId }
-        obj.invoice['customerName'] = obj.invoice.customerId.clientName;
-        delete obj.invoice['customerId'];
+        obj.invoice['customerName'] = obj.invoice.customerId.clientName
+        delete obj.invoice['customerId']
         result['brandName'] = result.brandId.brandName
         result.brandId = result.brandId._id
         result['itemName'] = result.itemId.name
@@ -49,11 +51,13 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
     let invoiceDetailsArray, invoiceVar
     req.body.invoice['_id'] = new mongoose.Types.ObjectId()
     const invoice = new Invoice(req.body.invoice)
-    invoice.save().then(result => {
+    invoice.save().then(async result => {
       if (!result) {
         return error
       } else {
         invoiceVar = result
+        let ledgerReport = await addLedgerReport(result);
+        // res.status(200).send(ledgerReport)
         req.body.invoiceDetails.map(x => (x['invoiceId'] = invoice._id))
         Promise.all(
           req.body.invoiceDetails.map(async detail => {
@@ -119,6 +123,29 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
   } catch (err) {
     res.status(500).json(errorHandler(err))
   }
+}
+
+async function addLedgerReport (invoiceDetail) {
+  console.log(invoiceDetail.customerId);
+  let ledger = await LedgerReport.find({ customerId: invoiceDetail.customerId }).sort({createdAt: -1})
+    .limit(1)
+    // .then(ledger => {
+      console.log('ledger', ledger)
+      let newObj = {
+        balance: 0,
+        credit: invoiceDetail.totalNetCost,
+        date: invoiceDetail.date,
+        description:'',
+        customerId: invoiceDetail.customerId,
+        invoiceId: invoiceDetail._id
+      }
+      if (!ledger.length) {
+        newObj['balance'] = invoiceDetail.totalNetCost
+      } else {
+        newObj['balance'] = invoiceDetail.totalNetCost + ledger[0].balance
+      }
+      let updated = await LedgerReport.create(newObj);
+      return updated;
 }
 
 module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {

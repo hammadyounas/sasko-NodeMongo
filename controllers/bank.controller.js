@@ -1,5 +1,6 @@
 const Bank = require('../models/bank.model')
 const errorHandler = require('../utils/errorHandler')
+const PaymentRecieve = require('../models/payment-receive.model')
 
 module.exports.getBank = (req, res) => {
   Bank.find({ status: true })
@@ -13,6 +14,22 @@ module.exports.getBank = (req, res) => {
     .catch(err => {
       res.status(500).json(errorHandler(err))
     })
+}
+
+module.exports.getBankListing = (req, res) => {
+  PaymentRecieve.find(
+    {},
+    { createdAt: 0, updatedAt: 0, status: 0, __v: 0, customerId: 0 },
+    (err, data) => {
+      if (err) {
+        res.status(404).send(errorHandler(err));
+      } else {
+        res.status(200).send(data)
+      }
+    }
+  )
+    .populate('bankId', 'name')
+    .lean()
 }
 
 module.exports.setBank = (req, res) => {

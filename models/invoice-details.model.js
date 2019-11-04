@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
-const Schema = mongoose.Schema;
+const Schema = mongoose.Schema
 
-const invoiceDetails = new Schema({
+const invoiceDetails = new Schema(
+  {
     invoiceId: { type: Schema.Types.ObjectId, ref: 'invoice' },
     stockDetailId: { type: Schema.Types.ObjectId, ref: 'stockDetails' },
     itemId: { type: Schema.Types.ObjectId, ref: 'item' },
@@ -16,10 +17,10 @@ const invoiceDetails = new Schema({
     status: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
-},
-    {
-        timestamps: { createdAt: true, updatedAt: true }
-    }
-);
+  },
+  {
+    timestamps: { createdAt: true, updatedAt: true }
+  }
+)
 
-module.exports = mongoose.model('invoiceDetails', invoiceDetails);
+module.exports = mongoose.model('invoiceDetails', invoiceDetails)
