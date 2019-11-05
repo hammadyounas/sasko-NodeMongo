@@ -8,7 +8,11 @@ module.exports.getPaymentReceive = (req, res) => {
     .populate('customerId')
     .populate('bankId')
     .then(payment_receives => {
+      if(!payment_receives.length){
+        res.status(404).send({message:'No Data Found'});  
+      }else{
       res.status(200).send(payment_receives)
+    }
     })
     .catch(err => {
       res.status(500).json(errorHandler(err))

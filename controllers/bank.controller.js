@@ -22,9 +22,14 @@ module.exports.getBankListing = (req, res) => {
     { createdAt: 0, updatedAt: 0, status: 0, __v: 0, customerId: 0 },
     (err, data) => {
       if (err) {
-        res.status(404).send(errorHandler(err));
+        console.log('check err', err)
+        res.status(500).send(errorHandler(err))
       } else {
-        res.status(200).send(data)
+        if (!data.length) {
+          res.status(404).send({ message: 'no data found' })
+        } else {
+          res.status(200).send(data)
+        }
       }
     }
   )

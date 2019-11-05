@@ -56,7 +56,7 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
         return error
       } else {
         invoiceVar = result
-        let ledgerReport = await addLedgerReport(result);
+        let ledgerReport = await addLedgerReport(result)
         // res.status(200).send(ledgerReport)
         req.body.invoiceDetails.map(x => (x['invoiceId'] = invoice._id))
         Promise.all(
@@ -126,26 +126,27 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
 }
 
 async function addLedgerReport (invoiceDetail) {
-  console.log(invoiceDetail.customerId);
-  let ledger = await LedgerReport.find({ customerId: invoiceDetail.customerId }).sort({createdAt: -1})
+  console.log(invoiceDetail.customerId)
+  let ledger = await LedgerReport.find({ customerId: invoiceDetail.customerId })
+    .sort({ createdAt: -1 })
     .limit(1)
-    // .then(ledger => {
-      console.log('ledger', ledger)
-      let newObj = {
-        balance: 0,
-        credit: invoiceDetail.totalNetCost,
-        date: invoiceDetail.date,
-        description:'',
-        customerId: invoiceDetail.customerId,
-        invoiceId: invoiceDetail._id
-      }
-      if (!ledger.length) {
-        newObj['balance'] = invoiceDetail.totalNetCost
-      } else {
-        newObj['balance'] = invoiceDetail.totalNetCost + ledger[0].balance
-      }
-      let updated = await LedgerReport.create(newObj);
-      return updated;
+  // .then(ledger => {
+  console.log('ledger', ledger)
+  let newObj = {
+    balance: 0,
+    credit: invoiceDetail.totalNetCost,
+    date: invoiceDetail.date,
+    description: '',
+    customerId: invoiceDetail.customerId,
+    invoiceId: invoiceDetail._id
+  }
+  if (!ledger.length) {
+    newObj['balance'] = invoiceDetail.totalNetCost
+  } else {
+    newObj['balance'] = invoiceDetail.totalNetCost + ledger[0].balance
+  }
+  let updated = await LedgerReport.create(newObj)
+  return updated
 }
 
 module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
@@ -330,23 +331,27 @@ module.exports.modelColorWiseSale = async (req, res) => {
     })
     .lean()
     .then(invoiceDetails => {
-      Promise.all(
-        invoiceDetails.map((invoiceDetail, i) => {
-          invoiceDetails[i]['itemName'] = invoiceDetail.itemId.name
-          invoiceDetails[i]['brandName'] = invoiceDetail.brandId.brandName
-          invoiceDetails[i]['invoiceNo'] = invoiceDetail.invoiceId.invoiceNo
-          invoiceDetails[i]['totalQty'] = invoiceDetail.invoiceId.totalQty
-          invoiceDetails[i]['date'] = invoiceDetail.invoiceId.date
-          invoiceDetails[i]['brandName'] = invoiceDetail.brandId.brandName
-          invoiceDetails[i]['customerName'] =
-            invoiceDetail.invoiceId.customerId.clientName
-          delete invoiceDetails[i]['itemId']
-          delete invoiceDetails[i]['brandId']
-          delete invoiceDetails[i].invoiceId
+      if (!invoiceDetails.length) {
+        res.status(404).send({msg:'data not found'})
+      } else {
+        Promise.all(
+          invoiceDetails.map((invoiceDetail, i) => {
+            invoiceDetails[i]['itemName'] = invoiceDetail.itemId.name
+            invoiceDetails[i]['brandName'] = invoiceDetail.brandId.brandName
+            invoiceDetails[i]['invoiceNo'] = invoiceDetail.invoiceId.invoiceNo
+            invoiceDetails[i]['totalQty'] = invoiceDetail.invoiceId.totalQty
+            invoiceDetails[i]['date'] = invoiceDetail.invoiceId.date
+            invoiceDetails[i]['brandName'] = invoiceDetail.brandId.brandName
+            invoiceDetails[i]['customerName'] =
+              invoiceDetail.invoiceId.customerId.clientName
+            delete invoiceDetails[i]['itemId']
+            delete invoiceDetails[i]['brandId']
+            delete invoiceDetails[i].invoiceId
+          })
+        ).then(() => {
+          res.status(200).send(invoiceDetails)
         })
-      ).then(() => {
-        res.status(200).send(invoiceDetails)
-      })
+      }
     })
     .catch(err => {
       res.status(500).json(errorHandler(err))
