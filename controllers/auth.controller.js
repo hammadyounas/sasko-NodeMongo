@@ -14,7 +14,7 @@ module.exports.login = (req, res) => {
       ) {
         const JWTToken = jwt.sign(
           {
-            email: user.email,
+            userName: user.userName,
             _id: user._id
           },
           'secretOfSasscoTraders',
