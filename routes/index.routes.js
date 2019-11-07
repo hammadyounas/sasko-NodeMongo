@@ -14,6 +14,7 @@ const uploadPdf = require('./uploadPdf.routes');
 const userInfo = require('./users.routes');
 const userRoles = require('./user-roles.routes');
 const authRoutes = require('./auth.routes');
+const historyRoutes = require('./history.routes');
 
 const routes = express.Router();
 console.log("iteeeemmms");
@@ -33,5 +34,6 @@ routes.use('/uploadPdf',uploadPdf);
 routes.use('/users',userInfo);
 routes.use('/usersRoles',userRoles);
 routes.use('/auth',authRoutes);
+routes.use('/history',historyRoutes);
 
 module.exports = routes;
