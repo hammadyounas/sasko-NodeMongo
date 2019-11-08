@@ -32,7 +32,7 @@ async function addHistory(obj, payload, feature, type) {
         changes: obj
       }
       if (type == 'update') {
-        newobj['description'] = `${payload.userName} has upadted in ${feature}`,
+        newobj['description'] = `${payload.userName} has updated in ${feature}`,
         newobj['isType'] = 'update'
       } else if (type == 'add') {
         newobj['description'] = `${payload.userName} has added in ${feature}`
