@@ -2,17 +2,19 @@ const PaymentReceive = require('../models/payment-receive.model')
 const errorHandler = require('../utils/errorHandler')
 const sixDigits = require('../utils/sixDigits')
 const LedgerReport = require('../models/ledger-report.model')
+const historyController = require('./history.controller')
+const jwt = require('jsonwebtoken')
 
 module.exports.getPaymentReceive = (req, res) => {
   PaymentReceive.find({ status: true })
     .populate('customerId')
     .populate('bankId')
     .then(payment_receives => {
-      if(!payment_receives.length){
-        res.status(404).send({message:'No Data Found'});  
-      }else{
-      res.status(200).send(payment_receives)
-    }
+      if (!payment_receives.length) {
+        res.status(404).send({ message: 'No Data Found' })
+      } else {
+        res.status(200).send(payment_receives)
+      }
     })
     .catch(err => {
       res.status(500).json(errorHandler(err))
@@ -20,14 +22,29 @@ module.exports.getPaymentReceive = (req, res) => {
 }
 
 module.exports.setPaymentReceive = (req, res) => {
-  PaymentReceive.create(req.body)
-    .then(async payment_receive => {
-      let ledgerReport = await setLedgerReport(payment_receive);
-      res.status(200).send(payment_receive)
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      PaymentReceive.create(req.body)
+        .then(async payment_receive => {
+          let record = await historyController.addHistory(
+            req.body.history,
+            payload,
+            'Payment Recieve',
+            'add'
+          )
+          let ledgerReport = await setLedgerReport(payment_receive)
+          res.status(200).send(payment_receive)
+        })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }
 
 async function setLedgerReport (receivedPayment) {
@@ -46,7 +63,7 @@ async function setLedgerReport (receivedPayment) {
     newObj['balance'] = list[0].balance - receivedPayment.amount
   }
   let updated = await LedgerReport.create(newObj)
-  return updated;
+  return updated
 }
 
 module.exports.getTransactionId = (req, res) => {

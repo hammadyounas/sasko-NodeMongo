@@ -1,8 +1,8 @@
 const Brands = require('../models/brand.model')
 const Items = require('../models/item.model')
-const utilFunction = require('../utils/ReplaceName')
-const historyController = require('./history.controller')
-const jwt = require('jsonwebtoken')
+const utilFunction = require('../utils/ReplaceName');
+const historyController = require('./history.controller');
+const jwt = require('jsonwebtoken');
 
 let errorHandler = error => {
   return {
