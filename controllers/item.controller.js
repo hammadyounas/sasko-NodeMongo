@@ -1,6 +1,7 @@
 const Items = require('../models/item.model')
 const jwt = require('jsonwebtoken')
 const History = require('../models/history.model')
+const historyController = require('./history.controller')
 
 let errorHandler = error => {
   return {
@@ -48,7 +49,7 @@ module.exports.editItems = (req, res) => {
               { new: true }
             ).exec(async (error, doc) => {
               if (error) res.send(error)
-              let record = await addHistory(
+              let record = await historyController.addHistory(
                 req.body.history,
                 payload,
                 'Item',
@@ -71,24 +72,9 @@ module.exports.editItems = (req, res) => {
   })
 }
 
-async function addHistory (obj, payload, feature, type) {
-  let description = ''
-  let newobj = {
-    userId: payload._id,
-    description: '',
-    isType:'',
-    changes: obj
-  }
-  if (type == 'update') {
-    newobj['description'] = `${payload.userName} has upadted in ${feature}`,
-    newobj['isType'] = 'update'
-  } else if (type == 'add') {
-    newobj['description'] = `${payload.userName} has added in ${feature}`
-    newobj['isType'] = 'add'
-  }
-  let upadted = await History.create(newobj)
-  return upadted
-}
+// async function addHistory (obj, payload, feature, type) {
+  
+// }
 
 module.exports.addItems = (req, res) => {
   jwt.verify(req.body.token, 'secretOfSasscoTraders', function (err, payload) {
@@ -100,7 +86,7 @@ module.exports.addItems = (req, res) => {
           if (!result) {
             Items.create(req.body)
               .then(async ninja => {
-                let record = await addHistory(
+                let record = await historyController.addHistory(
                   req.body.history,
                   payload,
                   'item',
