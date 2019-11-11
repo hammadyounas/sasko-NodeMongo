@@ -38,7 +38,7 @@ async function addHistory(obj, payload, feature, type) {
         newobj['description'] = `${payload.userName} has added in ${feature}`
         newobj['isType'] = 'add'
       }
-      console.log("history =>",newobj);
+    //   console.log("history =>",newobj);
       let upadted = await History.create(newobj);
       return upadted;
 };

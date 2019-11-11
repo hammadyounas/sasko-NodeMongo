@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
 const UploadPdf = require('../models/uploadPdf.model')
 const cloudinary = require('cloudinary')
+const historyController = require('./history.controller')
+const jwt = require('jsonwebtoken')
 
 let errorHandler = error => {
   return {
@@ -14,25 +16,30 @@ cloudinary.config({
   api_key: '527597425984315',
   api_secret: 'X4RWf4qfZ-BHhz9UDNQac3hT6vM'
 })
-// module.exports.getPettyCashTransactionId = (req, res) => {
-//   PettyCash.count()
-//     .then(length => {
-//       let id = sixDigits((length + 1).toString())
-//       res.status(200).send({ pettyCashTransactionId: id })
-//     })
-//     .catch(err => {
-//       res.status(500).json(errorHandler(err))
-//     })
-// }
 
 module.exports.setUploadPdf = (req, res) => {
-  UploadPdf.create(req.body)
-    .then(pdf => {
-      res.status(200).send(pdf)
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      UploadPdf.create(req.body)
+        .then(async pdf => {
+          let record = await historyController.addHistory(
+            req.body.history,
+            payload,
+            'PDF',
+            'add'
+          )
+          res.status(200).send(pdf)
+        })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }
 
 module.exports.getUploadPdf = (req, res) => {
@@ -55,7 +62,7 @@ module.exports.deleteUploadedPdf = (req, res) => {
       res.status(200).send(resp)
       if (res.status(200)) {
         cloudinary.v2.uploader.destroy(_id, function (error, result) {
-          console.log(result, error)
+          console.log(result, error);
         })
       }
     })
