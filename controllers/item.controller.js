@@ -12,27 +12,39 @@ let errorHandler = error => {
 }
 
 module.exports.getItems = (req, res) => {
-  Items.find()
-    .then(Items => {
-      if (Items.length) {
-        res.status(200).send(Items)
-      } else {
-        res.status(404).send({ msg: 'No Data Found' })
-      }
-    })
-    .catch(error => {
-      res.status(500).json(errorHandler(error))
-    })
+  jwt.verify(req.body.token, 'secretOfSasscoTraders', function (err, payload) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      Items.find()
+        .then(Items => {
+          if (Items.length) {
+            res.status(200).send(Items)
+          } else {
+            res.status(404).send({ msg: 'No Data Found' })
+          }
+        })
+        .catch(error => {
+          res.status(500).json(errorHandler(error))
+        })
+    }
+  })
 }
 
 module.exports.deleteItems = (req, res) => {
-  Items.remove({ _id: req.params.id })
-    .then(Items => {
-      res.send(Items)
-    })
-    .catch(error => {
-      res.send(error)
-    })
+  jwt.verify(req.body.token, 'secretOfSasscoTraders', function (err, payload) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      Items.remove({ _id: req.params.id })
+        .then(Items => {
+          res.send(Items)
+        })
+        .catch(error => {
+          res.send(error)
+        })
+    }
+  })
 }
 
 module.exports.editItems = (req, res) => {
@@ -73,7 +85,7 @@ module.exports.editItems = (req, res) => {
 }
 
 // async function addHistory (obj, payload, feature, type) {
-  
+
 // }
 
 module.exports.addItems = (req, res) => {
