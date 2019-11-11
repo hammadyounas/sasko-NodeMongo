@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
 const PettyCash = require('../models/petty-cash.model')
 const sixDigits = require('../utils/sixDigits')
+const historyController = require('./history.controller')
+const jwt = require('jsonwebtoken')
 
 let errorHandler = error => {
   return {
@@ -22,28 +24,43 @@ module.exports.getPettyCashTransactionId = (req, res) => {
 }
 
 module.exports.setPettyCash = (req, res) => {
-  PettyCash.findOne({
-    pettyCashTransactionId: req.body.pettyCashTransactionId,
-    date: req.body.date,
-    pettyCashName: req.body.pettyCashName,
-    cash: req.body.cash
+  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      PettyCash.findOne({
+        pettyCashTransactionId: req.body.pettyCashTransactionId,
+        date: req.body.date,
+        pettyCashName: req.body.pettyCashName,
+        cash: req.body.cash
+      })
+        .then(result => {
+          if (!result) {
+            PettyCash.create(req.body)
+              .then(async createPettyCash => {
+                let record = await historyController.addHistory(
+                  req.body.history,
+                  payload,
+                  'Petty Cash',
+                  'add'
+                )
+                res.status(200).send(createPettyCash)
+              })
+              .catch(err => {
+                res.status(500).json(errorHandler(err))
+              })
+          } else {
+            res.status(409).send({ msg: 'already exist this petty cash' })
+          }
+        })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
   })
-    .then(result => {
-      if (!result) {
-        PettyCash.create(req.body)
-          .then(createPettyCash => {
-            res.status(200).send(createPettyCash)
-          })
-          .catch(err => {
-            res.status(500).json(errorHandler(err))
-          })
-      } else {
-        res.status(409).send({ msg: 'already exist this petty cash' })
-      }
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
 }
 
 module.exports.getPettyCashList = (req, res) => {
@@ -71,16 +88,29 @@ module.exports.getPettyCashById = (req, res) => {
 }
 
 module.exports.updatePettyCash = (req, res) => {
-  PettyCash.findOne({
-    date: req.body.date,
-    pettyCashName: req.body.pettyCashName,
-    cash: req.body.cash
-  }).then(response => {
-    if (!response) {
+  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      // PettyCash.findOne({
+      //   date: req.body.date,
+      //   pettyCashName: req.body.pettyCashName,
+      //   cash: req.body.cash
+      // }).then(response => {
+      //   if (!response) {
       PettyCash.findByIdAndUpdate({ _id: req.body._id }, req.body)
         .then(() => {
           PettyCash.findById({ _id: req.body._id })
-            .then(updatePettyCash => {
+            .then(async updatePettyCash => {
+              let record = await historyController.addHistory(
+                req.body.history,
+                payload,
+                'Payment Recieve',
+                'update'
+              )
               res.status(200).send(updatePettyCash)
             })
             .catch(err => {
@@ -90,10 +120,12 @@ module.exports.updatePettyCash = (req, res) => {
         .catch(err => {
           res.status(500).json(errorHandler(err))
         })
-    } else {
-      res
-        .status(409)
-        .send({ msg: 'this data is already exist on another petty cash' })
+      // } else {
+      //   res
+      //     .status(409)
+      //     .send({ msg: 'this data is already exist on another petty cash' })
+      // }
+      // })
     }
   })
 }
