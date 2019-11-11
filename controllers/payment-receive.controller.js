@@ -78,7 +78,7 @@ module.exports.getTransactionId = (req, res) => {
 }
 // getPaymentDetailById
 module.exports.getPaymentDetailById = (req, res) => {
-  PaymentReceive.findById({ _id: req.params.id, status: true })
+  PaymentReceive.findById({ _id: req.params.id, status: true },{__v:0,createdAt:0,updatedAt:0})
     .then(bank => {
       res.status(200).send(bank)
     })
@@ -88,22 +88,37 @@ module.exports.getPaymentDetailById = (req, res) => {
 }
 
 module.exports.editPaymentReceive = (req, res) => {
-  PaymentReceive.findByIdAndUpdate(
-    { _id: req.body._id, status: true },
-    req.body
-  )
-    .then(() => {
-      PaymentReceive.findById({ _id: req.body._id })
-        .then(payment_receive => {
-          res.status(200).send(payment_receive)
+  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      PaymentReceive.findByIdAndUpdate(
+        { _id: req.body._id, status: true },
+        req.body
+      )
+        .then(() => {
+          PaymentReceive.findById({ _id: req.body._id })
+            .then(async payment_receive => {
+              let record = await historyController.addHistory(
+                req.body.history,
+                payload,
+                'Payment Recieve',
+                'update'
+              )
+              res.status(200).send(payment_receive)
+            })
+            .catch(err => {
+              res.status(500).json(errorHandler(err))
+            })
         })
         .catch(err => {
           res.status(500).json(errorHandler(err))
         })
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+    }
+  })
 }
 
 module.exports.deletePaymentReceive = (req, res) => {

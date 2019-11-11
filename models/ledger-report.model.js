@@ -6,7 +6,7 @@ const ledgerReport = mongoose.Schema(
     debit: { type: Number, default: 0 },
     credit: { type: Number, default: 0 },
     balance: { type: Number, required: true },
-    date: { type: String, required: true },
+    date: { type: Date, required: true },
     description: { type: String },
     customerId: { type: String, required: true, ref: 'customer' },
     paymentReceiveId: { type: String, ref: 'payment-receive' },
