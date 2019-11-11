@@ -1,6 +1,8 @@
 const Bank = require('../models/bank.model')
 const errorHandler = require('../utils/errorHandler')
 const PaymentRecieve = require('../models/payment-receive.model')
+const historyController = require('./history.controller')
+const jwt = require('jsonwebtoken')
 
 module.exports.getBank = (req, res) => {
   Bank.find({ status: true })
@@ -38,29 +40,59 @@ module.exports.getBankListing = (req, res) => {
 }
 
 module.exports.setBank = (req, res) => {
-  Bank.create(req.body)
-    .then(bank => {
-      res.status(200).send(bank)
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
-}
-
-module.exports.editBank = (req, res) => {
-  Bank.findByIdAndUpdate({ _id: req.body._id, status: true }, req.body)
-    .then(() => {
-      Bank.findById({ _id: req.body._id })
-        .then(bank => {
+  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      Bank.create(req.body)
+        .then(async bank => {
+          let record = await historyController.addHistory(
+            req.body.history,
+            payload,
+            'Bank',
+            'add'
+          )
           res.status(200).send(bank)
         })
         .catch(err => {
           res.status(500).json(errorHandler(err))
         })
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+    }
+  })
+}
+
+module.exports.editBank = (req, res) => {
+  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      Bank.findByIdAndUpdate({ _id: req.body._id, status: true }, req.body)
+        .then(() => {
+          Bank.findById({ _id: req.body._id })
+            .then(async bank => {
+              let record = await historyController.addHistory(
+                req.body.history,
+                payload,
+                'Bank',
+                'update'
+              )
+              res.status(200).send(bank)
+            })
+            .catch(err => {
+              res.status(500).json(errorHandler(err))
+            })
+        })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }
 
 module.exports.getBankById = (req, res) => {
