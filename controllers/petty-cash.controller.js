@@ -13,14 +13,20 @@ let errorHandler = error => {
 }
 
 module.exports.getPettyCashTransactionId = (req, res) => {
-  PettyCash.count()
-    .then(length => {
-      let id = sixDigits((length + 1).toString())
-      res.status(200).send({ pettyCashTransactionId: id })
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      PettyCash.count()
+        .then(length => {
+          let id = sixDigits((length + 1).toString())
+          res.status(200).send({ pettyCashTransactionId: id })
+        })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }
 
 module.exports.setPettyCash = (req, res) => {
@@ -64,27 +70,39 @@ module.exports.setPettyCash = (req, res) => {
 }
 
 module.exports.getPettyCashList = (req, res) => {
-  PettyCash.find()
-    .then(result => {
-      if (result.length) {
-        res.status(200).send(result)
-      } else {
-        res.status(404).send({ msg: 'No Data Found' })
-      }
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      PettyCash.find()
+        .then(result => {
+          if (result.length) {
+            res.status(200).send(result)
+          } else {
+            res.status(404).send({ msg: 'No Data Found' })
+          }
+        })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }
 
 module.exports.getPettyCashById = (req, res) => {
-  PettyCash.findOne({ _id: req.params.id })
-    .then(result => {
-      res.status(200).send(result)
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      PettyCash.findOne({ _id: req.params.id })
+        .then(result => {
+          res.status(200).send(result)
+        })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }
 
 module.exports.updatePettyCash = (req, res) => {
@@ -131,11 +149,17 @@ module.exports.updatePettyCash = (req, res) => {
 }
 
 module.exports.deletePettyCash = (req, res) => {
-  PettyCash.findByIdAndRemove({ _id: req.params.id })
-    .then(resp => {
-      res.status(200).send(resp)
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      PettyCash.findByIdAndRemove({ _id: req.params.id })
+        .then(resp => {
+          res.status(200).send(resp)
+        })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }

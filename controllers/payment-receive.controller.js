@@ -6,19 +6,25 @@ const historyController = require('./history.controller')
 const jwt = require('jsonwebtoken')
 
 module.exports.getPaymentReceive = (req, res) => {
-  PaymentReceive.find({ status: true })
-    .populate('customerId')
-    .populate('bankId')
-    .then(payment_receives => {
-      if (!payment_receives.length) {
-        res.status(404).send({ message: 'No Data Found' })
-      } else {
-        res.status(200).send(payment_receives)
-      }
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      PaymentReceive.find({ status: true })
+        .populate('customerId')
+        .populate('bankId')
+        .then(payment_receives => {
+          if (!payment_receives.length) {
+            res.status(404).send({ message: 'No Data Found' })
+          } else {
+            res.status(200).send(payment_receives)
+          }
+        })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }
 
 module.exports.setPaymentReceive = (req, res) => {
@@ -67,24 +73,39 @@ async function setLedgerReport (receivedPayment) {
 }
 
 module.exports.getTransactionId = (req, res) => {
-  PaymentReceive.count()
-    .then(length => {
-      let id = sixDigits((length + 1).toString())
-      res.status(200).send({ trasactionsId: id })
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      PaymentReceive.count()
+        .then(length => {
+          let id = sixDigits((length + 1).toString())
+          res.status(200).send({ trasactionsId: id })
+        })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }
 // getPaymentDetailById
 module.exports.getPaymentDetailById = (req, res) => {
-  PaymentReceive.findById({ _id: req.params.id, status: true },{__v:0,createdAt:0,updatedAt:0})
-    .then(bank => {
-      res.status(200).send(bank)
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      PaymentReceive.findById(
+        { _id: req.params.id, status: true },
+        { __v: 0, createdAt: 0, updatedAt: 0 }
+      )
+        .then(bank => {
+          res.status(200).send(bank)
+        })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }
 
 module.exports.editPaymentReceive = (req, res) => {
@@ -122,44 +143,56 @@ module.exports.editPaymentReceive = (req, res) => {
 }
 
 module.exports.deletePaymentReceive = (req, res) => {
-  PaymentReceive.findByIdAndUpdate(
-    { _id: req.params.id, status: true },
-    { $set: { status: false } }
-  )
-    .then(() => {
-      PaymentReceive.findById({ _id: req.params.id })
-        .then(payment_receive => {
-          res.status(200).send(payment_receive)
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      PaymentReceive.findByIdAndUpdate(
+        { _id: req.params.id, status: true },
+        { $set: { status: false } }
+      )
+        .then(() => {
+          PaymentReceive.findById({ _id: req.params.id })
+            .then(payment_receive => {
+              res.status(200).send(payment_receive)
+            })
+            .catch(err => {
+              res.status(500).json(errorHandler(err))
+            })
         })
         .catch(err => {
           res.status(500).json(errorHandler(err))
         })
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+    }
+  })
 }
 
 module.exports.getLedgerReport = (req, res) => {
-  LedgerReport.find()
-    .sort({ createdAt: -1 })
-    .populate('customerId', 'clientName')
-    .lean()
-    .then(result => {
-      if (!result.length) {
-        res.status(404).send({ msg: 'ledger not found' })
-      } else {
-        Promise.all(
-          result.map((report, i) => {
-            result[i]['customerName'] = report.customerId.clientName
-            result[i]['customerId'] = report.customerId._id
-          })
-        ).then(() => {
-          res.status(200).send(result)
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      LedgerReport.find()
+        .sort({ createdAt: -1 })
+        .populate('customerId', 'clientName')
+        .lean()
+        .then(result => {
+          if (!result.length) {
+            res.status(404).send({ msg: 'ledger not found' })
+          } else {
+            Promise.all(
+              result.map((report, i) => {
+                result[i]['customerName'] = report.customerId.clientName
+                result[i]['customerId'] = report.customerId._id
+              })
+            ).then(() => {
+              res.status(200).send(result)
+            })
+          }
         })
-      }
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }

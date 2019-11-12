@@ -12,7 +12,8 @@ let errorHandler = error => {
 }
 
 module.exports.getItems = (req, res) => {
-  jwt.verify(req.body.token, 'secretOfSasscoTraders', function (err, payload) {
+  // console.log('req.query.token',req.query.token);
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
@@ -32,7 +33,7 @@ module.exports.getItems = (req, res) => {
 }
 
 module.exports.deleteItems = (req, res) => {
-  jwt.verify(req.body.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {

@@ -1,8 +1,8 @@
 const Brands = require('../models/brand.model')
 const Items = require('../models/item.model')
-const utilFunction = require('../utils/ReplaceName');
-const historyController = require('./history.controller');
-const jwt = require('jsonwebtoken');
+const utilFunction = require('../utils/ReplaceName')
+const historyController = require('./history.controller')
+const jwt = require('jsonwebtoken')
 
 let errorHandler = error => {
   return {
@@ -38,20 +38,28 @@ module.exports.getBrandsWithItems = async (req, res) => {
 }
 
 module.exports.getBrands = async (req, res) => {
-  try {
-    let brands = await Brands.find().populate('itemId')
-    if (brands.length) {
-      res.status(200).send(brands)
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
     } else {
-      res.status(404).send({ msg: 'No Data Found' })
+      try {
+        let brands = await Brands.find().populate('itemId')
+        if (brands.length) {
+          res.status(200).send(brands)
+        } else {
+          res.status(404).send({ msg: 'No Data Found' })
+        }
+      } catch (err) {
+        res.status(500).send({ msg: 'internal server error' })
+      }
     }
-  } catch (err) {
-    res.status(500).send({ msg: 'internal server error' })
-  }
+  })
 }
 
 module.exports.addBrands = (req, res) => {
-  // console.log("body ->",req.body);
   jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
     err,
     payload
@@ -98,7 +106,7 @@ module.exports.editBrands = async (req, res) => {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      obj = req.body;
+      obj = req.body
       let resp = await Brands.findOne({
         itemId: obj.itemId,
         brandName: obj.brandName
@@ -128,27 +136,42 @@ module.exports.editBrands = async (req, res) => {
 }
 
 module.exports.deleteBrands = async (req, res) => {
-  Brands.remove({ _id: req.params.id })
-    .then(brands => {
-      res.send(brands)
-    })
-    .catch(error => {
-      res.status(500).json(errorHandler(error))
-    })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      Brands.remove({ _id: req.params.id })
+        .then(brands => {
+          res.send(brands)
+        })
+        .catch(error => {
+          res.status(500).json(errorHandler(error))
+        })
+    }
+  })
 }
 
 module.exports.getItemBrands = async (req, res) => {
-  try {
-    let getItemBrands = await Brands.find({ itemId: req.body.itemId })
-    utilFunction
-      .replace(getItemBrands, Items)
-      .then(data => {
-        res.send(data)
-      })
-      .catch(error => {
-        res.status(500).json(errorHandler(error))
-      })
-  } catch (error) {
-    res.status(500).send(errorHandler(error))
-  }
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      try {
+        let getItemBrands = await Brands.find({ itemId: req.body.itemId })
+        utilFunction
+          .replace(getItemBrands, Items)
+          .then(data => {
+            res.send(data)
+          })
+          .catch(error => {
+            res.status(500).json(errorHandler(error))
+          })
+      } catch (error) {
+        res.status(500).send(errorHandler(error))
+      }
+    }
+  })
 }

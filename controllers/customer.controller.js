@@ -4,27 +4,39 @@ const historyController = require('./history.controller')
 const jwt = require('jsonwebtoken')
 
 module.exports.getCustomer = (req, res) => {
-  Customer.find({ status: true })
-    .then(customers => {
-      if (customers.length) {
-        res.status(200).send(customers)
-      } else {
-        res.status(404).send({ msg: 'No Data Found' })
-      }
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      Customer.find({ status: true })
+        .then(customers => {
+          if (customers.length) {
+            res.status(200).send(customers)
+          } else {
+            res.status(404).send({ msg: 'No Data Found' })
+          }
+        })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }
 
 module.exports.getCustomerById = (req, res) => {
-  Customer.findById({ _id: req.params.id, status: true })
-    .then(customer => {
-      res.status(200).send(customer)
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      Customer.findById({ _id: req.params.id, status: true })
+        .then(customer => {
+          res.status(200).send(customer)
+        })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }
 
 module.exports.setCustomer = (req, res) => {
@@ -42,7 +54,7 @@ module.exports.setCustomer = (req, res) => {
         .then(result => {
           if (!result) {
             Customer.create(req.body)
-              .then( async customer => {
+              .then(async customer => {
                 let record = await historyController.addHistory(
                   req.body.history,
                   payload,
@@ -113,20 +125,26 @@ module.exports.editCustomer = (req, res) => {
 }
 
 module.exports.deleteCustomer = (req, res) => {
-  Customer.findByIdAndUpdate(
-    { _id: req.params.id, status: true },
-    { $set: { status: false } }
-  )
-    .then(() => {
-      Customer.findById({ _id: req.params.id })
-        .then(customer => {
-          res.status(200).send(customer)
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      Customer.findByIdAndUpdate(
+        { _id: req.params.id, status: true },
+        { $set: { status: false } }
+      )
+        .then(() => {
+          Customer.findById({ _id: req.params.id })
+            .then(customer => {
+              res.status(200).send(customer)
+            })
+            .catch(err => {
+              res.status(500).json(errorHandler(err))
+            })
         })
         .catch(err => {
           res.status(500).json(errorHandler(err))
         })
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+    }
+  })
 }
