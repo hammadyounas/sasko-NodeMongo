@@ -18,7 +18,7 @@ cloudinary.config({
 })
 
 module.exports.setUploadPdf = (req, res) => {
-  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
     err,
     payload
   ) {
@@ -43,30 +43,48 @@ module.exports.setUploadPdf = (req, res) => {
 }
 
 module.exports.getUploadPdf = (req, res) => {
-  UploadPdf.find()
-    .then(pdfFiles => {
-      if (!pdfFiles.length) {
-        res.status(404).send({ msg: 'No Data Found' })
-      } else {
-        res.status(200).send(pdfFiles)
-      }
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      UploadPdf.find()
+        .then(pdfFiles => {
+          if (!pdfFiles.length) {
+            res.status(404).send({ msg: 'No Data Found' })
+          } else {
+            res.status(200).send(pdfFiles)
+          }
+        })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }
 
 module.exports.deleteUploadedPdf = (req, res) => {
-  UploadPdf.findByIdAndRemove({ _id: req.params.id })
-    .then(resp => {
-      res.status(200).send(resp)
-      if (res.status(200)) {
-        cloudinary.v2.uploader.destroy(_id, function (error, result) {
-          console.log(result, error);
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      UploadPdf.findByIdAndRemove({ _id: req.params.id })
+        .then(resp => {
+          res.status(200).send(resp)
+          if (res.status(200)) {
+            cloudinary.v2.uploader.destroy(_id, function (error, result) {
+              console.log(result, error)
+            })
+          }
         })
-      }
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }
