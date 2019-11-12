@@ -3,6 +3,8 @@ const StockDetails = require('../models/stock-details.model')
 const Stock = require('../models/stock.model')
 const Item = require('../models/item.model')
 const Brands = require('../models/brand.model')
+const historyController = require('./history.controller')
+const jwt = require('jsonwebtoken')
 
 let errorHandler = error => {
   return {

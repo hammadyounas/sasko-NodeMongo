@@ -5,6 +5,8 @@ const errorHandler = require('../utils/errorHandler')
 const StockDetails = require('../models/stock-details.model')
 const LedgerReport = require('../models/ledger-report.model')
 const Customer = require('../models/customer.model')
+const historyController = require('./history.controller')
+const jwt = require('jsonwebtoken')
 
 module.exports.getInvoiceDetails = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (

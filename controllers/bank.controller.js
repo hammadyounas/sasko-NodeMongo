@@ -19,7 +19,7 @@ module.exports.getBank = (req, res) => {
 }
 
 module.exports.getBankListing = (req, res) => {
-  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
     err,
     payload
   ) {
