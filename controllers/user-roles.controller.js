@@ -20,7 +20,7 @@ module.exports.getUserRoles = (req, res) => {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      console.log('check payload', payload)
+      // console.log('check payload', payload)
       if (payload.role == 'admin') {
         User.findOne({ _id: req.params.userId })
           .populate('userRoles')
