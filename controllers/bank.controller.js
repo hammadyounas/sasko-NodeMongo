@@ -49,14 +49,7 @@ module.exports.getBankListing = (req, res) => {
 }
 
 module.exports.setBank = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
-    err,
-    payload
-  ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+      jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
         err,
         payload
       ) {
@@ -78,8 +71,6 @@ module.exports.setBank = (req, res) => {
             })
         }
       })
-    }
-  })
 }
 
 module.exports.editBank = (req, res) => {
@@ -114,7 +105,7 @@ module.exports.editBank = (req, res) => {
 }
 
 module.exports.getBankById = (req, res) => {
-  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
     err,
     payload
   ) {

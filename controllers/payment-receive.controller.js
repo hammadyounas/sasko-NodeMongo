@@ -28,7 +28,7 @@ module.exports.getPaymentReceive = (req, res) => {
 }
 
 module.exports.setPaymentReceive = (req, res) => {
-  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
     err,
     payload
   ) {
@@ -109,7 +109,7 @@ module.exports.getPaymentDetailById = (req, res) => {
 }
 
 module.exports.editPaymentReceive = (req, res) => {
-  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
     err,
     payload
   ) {

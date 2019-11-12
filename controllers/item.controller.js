@@ -49,7 +49,7 @@ module.exports.deleteItems = (req, res) => {
 }
 
 module.exports.editItems = (req, res) => {
-  jwt.verify(req.body.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
@@ -90,7 +90,7 @@ module.exports.editItems = (req, res) => {
 // }
 
 module.exports.addItems = (req, res) => {
-  jwt.verify(req.body.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
