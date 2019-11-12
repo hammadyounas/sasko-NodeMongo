@@ -19,27 +19,6 @@ module.exports.getBank = (req, res) => {
 }
 
 module.exports.getBankListing = (req, res) => {
-  PaymentRecieve.find(
-    {},
-    { createdAt: 0, updatedAt: 0, status: 0, __v: 0, customerId: 0 },
-    (err, data) => {
-      if (err) {
-        console.log('check err', err)
-        res.status(500).send(errorHandler(err))
-      } else {
-        if (!data.length) {
-          res.status(404).send({ message: 'no data found' })
-        } else {
-          res.status(200).send(data)
-        }
-      }
-    }
-  )
-    .populate('bankId', 'name')
-    .lean()
-}
-
-module.exports.setBank = (req, res) => {
   jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
     err,
     payload
@@ -47,25 +26,64 @@ module.exports.setBank = (req, res) => {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      Bank.create(req.body)
-        .then(async bank => {
-          let record = await historyController.addHistory(
-            req.body.history,
-            payload,
-            'Bank',
-            'add'
-          )
-          res.status(200).send(bank)
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+      PaymentRecieve.find(
+        {},
+        { createdAt: 0, updatedAt: 0, status: 0, __v: 0, customerId: 0 },
+        (err, data) => {
+          if (err) {
+            console.log('check err', err)
+            res.status(500).send(errorHandler(err))
+          } else {
+            if (!data.length) {
+              res.status(404).send({ message: 'no data found' })
+            } else {
+              res.status(200).send(data)
+            }
+          }
+        }
+      )
+        .populate('bankId', 'name')
+        .lean()
+    }
+  })
+}
+
+module.exports.setBank = (req, res) => {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+        err,
+        payload
+      ) {
+        if (err) {
+          res.send(401).send({ message: 'not authentic user' })
+        } else {
+          Bank.create(req.body)
+            .then(async bank => {
+              let record = await historyController.addHistory(
+                req.body.history,
+                payload,
+                'Bank',
+                'add'
+              )
+              res.status(200).send(bank)
+            })
+            .catch(err => {
+              res.status(500).json(errorHandler(err))
+            })
+        }
+      })
     }
   })
 }
 
 module.exports.editBank = (req, res) => {
-  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
     err,
     payload
   ) {
@@ -96,6 +114,13 @@ module.exports.editBank = (req, res) => {
 }
 
 module.exports.getBankById = (req, res) => {
+  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
   Bank.findById({ _id: req.params.id, status: true })
     .then(bank => {
       res.status(200).send(bank)
@@ -103,6 +128,8 @@ module.exports.getBankById = (req, res) => {
     .catch(err => {
       res.status(500).json(errorHandler(err))
     })
+  }
+})
 }
 
 module.exports.deleteBank = (req, res) => {

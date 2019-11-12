@@ -13,28 +13,37 @@ let errorHandler = error => {
 }
 
 module.exports.getBrandsWithItems = async (req, res) => {
-  try {
-    let brands = await Brands.find()
-    let arr = []
-    Promise.all(
-      brands.map(async obj => {
-        let item = await Items.findOne({ _id: obj.itemId })
-        let tempObj = {
-          brandName: obj.brandName,
-          _id: obj._id,
-          itemId: obj.itemId,
-          createdAt: obj.createdAt,
-          updatedAt: obj.updatedAt,
-          itemName: item.name
-        }
-        arr.push(tempObj)
-      })
-    ).then(result => {
-      res.status(200).send(arr)
-    })
-  } catch (err) {
-    res.status(500).send({ msg: 'internal server error' })
-  }
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      try {
+        let brands = await Brands.find()
+        let arr = []
+        Promise.all(
+          brands.map(async obj => {
+            let item = await Items.findOne({ _id: obj.itemId })
+            let tempObj = {
+              brandName: obj.brandName,
+              _id: obj._id,
+              itemId: obj.itemId,
+              createdAt: obj.createdAt,
+              updatedAt: obj.updatedAt,
+              itemName: item.name
+            }
+            arr.push(tempObj)
+          })
+        ).then(result => {
+          res.status(200).send(arr)
+        })
+      } catch (err) {
+        res.status(500).send({ msg: 'internal server error' })
+      }
+    }
+  })
 }
 
 module.exports.getBrands = async (req, res) => {
@@ -60,7 +69,7 @@ module.exports.getBrands = async (req, res) => {
 }
 
 module.exports.addBrands = (req, res) => {
-  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
     err,
     payload
   ) {
@@ -99,7 +108,7 @@ module.exports.addBrands = (req, res) => {
 }
 
 module.exports.editBrands = async (req, res) => {
-  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
     err,
     payload
   ) {
