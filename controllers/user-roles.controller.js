@@ -13,27 +13,61 @@ let errorHandler = error => {
 }
 
 module.exports.getUserRoles = (req, res) => {
-  User.findOne({ _id: req.params.userId }).populate('userRoles').lean()
-    .then(roles => {
-      if (roles != null) {
-        let userRoles = roles.userRoles;
-        userRoles['userId'] = req.params.userId;
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      console.log('check payload', payload)
+      if (payload.role == 'admin') {
+        User.findOne({ _id: req.params.userId })
+          .populate('userRoles')
+          .lean()
+          .then(roles => {
+            if (roles != null) {
+              let userRoles = roles.userRoles
+              userRoles['userId'] = req.params.userId
 
-        res.status(200).send(userRoles)
-      }else{
-        res.status(404).send({msg:'roles not found'})
+              res.status(200).send(userRoles)
+            } else {
+              res.status(404).send({ msg: 'roles not found' })
+            }
+          })
+          .catch(err => {
+            res.status(500).json(errorHandler(err))
+          })
+      } else {
+        res
+          .send(404)
+          .send({ message: 'You have no permission to access the roles' })
       }
-    }).catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+    }
+  })
 }
 
 module.exports.updateUserRoles = (req, res) => {
-  UserRoles.findOneAndUpdate({ _id: req.body._id }, req.body)
-    .then(updatedUserRoles => {
-      res.status(200).send(updatedUserRoles)
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      if (payload.role == 'admin') {
+        UserRoles.findOneAndUpdate({ _id: req.body._id }, req.body)
+          .then(updatedUserRoles => {
+            res.status(200).send(updatedUserRoles)
+          })
+          .catch(err => {
+            res.status(500).json(errorHandler(err))
+          })
+      } else {
+        res
+          .send(404)
+          .send({ message: 'You have no permission to access the roles' })
+      }
+    }
+  })
 }

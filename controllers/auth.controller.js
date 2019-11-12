@@ -15,7 +15,8 @@ module.exports.login = (req, res) => {
         const JWTToken = jwt.sign(
           {
             userName: user.userName,
-            _id: user._id
+            _id: user._id,
+            role:user.role
           },
           'secretOfSasscoTraders',
           {
@@ -44,7 +45,6 @@ module.exports.currentUser = (req, res) => {
   jwt.verify(req.params.token, 'secretOfSasscoTraders', function (err, payload) {
     if (err) {
       throw new Error('unauthorized user')
-      // res.status(401).send({ msg: 'unauthorized token' })
     } else {
       User.findOne({ _id: payload._id })
         .populate('userRoles')
