@@ -30,7 +30,7 @@ module.exports.getPettyCashTransactionId = (req, res) => {
 }
 
 module.exports.setPettyCash = (req, res) => {
-  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
     err,
     payload
   ) {
@@ -106,7 +106,7 @@ module.exports.getPettyCashById = (req, res) => {
 }
 
 module.exports.updatePettyCash = (req, res) => {
-  jwt.verify(req.body.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
     err,
     payload
   ) {
