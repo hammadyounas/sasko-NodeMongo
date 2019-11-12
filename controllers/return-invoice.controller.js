@@ -6,46 +6,70 @@ const StockDetails = require('../models/stock-details.model')
 const ReturnInvoiceDetail = require('../models/return-invoice.model')
 
 module.exports.getReturnInvoice = (req, res) => {
-  ReturnInvoice.find({ status: true })
-    .populate({
-      path: 'invoiceDetailId',
-      populate: { path: 'invoiceId', select: 'invoiceNo manualBookNo  date' }
-    })
-    .lean()
-    .then(invoices => {
-      if (invoices) {
-        invoices.map((obj, i) => {
-          obj['invoiceNo'] = obj.invoiceDetailId.invoiceId.invoiceNo
-          obj['manualBookNo'] = obj.invoiceDetailId.invoiceId.manualBookNo
-          obj['invoiceDate'] = obj.invoiceDetailId.invoiceId.date
-          obj['invoiceId'] = obj.invoiceDetailId.invoiceId._id
-          obj['invoiceDetailId'] = obj.invoiceDetailId._id
-          delete obj['invoiceDetailId']
-          invoices[i] = obj
-        })
-        res.status(200).send(invoices)
-      } else {
-        res.status(404).send({ msg: 'return invoices not found' })
-      }
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
-}
-
-module.exports.getReturnInvoiceId = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      ReturnInvoice.count()
-        .then(length => {
-          let id = sixDigits((length + 1).toString())
-          res.status(200).send({ invoiceId: id })
+      ReturnInvoice.find({ status: true })
+        .populate({
+          path: 'invoiceDetailId',
+          populate: {
+            path: 'invoiceId',
+            select: 'invoiceNo manualBookNo  date'
+          }
+        })
+        .lean()
+        .then(invoices => {
+          if (invoices) {
+            invoices.map((obj, i) => {
+              obj['invoiceNo'] = obj.invoiceDetailId.invoiceId.invoiceNo
+              obj['manualBookNo'] = obj.invoiceDetailId.invoiceId.manualBookNo
+              obj['invoiceDate'] = obj.invoiceDetailId.invoiceId.date
+              obj['invoiceId'] = obj.invoiceDetailId.invoiceId._id
+              obj['invoiceDetailId'] = obj.invoiceDetailId._id
+              delete obj['invoiceDetailId']
+              invoices[i] = obj
+            })
+            res.status(200).send(invoices)
+          } else {
+            res.status(404).send({ msg: 'return invoices not found' })
+          }
         })
         .catch(err => {
           res.status(500).json(errorHandler(err))
         })
+    }
+  })
+}
+
+module.exports.getReturnInvoiceId = (req, res) => {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      jwt.verify(req.query.token, 'secretOfSasscoTraders', function (
+        err,
+        payload
+      ) {
+        if (err) {
+          res.send(401).send({ message: 'not authentic user' })
+        } else {
+          ReturnInvoice.count()
+            .then(length => {
+              let id = sixDigits((length + 1).toString())
+              res.status(200).send({ invoiceId: id })
+            })
+            .catch(err => {
+              res.status(500).json(errorHandler(err))
+            })
+        }
+      })
     }
   })
 }
