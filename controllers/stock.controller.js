@@ -1,8 +1,10 @@
-const Stock = require('../models/stock.model')
-const StockDetails = require('../models/stock-details.model')
-const Item = require('../models/item.model')
-const Brands = require('../models/brand.model')
-const sixDigits = require('../utils/sixDigits')
+const Stock = require('../models/stock.model');
+const StockDetails = require('../models/stock-details.model');
+const Item = require('../models/item.model');
+const Brands = require('../models/brand.model');
+const sixDigits = require('../utils/sixDigits');
+const historyController = require('./history.controller');
+const jwt = require('jsonwebtoken');
 
 let errorHandler = error => {
   return {

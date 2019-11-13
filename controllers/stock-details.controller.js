@@ -98,18 +98,35 @@ module.exports.addStockDetailsWithStock = (req, res) => {
       res.send(401).send({ message: 'not authentic user' })
     } else {
       req.body.stock['_id'] = new mongoose.Types.ObjectId()
+      let stockHistory = req.body.stock.history
+      delete req.body.stock['history']
+      console.log('req.body.stock', req.body.stock)
       const stock = new Stock(req.body.stock)
-      stock.save().then(result => {
+      stock.save().then(async result => {
         if (!result) {
           return error
         } else {
-          req.body.stockDetails.map(x => (x['stock'] = stock._id))
-          req.body.stockDetails.map((x, i) => {
-            req.body.stockDetails['stock'] = stock._id
-            req.body.stockDetails['soldQty'] = 0
+          // req.body.stockDetails.map(x => (x['stock'] = stock._id))
+          let add = await req.body.stockDetails.map((x, i) => {
+            historyController.addHistory(
+              x.history,
+              payload,
+              'stock',
+              'addStockDetail',
+              (req.body.stockDetails.length - i)
+            )
+            req.body.stockDetails[i]['stock'] = stock._id
+            req.body.stockDetails[i]['soldQty'] = 0
           })
           StockDetails.insertMany(req.body.stockDetails)
             .then(data => {
+              historyController.addHistory(
+                stockHistory,
+                payload,
+                'stock',
+                'add',
+                0
+              )
               res.status(200).send(data)
             })
             .catch(error => {
