@@ -66,7 +66,8 @@ module.exports.editItems = (req, res) => {
                 req.body.history,
                 payload,
                 'Item',
-                'update'
+                'update',
+                0
               )
               res.send(doc)
             })
@@ -103,7 +104,8 @@ module.exports.addItems = (req, res) => {
                   req.body.history,
                   payload,
                   'item',
-                  'add'
+                  'add',
+                  0
                 )
                 res.send(ninja)
               })

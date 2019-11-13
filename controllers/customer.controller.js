@@ -59,7 +59,8 @@ module.exports.setCustomer = (req, res) => {
                   req.body.history,
                   payload,
                   'Customer',
-                  'add'
+                  'add',
+                  0
                 )
                 res.status(200).send(customer)
               })
@@ -102,7 +103,8 @@ module.exports.editCustomer = (req, res) => {
                       req.body.history,
                       payload,
                       'Customer',
-                      'update'
+                      'update',
+                      0
                     )
                     res.status(200).send(customer)
                   })

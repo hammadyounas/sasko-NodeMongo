@@ -62,7 +62,8 @@ module.exports.setBank = (req, res) => {
                 req.body.history,
                 payload,
                 'Bank',
-                'add'
+                'add',
+                0
               )
               res.status(200).send(bank)
             })
@@ -89,7 +90,8 @@ module.exports.editBank = (req, res) => {
                 req.body.history,
                 payload,
                 'Bank',
-                'update'
+                'update',
+                0
               )
               res.status(200).send(bank)
             })

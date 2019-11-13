@@ -24,19 +24,27 @@ module.exports.getHistory = (req,res)=>{
     }
 }
 
-async function addHistory(obj, payload, feature, type) {
+async function addHistory(obj, payload, feature, type,counter) {
     let newobj = {
         userId: payload._id,
         description: '',
         isType:'',
         changes: obj
       }
-      if (type == 'update') {
-        newobj['description'] = `${payload.userName} has updated in ${feature}`,
-        newobj['isType'] = 'update'
-      } else if (type == 'add') {
-        newobj['description'] = `${payload.userName} has added in ${feature}`
-        newobj['isType'] = 'add'
+      switch(type){
+        case 'update':
+            newobj['description'] = `${payload.userName} has updated in ${feature}`,
+            newobj['isType'] = 'update';
+            break;
+        case 'add':
+            newobj['description'] = `${payload.userName} has added in ${feature}`
+            newobj['isType'] = 'add';
+            break;
+        case 'addStockDetail':
+            newobj['description'] = `Stock detail ${counter}`
+            newobj['isType'] = 'add';
+            break;
+
       }
       let upadted = await History.create(newobj);
       return upadted;

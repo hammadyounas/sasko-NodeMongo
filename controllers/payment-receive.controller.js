@@ -41,7 +41,8 @@ module.exports.setPaymentReceive = (req, res) => {
             req.body.history,
             payload,
             'Payment Recieve',
-            'add'
+            'add',
+            0
           )
           let ledgerReport = await setLedgerReport(payment_receive)
           res.status(200).send(payment_receive)
@@ -127,7 +128,8 @@ module.exports.editPaymentReceive = (req, res) => {
                 req.body.history,
                 payload,
                 'Payment Recieve',
-                'update'
+                'update',
+                0
               )
               res.status(200).send(payment_receive)
             })

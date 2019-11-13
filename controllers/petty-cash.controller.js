@@ -51,7 +51,8 @@ module.exports.setPettyCash = (req, res) => {
                   req.body.history,
                   payload,
                   'Petty Cash',
-                  'add'
+                  'add',
+                  0
                 )
                 res.status(200).send(createPettyCash)
               })
@@ -127,7 +128,8 @@ module.exports.updatePettyCash = (req, res) => {
                 req.body.history,
                 payload,
                 'Payment Recieve',
-                'update'
+                'update',
+                0
               )
               res.status(200).send(updatePettyCash)
             })

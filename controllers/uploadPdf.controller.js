@@ -31,7 +31,8 @@ module.exports.setUploadPdf = (req, res) => {
             req.body.history,
             payload,
             'PDF',
-            'add'
+            'add',
+            0
           )
           res.status(200).send(pdf)
         })

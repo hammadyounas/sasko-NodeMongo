@@ -95,7 +95,8 @@ module.exports.addBrands = (req, res) => {
               req.body.history,
               payload,
               'Brand',
-              'add'
+              'add',
+              0
             )
             res.status(200).send(brands)
           })
@@ -131,7 +132,8 @@ module.exports.editBrands = async (req, res) => {
             req.body.history,
             payload,
             'Brand',
-            'update'
+            'update',
+            0
           )
           res.status(200).send(doc)
         })
