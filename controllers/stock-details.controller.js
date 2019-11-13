@@ -65,24 +65,48 @@ module.exports.editStockDetails = (req, res) => {
     } else {
       try {
         let updatedArray = []
+        let stockHistory = req.body.stock.history
+        delete req.body.stock['history']
         const stock = await Stock.findByIdAndUpdate(
           { _id: req.body.stock._id },
           req.body.stock
         )
         Promise.all(
-          req.body.stockDetails.map(async stockDetail => {
+          req.body.stockDetails.map(async (stockDetail, i) => {
             if (stockDetail._id) {
               const stockDetails = await StockDetails.findByIdAndUpdate(
                 { _id: stockDetail._id },
                 stockDetail
               )
+              let record = await historyController.addHistory(
+                stockDetail.history,
+                payload,
+                'stock',
+                'updateStockDetail',
+                req.body.stockDetails.length - i
+              )
             } else {
               stockDetail['stock'] = stock._id
               const newStockDetail = new StockDetails(stockDetail)
+              // newStockDetail['_id'] = mongoose.Schema.ObjectId;
               const stockDetails = await newStockDetail.save()
+              let record = await historyController.addHistory(
+                stockDetail.history,
+                payload,
+                'stock',
+                'updateStockDetail',
+                req.body.stockDetails.length - i
+              )
             }
           })
         ).then(async () => {
+          let record = await historyController.addHistory(
+            stockHistory,
+            payload,
+            'stock',
+            'update',
+            0
+          )
           res.status(200).send({ msg: 'updated' })
         })
       } catch (err) {
@@ -113,7 +137,7 @@ module.exports.addStockDetailsWithStock = (req, res) => {
               payload,
               'stock',
               'addStockDetail',
-              (req.body.stockDetails.length - i)
+              req.body.stockDetails.length - i
             )
             req.body.stockDetails[i]['stock'] = stock._id
             req.body.stockDetails[i]['soldQty'] = 0

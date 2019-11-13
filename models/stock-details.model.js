@@ -3,7 +3,6 @@ const Schema = mongoose.Schema
 
 const stockDetails = new Schema(
   {
-    _id: Schema.Types.ObjectId,
     stock: { type: Schema.Types.ObjectId, ref: 'stock' },
     itemId: { type: Schema.Types.ObjectId, ref: 'item' },
     brandId: { type: Schema.Types.ObjectId, ref: 'brand' },

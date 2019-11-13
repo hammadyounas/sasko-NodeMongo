@@ -12,24 +12,31 @@ let errorHandler = error => {
 }
 
 module.exports.getItems = (req, res) => {
-  // console.log('req.query.token',req.query.token);
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      Items.find()
-        .then(Items => {
-          if (Items.length) {
-            res.status(200).send(Items)
-          } else {
-            res.status(404).send({ msg: 'No Data Found' })
-          }
-        })
-        .catch(error => {
-          res.status(500).json(errorHandler(error))
-        })
-    }
-  })
+  console.log('req.query.token', req.query.token)
+  if (req.query.token != undefined) {
+    jwt.verify(req.query.token, 'secretOfSasscoTraders', function (
+      err,
+      payload
+    ) {
+      if (err) {
+        res.status(401).send({ message: 'not authentic user' })
+      } else {
+        Items.find()
+          .then(Items => {
+            if (Items.length) {
+              res.status(200).send(Items)
+            } else {
+              res.status(404).send({ msg: 'No Data Found' })
+            }
+          })
+          .catch(error => {
+            res.status(500).json(errorHandler(error))
+          })
+      }
+    })
+  }else{
+    res.status(401).send({ message: 'not authentic user' });
+  }
 }
 
 module.exports.deleteItems = (req, res) => {

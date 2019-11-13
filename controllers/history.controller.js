@@ -44,7 +44,10 @@ async function addHistory(obj, payload, feature, type,counter) {
             newobj['description'] = `Stock detail ${counter}`
             newobj['isType'] = 'add';
             break;
-
+        case 'updateStockDetail':
+            newobj['description'] = `Stock detail ${counter}`
+            newobj['isType'] = 'update';
+            break;
       }
       let upadted = await History.create(newobj);
       return upadted;
