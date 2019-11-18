@@ -31,6 +31,53 @@ module.exports.getInvoice = (req, res) => {
   })
 }
 
+module.exports.getInvoicesSummery = (req, res) => {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      let invoices = await Invoice.find().count();
+      InvoiceDetails.find()
+        .populate('invoiceId')
+        .then(details => {
+          let obj = {
+            invoices:invoices,
+            totalPieces: details.reduce((acc, current) => {
+              return acc + current.pieceQty
+            }, 0),
+            sale: details.reduce((acc, current) => {
+              return acc + current.rate
+            }, 0),
+            netDiscount: details.reduce((acc, current) => {
+              return acc + (current.totalCost - current.afterDiscount)
+            }, 0),
+            netSale:
+              details.reduce((acc, current) => {
+                return acc + current.totalCost
+              }, 0) -
+              details.reduce((acc, current) => {
+                return acc + (current.totalCost - current.afterDiscount)
+              }, 0),
+            profitLoss:
+              details.reduce((acc, current) => {
+                return acc + current.totalCost
+              }, 0) -
+              (details.reduce((acc, current) => {
+                return acc + current.rate
+              }, 0) -
+                details.reduce((acc, current) => {
+                  return acc + (current.totalCost - current.afterDiscount)
+                }, 0))
+          }
+          res.status(200).send(obj)
+        })
+    }
+  })
+}
+
 module.exports.getInvoiceId = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
     err,
