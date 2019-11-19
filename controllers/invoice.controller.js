@@ -45,6 +45,9 @@ module.exports.getInvoicesSummery = (req, res) => {
         .then(details => {
           let obj = {
             invoices:invoices,
+            cost: details.reduce((acc, current) => {
+              return acc + current.avgCost
+            }, 0),
             totalPieces: details.reduce((acc, current) => {
               return acc + current.pieceQty
             }, 0),
