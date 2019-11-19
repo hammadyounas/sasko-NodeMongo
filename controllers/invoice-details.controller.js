@@ -76,7 +76,10 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
     } else {
       try {
         let invoiceDetailsArray, invoiceVar
+       
         req.body.invoice['_id'] = new mongoose.Types.ObjectId()
+        let invoiceHistory = req.body.invoice.history; 
+        delete req.body.invoice['history'];
         const invoice = new Invoice(req.body.invoice)
         invoice.save().then(async result => {
           if (!result) {
@@ -84,8 +87,16 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
           } else {
             invoiceVar = result
             let ledgerReport = await addLedgerReport(result)
-            // res.status(200).send(ledgerReport)
-            req.body.invoiceDetails.map(x => (x['invoiceId'] = invoice._id))
+            req.body.invoiceDetails.map((x,i) => {
+                historyController.addHistory(
+                  x.history,
+                  payload,
+                  'invoice',
+                  'addInvoiceDetail',
+                  req.body.invoiceDetails.length - i
+                )
+                x['invoiceId'] = invoice._id;
+            })
             Promise.all(
               req.body.invoiceDetails.map(async detail => {
                 let stockDetails = await StockDetails.find(
@@ -134,6 +145,13 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
             ).then(() => {
               const promise = InvoiceDetails.insertMany(req.body.invoiceDetails)
                 .then(data => {
+                  historyController.addHistory(
+                    invoiceHistory,
+                    payload,
+                    'invoice',
+                    'add',
+                    0
+                  )
                   invoiceDetailsArray = data
                 })
                 .catch(err => {
