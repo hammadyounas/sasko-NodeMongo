@@ -213,12 +213,14 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
         if (req.body.posted) {
           res.status(404).send({ msg: 'can not edit this invoice detail' })
         } else {
+          let invoiceHistory = req.body.invoice.history
+           delete req.body.invoice['history']
           const invoice = await Invoice.findByIdAndUpdate(
             { _id: req.body.invoice._id },
             req.body.invoice
           )
           Promise.all(
-            req.body.invoiceDetails.map(async invoiceDetail => {
+            req.body.invoiceDetails.map(async (invoiceDetail,i) => {
               let stockDetails = await StockDetails.find(
                 {
                   itemId: invoiceDetail.itemId,
@@ -285,8 +287,22 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
                 const newInvoiceDetail = new InvoiceDetails(invoiceDetail)
                 const newAddedInvoiceDetail = await newInvoiceDetail.save()
               }
+              let record = await historyController.addHistory(
+                invoiceDetail.history,
+                payload,
+                'stock',
+                'updateInvoiceDetail',
+                req.body.invoiceDetails.length - i
+              )
             })
-          ).then(() => {
+          ).then(async  () => {
+            let record = await historyController.addHistory(
+              invoiceHistory,
+              payload,
+              'invoice',
+              'update',
+              0
+            )
             res.status(200).send({ msg: 'invoice updated' })
           })
         }
