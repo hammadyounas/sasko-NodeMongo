@@ -14,7 +14,7 @@ module.exports.getHistory = (req,res)=>{
             }
         })
     }else {
-        History.find().sort({ createdAt: -1 }).skip(parseInt(req.query.skip)).limit(parseInt( req.query.limit)).then(data =>{
+        History.find().sort({ createdAt: -1 }).skip(parseInt(req.query.skip)).limit(parseInt( 15)).then(data =>{
             if(data.length){
                 res.status(200).send(data);
             }else{
