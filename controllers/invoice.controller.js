@@ -52,7 +52,7 @@ module.exports.getInvoicesSummery = (req, res) => {
               return acc + current.pieceQty
             }, 0),
             sale: details.reduce((acc, current) => {
-              return acc + current.rate
+              return acc + current.totalCost
             }, 0),
             netDiscount: details.reduce((acc, current) => {
               return acc + (current.totalCost - current.afterDiscount)
@@ -64,16 +64,9 @@ module.exports.getInvoicesSummery = (req, res) => {
               details.reduce((acc, current) => {
                 return acc + (current.totalCost - current.afterDiscount)
               }, 0),
-            profitLoss:
-              details.reduce((acc, current) => {
-                return acc + current.totalCost
-              }, 0) -
-              (details.reduce((acc, current) => {
-                return acc + current.rate
-              }, 0) -
-                details.reduce((acc, current) => {
-                  return acc + (current.totalCost - current.afterDiscount)
-                }, 0))
+            profitLoss:details.reduce((acc,current) =>{
+              return acc + (current.afterDiscount - (current.avgCost * current.pieceQty))
+            }, 0)
           }
           res.status(200).send(obj)
         })
