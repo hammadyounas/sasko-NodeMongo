@@ -261,9 +261,9 @@ module.exports.getDamageStock = (req, res) => {
       res.send(401).send({ message: 'not authentic user' })
     } else {
       StockDetails.find({}, { date: 1, damageQty: 1 })
-        .populate('brandId', 'brandName')
+        .populate('brandId', 'brandName').lean()
         .then(async result => {
-          let arr = []
+          let arr = [];
           Promise.all(
             result.map(obj => {
               let filter = result.filter(object => {
@@ -280,10 +280,15 @@ module.exports.getDamageStock = (req, res) => {
               }
               result = result.filter(object => {
                 return object.brandId._id != obj.brandId._id
-              })
+              })             
             })
           ).then(() => {
             if (arr.length) {
+              arr.map((obj, i) => {
+                arr[i]['brandName'] = obj.brandId.brandName
+                arr[i]['brandId'] = obj.brandId._id
+              })
+              // arr.map(obj =>{ return })
               res.status(200).send(arr)
             } else {
               res.status(404).send({ msg: 'No Data Found' })
