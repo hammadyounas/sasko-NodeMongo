@@ -17,7 +17,7 @@ module.exports.getInvoice = (req, res) => {
     } else {
       Invoice.find({ status: true })
         .populate('customerId', 'clientName')
-        .then(invoices => {
+        .exec().then(invoices => {
           if (!invoices.length) {
             res.status(404).send({ message: 'No Data Found' })
           } else {

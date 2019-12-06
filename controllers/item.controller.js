@@ -12,7 +12,6 @@ let errorHandler = error => {
 }
 
 module.exports.getItems = (req, res) => {
-  console.log('req.query.token', req.query.token)
   if (req.query.token != undefined) {
     jwt.verify(req.query.token, 'secretOfSasscoTraders', function (
       err,

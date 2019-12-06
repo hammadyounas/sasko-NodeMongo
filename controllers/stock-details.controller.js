@@ -124,7 +124,6 @@ module.exports.addStockDetailsWithStock = (req, res) => {
       req.body.stock['_id'] = new mongoose.Types.ObjectId()
       let stockHistory = req.body.stock.history
       delete req.body.stock['history']
-      console.log('req.body.stock', req.body.stock)
       const stock = new Stock(req.body.stock)
       stock.save().then(async result => {
         if (!result) {

@@ -79,7 +79,6 @@ module.exports.deleteUploadedPdf = (req, res) => {
           res.status(200).send(resp)
           if (res.status(200)) {
             cloudinary.v2.uploader.destroy(_id, function (error, result) {
-              console.log(result, error)
             })
           }
         })

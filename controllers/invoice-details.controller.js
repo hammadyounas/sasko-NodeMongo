@@ -76,10 +76,10 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
     } else {
       try {
         let invoiceDetailsArray, invoiceVar
-       
+
         req.body.invoice['_id'] = new mongoose.Types.ObjectId()
-        let invoiceHistory = req.body.invoice.history; 
-        delete req.body.invoice['history'];
+        let invoiceHistory = req.body.invoice.history
+        delete req.body.invoice['history']
         const invoice = new Invoice(req.body.invoice)
         invoice.save().then(async result => {
           if (!result) {
@@ -87,15 +87,15 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
           } else {
             invoiceVar = result
             let ledgerReport = await addLedgerReport(result)
-            req.body.invoiceDetails.map((x,i) => {
-                historyController.addHistory(
-                  x.history,
-                  payload,
-                  'invoice',
-                  'addInvoiceDetail',
-                  req.body.invoiceDetails.length - i
-                )
-                x['invoiceId'] = invoice._id;
+            req.body.invoiceDetails.map((x, i) => {
+              historyController.addHistory(
+                x.history,
+                payload,
+                'invoice',
+                'addInvoiceDetail',
+                req.body.invoiceDetails.length - i
+              )
+              x['invoiceId'] = invoice._id
             })
             Promise.all(
               req.body.invoiceDetails.map(async detail => {
@@ -178,12 +178,9 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
 }
 
 async function addLedgerReport (invoiceDetail) {
-  console.log(invoiceDetail.customerId)
   let ledger = await LedgerReport.find({ customerId: invoiceDetail.customerId })
     .sort({ createdAt: -1 })
     .limit(1)
-  // .then(ledger => {
-  console.log('ledger', ledger)
   let newObj = {
     balance: 0,
     credit: invoiceDetail.totalNetCost,
@@ -214,13 +211,13 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
           res.status(404).send({ msg: 'can not edit this invoice detail' })
         } else {
           let invoiceHistory = req.body.invoice.history
-           delete req.body.invoice['history']
+          delete req.body.invoice['history']
           const invoice = await Invoice.findByIdAndUpdate(
             { _id: req.body.invoice._id },
             req.body.invoice
           )
           Promise.all(
-            req.body.invoiceDetails.map(async (invoiceDetail,i) => {
+            req.body.invoiceDetails.map(async (invoiceDetail, i) => {
               let stockDetails = await StockDetails.find(
                 {
                   itemId: invoiceDetail.itemId,
@@ -295,7 +292,7 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
                 req.body.invoiceDetails.length - i
               )
             })
-          ).then(async  () => {
+          ).then(async () => {
             let record = await historyController.addHistory(
               invoiceHistory,
               payload,
