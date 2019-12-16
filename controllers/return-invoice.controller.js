@@ -4,6 +4,7 @@ const sixDigits = require('../utils/sixDigits')
 const InvoiceDetails = require('../models/invoice-details.model')
 const StockDetails = require('../models/stock-details.model')
 const ReturnInvoiceDetail = require('../models/return-invoice.model')
+const jwt = require('jsonwebtoken')
 
 module.exports.getReturnInvoice = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (

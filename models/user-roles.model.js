@@ -14,6 +14,7 @@ const userRoles = mongoose.Schema(
     addInvoice: { type: Boolean, default: false },
     viewInvoice: { type:  Boolean, default: false },
     invoiceReport: { type: Boolean, default: false },
+    returnInvoice:{ type: Boolean, default: false },
     colorModelWise: { type: Boolean, default: false },
     updateAndCreateLedger: { type: Boolean, default: false },
     recieveMoneyReport: { type: Boolean, default: false },
