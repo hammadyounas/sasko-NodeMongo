@@ -3,34 +3,26 @@ const jwt = require('jsonwebtoken')
 const History = require('../models/history.model')
 const historyController = require('./history.controller')
 
-let errorHandler = error => {
-  return {
-    stack: error.stack,
-    code: error.code,
-    message: error.message
-  }
-}
-
 module.exports.getItems = (req, res) => {
   if (req.query.token != undefined) {
-    jwt.verify(req.query.token, 'secretOfSasscoTraders', function (
+    jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
       err,
       payload
     ) {
       if (err) {
         res.status(401).send({ message: 'not authentic user' })
       } else {
-        Items.find()
-          .then(Items => {
-            if (Items.length) {
-              res.status(200).send(Items)
-            } else {
-              res.status(404).send({ msg: 'No Data Found' })
-            }
-          })
-          .catch(error => {
-            res.status(500).json(errorHandler(error))
-          })
+        try{
+          
+          let list = await Items.find().exec();
+          
+          if(!list.length) return res.status(404).send({msg:'Items Not Found'});
+          
+          res.status(200).send(list);
+  
+        }catch(err){
+          res.status(500).send(err);
+        }
       }
     })
   }else{
@@ -39,100 +31,77 @@ module.exports.getItems = (req, res) => {
 }
 
 module.exports.deleteItems = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      Items.remove({ _id: req.params.id })
-        .then(Items => {
-          res.send(Items)
-        })
-        .catch(error => {
-          res.send(error)
-        })
+      try{
+          
+        let item = await  Items.remove({ _id: req.params.id });
+
+        let list = await Items.find().exec();
+
+        if(!list.length) return res.status(404).send({msg:'Items Not Found'});
+        
+        res.status(200).send(list);
+
+      }catch(err){
+        res.status(500).send(err);
+      }
     }
   })
 }
 
 module.exports.editItems = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders',async function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      Items.findOne({ name: req.body.name })
-        .then(async result => {
-          if (!result) {
-            Items.findByIdAndUpdate(
-              { _id: req.body._id },
-              { name: req.body.name },
-              { new: true }
-            ).exec(async (error, doc) => {
-              if (error) res.send(error)
-              let record = await historyController.addHistory(
-                req.body.history,
-                payload,
-                'Item',
-                'update',
-                0
-              )
-              res.send(doc)
-            })
-          } else {
-            res.status(409).send({ msg: 'item already exist' })
-          }
-        })
-        .catch(error => {
-          res.send(500).json({
-            stack: error.stack,
-            code: error.code,
-            message: error.message
-          })
-        })
+      try{        
+        let result = await  Items.findOne({ name: req.body.name })
+
+        if(result) return res.status(409).send({ msg: 'item already exist' });
+
+        let editItem = await Items.findByIdAndUpdate({ _id: req.body._id },{ name: req.body.name },{ new: true })
+
+        let record = await historyController.addHistory(req.body.history,payload,'Item','update',0)
+
+        let list = await Items.find().exec();
+
+        if(!list.length) return res.status(404).send({msg:'Items Not Found'});
+        
+        res.status(200).send(list);
+
+      }catch(err){
+        res.status(500).send(err);
+      }
     }
   })
 }
 
-// async function addHistory (obj, payload, feature, type) {
-
-// }
-
 module.exports.addItems = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      Items.findOne({ name: req.body.name })
-        .then(result => {
-          if (!result) {
-            Items.create(req.body)
-              .then(async ninja => {
-                let record = await historyController.addHistory(
-                  req.body.history,
-                  payload,
-                  'item',
-                  'add',
-                  0
-                )
-                res.send(ninja)
-              })
-              .catch(error => {
-                res.send(500).json({
-                  stack: error.stack,
-                  code: error.code,
-                  message: error.message
-                })
-              })
-          } else {
-            res.status(409).send({ msg: 'item already exist' })
-          }
-        })
-        .catch(error => {
-          res.send(500).json({
-            stack: error.stack,
-            code: error.code,
-            message: error.message
-          })
-        })
+      try{
+        let result = await Items.findOne({ name: req.body.name })
+        
+        if(result) res.status(409).send({ msg: 'item already exist' });
+
+        let ninja = await Items.create(req.body);
+        
+        let record = await historyController.addHistory( req.body.history,payload,'item','add', 0)
+        
+        let list = await Items.find().exec();
+        
+        if(!list.length) return res.status(404).send({msg:'items not found'})
+
+        res.status(200).send(list)
+
+      }catch(err){
+        res.status(500).send(err);
+      }
     }
   })
 }

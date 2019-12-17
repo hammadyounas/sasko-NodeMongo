@@ -252,54 +252,59 @@ module.exports.getStockSummary = (req, res) => {
 }
 
 module.exports.getDamageStock = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
-    err,
-    payload
-  ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      StockDetails.find({}, { date: 1, damageQty: 1 })
+  // jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  //   err,
+  //   payload
+  // ) {
+  //   if (err) {
+  //     res.send(401).send({ message: 'not authentic user' })
+  //   } else {
+      StockDetails.find({}, { date: 1, damageQty: 1, modelNumber:1, color:1, size:1 })
+        .populate('itemId', 'name')
         .populate('brandId', 'brandName').lean()
         .then(async result => {
+          let sendObj = result;
           let arr = [];
           Promise.all(
+            result.map((obj, i) => {
+              result[i]['brandName'] = obj.brandId.brandName
+              result[i]['brandId'] = obj.brandId._id
+              result[i]['itemName'] = obj.itemId.name
+              result[i]['itemId'] = obj.itemId._id
+              }),
             result.map(obj => {
-              let filter = result.filter(object => {
-                return object.brandId._id == obj.brandId._id
+               arr = result.filter(object => {
+                return object.brandId == obj.brandId
               })
-              if (filter.length) {
-                let sum = filter.reduce((ac, cu) => {
-                  return cu.brandId._id == obj.brandId._id
-                    ? ac + cu.damageQty
-                    : ac
-                }, 0)
-                obj.damageQty = sum
-                arr.push(obj)
-              }
-              result = result.filter(object => {
-                return object.brandId._id != obj.brandId._id
-              })             
+            //   if (filter.length) {
+            //     let sum = filter.reduce((ac, cu) => {
+            //       return cu.brandId._id == obj.brandId._id
+            //         ? ac + cu.damageQty
+            //         : ac
+            //     }, 0)
+            //     obj.damageQty = sum
+            //     // arr.push(obj)
+            //   }
+              // result = result.filter(object => {
+              //   return object.brandId._id != obj.brandId._id
+              // })             
             })
           ).then(() => {
-            if (arr.length) {
-              arr.map((obj, i) => {
-                arr[i]['brandName'] = obj.brandId.brandName
-                arr[i]['brandId'] = obj.brandId._id
-              })
+            // if (arr.length) {
+              
               // arr.map(obj =>{ return })
               res.status(200).send(arr)
-            } else {
-              res.status(404).send({ msg: 'No Data Found' })
-            }
+            // } else {
+            //   res.status(404).send({ msg: 'No Data Found' })
+            // }
           })
         })
         .catch(error => {
           res.status(500).send(error)
         })
     }
-  })
-}
+//   })
+// }
 
 module.exports.getItemsInStockDetails = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
