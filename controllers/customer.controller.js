@@ -47,33 +47,49 @@ module.exports.setCustomer = (req, res) => {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      Customer.findOne({
-        clientName: req.body.clientName,
-        companyName: req.body.companyName
-      })
-        .then(result => {
-          if (!result) {
-            Customer.create(req.body)
-              .then(async customer => {
-                let record = await historyController.addHistory(
-                  req.body.history,
-                  payload,
-                  'Customer',
-                  'add',
-                  0
-                )
-                res.status(200).send(customer)
-              })
-              .catch(err => {
-                res.status(500).json(errorHandler(err))
-              })
-          } else {
-            res.status(409).send({ msg: 'customer already exist' })
-          }
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+      try{
+
+        let result = await Customer.findOne({clientName: req.body.clientName,companyName: req.body.companyName}) 
+
+        if(result) return res.status(409).send({ msg: 'customer already exist' })
+
+        let customer = await Customer.create(req.body);
+
+        let record = await historyController.addHistory(req.body.history,payload,'Customer','add',0)
+
+        let  customers = await Customer.find({ status: true });
+        
+        res.status(200).send(customers)
+      }catch(err){
+        res.status(500).send(err);
+      }
+      // Customer.findOne({
+      //   clientName: req.body.clientName,
+      //   companyName: req.body.companyName
+      // })
+      //   .then(result => {
+          // if (!result) {
+          //   Customer.create(req.body)
+          //     .then(async customer => {
+          //       let record = await historyController.addHistory(
+          //         req.body.history,
+          //         payload,
+          //         'Customer',
+          //         'add',
+          //         0
+          //       )
+          //       res.status(200).send(customer)
+          //     })
+          //     .catch(err => {
+          //       res.status(500).json(errorHandler(err))
+          //     })
+          // } else {
+          //   res.status(409).send({ msg: 'customer already exist' })
+          // }
+        // })
+        // .catch(err => {
+        //   res.status(500).json(errorHandler(err))
+        // })
     }
   })
 }
