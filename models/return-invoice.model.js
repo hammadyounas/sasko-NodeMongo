@@ -9,6 +9,7 @@ const returnInvoice = new Schema(
     returnQty: { type: Number, required: true },
     damageQty: { type: Number, required: true },
     totalReturnQty: { type: Number, default: false },
+    returnAmmount:{type:Number, require: true },
     status: { type: Boolean, default: true },
     itemId: { type: Schema.Types.ObjectId, ref: 'item' },
     brandId: { type: Schema.Types.ObjectId, ref: 'brand' },

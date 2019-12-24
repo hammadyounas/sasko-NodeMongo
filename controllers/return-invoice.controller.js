@@ -22,10 +22,16 @@ module.exports.getReturnInvoice = (req, res) => {
             select: 'invoiceNo manualBookNo  date'
           }
         })
+        .populate('itemId','name')
+        .populate('brandId','brandName')
         .lean()
         .then(invoices => {
           if (invoices) {
             invoices.map((obj, i) => {
+              obj['brandName'] = obj.brandId.brandName;
+              obj['brandId'] = obj.brandId._id;
+              obj['itemName'] = obj.itemId.name;
+              obj['itemId'] = obj.itemId._id
               obj['invoiceNo'] = obj.invoiceDetailId.invoiceId.invoiceNo
               obj['manualBookNo'] = obj.invoiceDetailId.invoiceId.manualBookNo
               obj['invoiceDate'] = obj.invoiceDetailId.invoiceId.date

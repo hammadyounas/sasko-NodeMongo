@@ -52,19 +52,24 @@ module.exports.getBrands = async (req, res) => {
     payload
   ) {
     if (err) {
-      res.send(401).send({ message: 'not authentic user' })
+      // return res.send(401).send({ message: 'not authentic user' })
     } else {
       try {
-        let brands = await Brands.find().populate('itemId')
-        if (brands.length) {
-          res.status(200).send(brands)
-        } else {
-          res.status(404).send({ msg: 'No Data Found' })
-        }
+        let brands = await Brands.find().populate('itemId');
+
+        if(!brands.length) return res.status(404).send({ msg: 'No Data Found' })
+        // if (brands.length) {
+          return res.status(200).send(brands)
+        // } else {
+        //   res.status(404).send({ msg: 'No Data Found' })
+        // }
       } catch (err) {
-        res.status(500).send({ msg: 'internal server error' })
+        return res.status(500).send({ msg: 'internal server error' })
       }
     }
+  }).catch(err =>{
+    return res.send(401).send({ message: 'not authentic user' })
+
   })
 }
 

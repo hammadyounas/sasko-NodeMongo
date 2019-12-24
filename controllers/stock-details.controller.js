@@ -77,14 +77,8 @@ module.exports.editStockDetails = (req, res) => {
               const stockDetails = await StockDetails.findByIdAndUpdate(
                 { _id: stockDetail._id },
                 stockDetail
-              )
-              let record = await historyController.addHistory(
-                stockDetail.history,
-                payload,
-                'stock',
-                'updateStockDetail',
-                req.body.stockDetails.length - i
-              )
+            )
+            if(stockDetail.history) await historyController.addHistory(stockDetail.history,payload,'stock','updateStockDetail',req.body.stockDetails.length - i)
             } else {
               stockDetail['stock'] = stock._id
               const newStockDetail = new StockDetails(stockDetail)
@@ -122,14 +116,14 @@ module.exports.addStockDetailsWithStock = (req, res) => {
       res.send(401).send({ message: 'not authentic user' })
     } else {
       req.body.stock['_id'] = new mongoose.Types.ObjectId()
-      let stockHistory = req.body.stock.history
+      let stockHistory = req.body.stock.history;
+
       delete req.body.stock['history']
       const stock = new Stock(req.body.stock)
       stock.save().then(async result => {
         if (!result) {
           return error
         } else {
-          // req.body.stockDetails.map(x => (x['stock'] = stock._id))
           let add = await req.body.stockDetails.map((x, i) => {
             historyController.addHistory(
               x.history,
@@ -438,7 +432,7 @@ module.exports.getStockOfColorModelItemAndBrand = (req, res) => {
           modelNumber: req.body.modelNumber,
           color: req.body.color
         },
-        { actualQty: 1, totalCost: 1, initialQty: 1 }
+        { actualQty: 1, totalCost: 1, initialQty: 1, unitCost:1 }
       )
         .exec()
         .then(result => {

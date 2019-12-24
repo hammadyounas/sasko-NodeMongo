@@ -11,8 +11,8 @@ module.exports.getPaymentReceive = (req, res) => {
       res.send(401).send({ message: 'not authentic user' })
     } else {
       PaymentReceive.find({ status: true })
-        .populate('customerId')
-        .populate('bankId')
+        .populate('customerId','companyName')
+        .populate('bankId','name')
         .then(payment_receives => {
           if (!payment_receives.length) {
             res.status(404).send({ message: 'No Data Found' })
