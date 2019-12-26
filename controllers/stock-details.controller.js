@@ -421,37 +421,23 @@ module.exports.getColorsOfModelsItemsAndBrands = (req, res) => {
 }
 
 module.exports.getStockOfColorModelItemAndBrand = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      StockDetails.find(
-        {
-          itemId: req.body.itemId,
-          brandId: req.body.brandId,
-          modelNumber: req.body.modelNumber,
-          color: req.body.color
-        },
-        { actualQty: 1, totalCost: 1, initialQty: 1, unitCost:1 }
-      )
-        .exec()
-        .then(result => {
-          let final = result
-            .reduce((ac, cu) => {
-              ac.actualQty += cu.actualQty
-              ac.initialQty += cu.initialQty
-              ac.totalCost += cu.totalCost
-              return ac
-            })
-            .toObject()
-          final['stock'] = final.actualQty
-          final['avgCost'] = final.totalCost / final.initialQty
+      try{
+          let result = await StockDetails.find({itemId: req.body.itemId,brandId: req.body.brandId, modelNumber: req.body.modelNumber,color: req.body.color},{ actualQty: 1, totalCost: 1, initialQty: 1, unitCost:1,date:1 }).sort('date').exec();
+          
+          let final ={
+            'stock': result.reduce((acc,current)=>{ return acc+current.actualQty},0),
+            'price' : result.find(val => {return val.actualQty > 0 }).unitCost
+          }
 
-          res.status(200).send(final)
-        })
-        .catch(error => {
-          res.status(500).send(error)
-        })
+          return res.status(200).send(final);
+
+      }catch(err){
+        return res.status(500).send(err);
+      }
     }
   })
 }
