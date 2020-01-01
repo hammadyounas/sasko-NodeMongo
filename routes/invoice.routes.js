@@ -8,6 +8,7 @@ console.log("Invoice Route Loaded");
 
 routes.get('/', invoiceController.getInvoice);
 routes.get('/getInvoicesSummery',invoiceController.getInvoicesSummery);
+routes.post('/getSummeryDetails',invoiceController.getSummeryDetails)
 routes.get('/getInvoiceId', invoiceController.getInvoiceId);
 routes.get('/:id', invoiceController.getInvoiceById);
 routes.get('/getInvoiceWithInvoiceDetails/:id', invoiceController.getInvoiceWithInvoiceDetails);

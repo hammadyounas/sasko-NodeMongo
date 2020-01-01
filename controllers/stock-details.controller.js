@@ -428,9 +428,17 @@ module.exports.getStockOfColorModelItemAndBrand = (req, res) => {
       try{
           let result = await StockDetails.find({itemId: req.body.itemId,brandId: req.body.brandId, modelNumber: req.body.modelNumber,color: req.body.color},{ actualQty: 1, totalCost: 1, initialQty: 1, unitCost:1,date:1 }).sort('date').exec();
           
-          let final ={
-            'stock': result.reduce((acc,current)=>{ return acc+current.actualQty},0),
-            'price' : result.find(val => {return val.actualQty > 0 }).unitCost
+          let calculate = result
+            .reduce((ac, cu) => {
+              ac.actualQty += cu.actualQty
+              ac.initialQty += cu.initialQty
+              ac.totalCost += cu.actualQty  ? cu.totalCost : 0
+              return ac
+            })
+            .toObject()
+            let final = {
+            'stock': calculate.actualQty,
+            'price' : calculate.totalCost / calculate.initialQty
           }
 
           return res.status(200).send(final);

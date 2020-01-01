@@ -6,6 +6,7 @@ const getInvoiceNumber = require('../utils/invoiceNumberGenerator')
 const sixDigits = require('../utils/sixDigits')
 const historyController = require('./history.controller')
 const jwt = require('jsonwebtoken')
+const mongoose = require('mongoose')
 
 module.exports.getInvoice = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
@@ -29,6 +30,71 @@ module.exports.getInvoice = (req, res) => {
         })
     }
   })
+}
+
+module.exports.getSummeryDetails = async (req,res) => {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      let detailQuery = {};
+      let invoiceQuery = {};
+      let matchQuery = {}
+      
+      req.body.itemId ? (detailQuery['itemId'] = req.body.itemId ) : "";
+      req.body.brandId ? (detailQuery['brandId'] = req.body.brandId ) : "";
+      req.body.modelNumber ? (detailQuery['modelNumber'] = req.body.modelNumber ) : "";
+      req.body.color ? (detailQuery['color'] = req.body.color ) : "";
+      
+      req.body.fromDate ? (invoiceQuery['date'] = {$gte:new Date(req.body.fromDate)}) : "";
+      req.body.toDate ? (invoiceQuery['date'] = {$gte:new Date(req.body.toDate)}) : "";
+      req.body.fromDate && req.body.toDate ? (invoiceQuery['date'] = {$gte:new Date(req.body.fromDate),$lte:new Date(req.body.toDate)} ) : "";
+      req.body.customerId ? (invoiceQuery['customerId'] = req.body.customerId ) : "";
+      req.body.invoiceNo ? (invoiceQuery['invoiceNo'] = req.body.invoiceNo ) : "";
+
+      let invoices = await Invoice.find().count();
+      InvoiceDetails.find(detailQuery)
+        .populate({
+          path:'invoiceId',
+          match:invoiceQuery
+        }).lean()
+        .then(details => {
+          // console.log("details ->",details);
+          let filterArray = details.filter(obj =>{return obj.invoiceId !== null});
+          let obj = {
+            invoices:invoices,
+            cost: filterArray.reduce((acc, current) => {
+              return acc + current.avgCost
+            }, 0),
+            totalPieces: filterArray.reduce((acc, current) => {
+              return acc + current.pieceQty
+            }, 0),
+            sale: filterArray.reduce((acc, current) => {
+              return acc + current.totalCost
+            }, 0),
+            netDiscount: filterArray.reduce((acc, current) => {
+              return acc + (current.totalCost - current.afterDiscount)
+            }, 0),
+            netSale:
+            filterArray.reduce((acc, current) => {
+                return acc + current.totalCost
+              }, 0) -
+              filterArray.reduce((acc, current) => {
+                return acc + (current.totalCost - current.afterDiscount)
+              }, 0),
+            profitLoss:filterArray.reduce((acc,current) =>{
+              return acc + (current.afterDiscount - (current.avgCost * current.pieceQty))
+            }, 0)
+          }
+          res.status(200).send(obj)
+        }).catch(err =>{
+          res.status(500).send(err);
+        })
+      }
+    })
 }
 
 module.exports.getInvoicesSummery = (req, res) => {
