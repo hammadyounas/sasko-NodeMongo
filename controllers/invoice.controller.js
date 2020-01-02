@@ -16,18 +16,24 @@ module.exports.getInvoice = (req, res) => {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      Invoice.find({ status: true })
-        .populate('customerId', 'clientName')
-        .exec().then(invoices => {
-          if (!invoices.length) {
-            res.status(404).send({ message: 'No Data Found' })
-          } else {
-            res.status(200).send(invoices)
-          }
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+      try{
+
+        let invoices = await Invoice.find({ status: true }).populate('customerId', 'companyName').lean().exec();
+
+        if(!invoices && !invoices.length) return res.status(404).send({ message: 'No Data Found' });
+
+        Promise.all(
+          invoices.map((invoice,i) =>{
+              invoices[i]['companyName'] = invoice.customerId.companyName;
+              invoices[i]['customerId'] = invoice.customerId._id;
+          })
+        ).then(data =>{
+           return res.status(200).send(invoices);
+        })        
+
+      }catch(err){
+        return res.status(500).send(err)
+      }
     }
   })
 }
