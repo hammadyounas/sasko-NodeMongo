@@ -55,14 +55,12 @@ module.exports.getBrands = async (req, res) => {
       // return res.send(401).send({ message: 'not authentic user' })
     } else {
       try {
-        let brands = await Brands.find().populate('itemId');
+        let brands = await Brands.find().populate('itemId','name');
 
         if(!brands.length) return res.status(404).send({ msg: 'No Data Found' })
-        // if (brands.length) {
-          return res.status(200).send(brands)
-        // } else {
-        //   res.status(404).send({ msg: 'No Data Found' })
-        // }
+          
+        return res.status(200).send(brands)
+
       } catch (err) {
         return res.status(500).send({ msg: 'internal server error' })
       }
@@ -81,34 +79,38 @@ module.exports.addBrands = (req, res) => {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      let brands = req.body.brands
-      let addBrands = []
-      Promise.all(
-        brands.map(async obj => {
-          let resp = await Brands.findOne({
-            itemId: obj.itemId,
-            brandName: obj.brandName
+      try{
+
+        let brands = req.body.brands;
+        let addBrands = [];
+
+        Promise.all(
+          brands.map(async obj => {
+            let resp = await Brands.findOne({
+              itemId: obj.itemId,
+              brandName: obj.brandName
+            })
+            if (!resp) {
+              addBrands.push(obj)
+            }
           })
-          if (!resp) {
-            addBrands.push(obj)
-          }
+        ).then(async result => {
+              
+              let createBrands = await Brands.create(addBrands);
+
+              let record = await historyController.addHistory(req.body.history,payload,'Brand','add',0);
+
+              let brands = await Brands.find().populate('itemId','name');
+
+              if(!brands.length) return res.status(404).send({ msg: 'No Data Found' })
+          
+              return res.status(200).send(brands)
         })
-      ).then(result => {
-        Brands.create(addBrands)
-          .then(async function (brands) {
-            let record = await historyController.addHistory(
-              req.body.history,
-              payload,
-              'Brand',
-              'add',
-              0
-            )
-            res.status(200).send(brands)
-          })
-          .catch(error => {
-            res.status(500).json(errorHandler(error))
-          })
-      })
+      }catch(err){
+        return res.status(500).send(err)
+      }
+     
+      
     }
   })
 }
