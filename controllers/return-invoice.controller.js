@@ -14,7 +14,8 @@ module.exports.getReturnInvoice = (req, res) => {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      ReturnInvoice.find({ status: true })
+      try{
+        let invoices = await ReturnInvoice.find({ status: true })
         .populate({
           path: 'invoiceDetailId',
           populate: {
@@ -24,30 +25,28 @@ module.exports.getReturnInvoice = (req, res) => {
         })
         .populate('itemId','name')
         .populate('brandId','brandName')
-        .lean()
-        .then(invoices => {
-          if (invoices) {
-            invoices.map((obj, i) => {
-              obj['brandName'] = obj.brandId.brandName;
-              obj['brandId'] = obj.brandId._id;
-              obj['itemName'] = obj.itemId.name;
-              obj['itemId'] = obj.itemId._id
-              obj['invoiceNo'] = obj.invoiceDetailId.invoiceId.invoiceNo
-              obj['manualBookNo'] = obj.invoiceDetailId.invoiceId.manualBookNo
-              obj['invoiceDate'] = obj.invoiceDetailId.invoiceId.date
-              obj['invoiceId'] = obj.invoiceDetailId.invoiceId._id
-              obj['invoiceDetailId'] = obj.invoiceDetailId._id
-              delete obj['invoiceDetailId']
-              invoices[i] = obj
-            })
-            res.status(200).send(invoices)
-          } else {
-            res.status(404).send({ msg: 'return invoices not found' })
-          }
+        .lean();
+
+        if(!invoices.length) return res.status(404).send({ msg: 'return invoices not found' });
+
+        invoices.map((obj, i) => {
+          obj['brandName'] = obj.brandId.brandName;
+          obj['brandId'] = obj.brandId._id;
+          obj['itemName'] = obj.itemId.name;
+          obj['itemId'] = obj.itemId._id
+          obj['invoiceNo'] = obj.invoiceDetailId.invoiceId.invoiceNo
+          obj['manualBookNo'] = obj.invoiceDetailId.invoiceId.manualBookNo
+          obj['invoiceDate'] = obj.invoiceDetailId.invoiceId.date
+          obj['invoiceId'] = obj.invoiceDetailId.invoiceId._id
+          obj['invoiceDetailId'] = obj.invoiceDetailId._id
+          delete obj['invoiceDetailId']
+          invoices[i] = obj
         })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+        res.status(200).send(invoices)
+
+      }catch(err){
+        return res.status(500).json(errorHandler(err))
+      }
     }
   })
 }
