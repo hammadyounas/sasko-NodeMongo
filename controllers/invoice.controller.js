@@ -194,12 +194,20 @@ module.exports.getInvoiceWithInvoiceDetails = async (req, res) => {
       res.send(401).send({ message: 'not authentic user' })
     } else {
       try {
-        let invoice = await Invoice.findOne({ _id: req.params.id })
+        let invoice = await Invoice.findOne({ _id: req.params.id }).populate('customerId','companyName').lean();
+        
+      if(!invoice) return res.status(404).send({msg:'Invoice not found'});
+
+        invoice['companyName'] = invoice.customerId.companyName;
+        invoice['customerId'] = invoice.customerId._id;
+
         let invoiceDetails = await InvoiceDetails.find({
           invoiceId: req.params.id
         })
           .populate('itemId', 'name')
           .populate('brandId', 'brandName')
+
+        if(!invoiceDetails) return res.status(404).send({msg:'Details not found'});
 
         let obj = { invoice, invoiceDetails }
         res.status(200).send(obj)
