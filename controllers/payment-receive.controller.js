@@ -176,7 +176,7 @@ module.exports.getLedgerReport = (req, res) => {
     } else {
       LedgerReport.find()
         .sort({ createdAt: -1 })
-        .populate('customerId', 'clientName')
+        .populate('customerId', 'companyName')
         .lean()
         .then(result => {
           if (!result.length) {
@@ -184,7 +184,7 @@ module.exports.getLedgerReport = (req, res) => {
           } else {
             Promise.all(
               result.map((report, i) => {
-                result[i]['customerName'] = report.customerId.clientName
+                result[i]['companyName'] = report.customerId.companyName
                 result[i]['customerId'] = report.customerId._id
               })
             ).then(() => {
