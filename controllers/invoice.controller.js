@@ -93,7 +93,7 @@ module.exports.getSummeryDetails = async (req,res) => {
               }, 0),
             profitLoss:filterArray.reduce((acc,current) =>{
               return acc + (current.afterDiscount - (current.avgCost * current.pieceQty))
-            }, 0)
+            }, 0).toFixed(2)
           }
           res.status(200).send(obj)
         }).catch(err =>{
@@ -136,9 +136,9 @@ module.exports.getInvoicesSummery = (req, res) => {
               details.reduce((acc, current) => {
                 return acc + (current.totalCost - current.afterDiscount)
               }, 0),
-            profitLoss:details.reduce((acc,current) =>{
+            profitLoss: details.reduce((acc,current) =>{
               return acc + (current.afterDiscount - (current.avgCost * current.pieceQty))
-            }, 0)
+            }, 0).toFixed(2) 
           }
           res.status(200).send(obj)
         })
