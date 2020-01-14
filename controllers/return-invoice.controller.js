@@ -23,6 +23,7 @@ module.exports.getReturnInvoice = (req, res) => {
             select: 'invoiceNo manualBookNo  date'
           }
         })
+        .populate('customerId','companyName')
         .populate('itemId','name')
         .populate('brandId','brandName')
         .lean();
@@ -33,12 +34,14 @@ module.exports.getReturnInvoice = (req, res) => {
           obj['brandName'] = obj.brandId.brandName;
           obj['brandId'] = obj.brandId._id;
           obj['itemName'] = obj.itemId.name;
-          obj['itemId'] = obj.itemId._id
-          obj['invoiceNo'] = obj.invoiceDetailId.invoiceId.invoiceNo
-          obj['manualBookNo'] = obj.invoiceDetailId.invoiceId.manualBookNo
-          obj['invoiceDate'] = obj.invoiceDetailId.invoiceId.date
-          obj['invoiceId'] = obj.invoiceDetailId.invoiceId._id
-          obj['invoiceDetailId'] = obj.invoiceDetailId._id
+          obj['itemId'] = obj.itemId._id;
+          obj['customer'] = obj.customerId ? obj.customerId.companyName : '';
+          obj['customerId'] = obj.customerId ? obj.customerId._id : '';
+          obj['invoiceNo'] = obj.invoiceDetailId.invoiceId.invoiceNo;
+          obj['manualBookNo'] = obj.invoiceDetailId.invoiceId.manualBookNo;
+          obj['invoiceDate'] = obj.invoiceDetailId.invoiceId.date;
+          obj['invoiceId'] = obj.invoiceDetailId.invoiceId._id;
+          obj['invoiceDetailId'] = obj.invoiceDetailId._id;
           delete obj['invoiceDetailId']
           invoices[i] = obj
         })
