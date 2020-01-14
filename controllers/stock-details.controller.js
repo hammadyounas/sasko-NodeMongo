@@ -438,7 +438,7 @@ module.exports.getStockOfColorModelItemAndBrand = (req, res) => {
             .toObject()
             let final = {
             'stock': calculate.actualQty,
-            'price' : calculate.totalCost / calculate.initialQty
+            'price' : Math.round( calculate.totalCost / calculate.initialQty).toFixed(2)
           }
 
           return res.status(200).send(final);

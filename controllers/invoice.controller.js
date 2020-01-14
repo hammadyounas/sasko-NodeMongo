@@ -209,6 +209,11 @@ module.exports.getInvoiceWithInvoiceDetails = async (req, res) => {
 
         if(!invoiceDetails) return res.status(404).send({msg:'Details not found'});
 
+        invoice['totalAmmount'] = invoiceDetails.reduce((acc,cu)=>{return acc + cu.totalCost},0) ;
+        invoice['profitLoss'] = invoiceDetails.reduce((acc,current) =>{
+          return acc + (current.afterDiscount - (current.avgCost * current.pieceQty))
+        }, 0).toFixed(2) 
+
         let obj = { invoice, invoiceDetails }
         res.status(200).send(obj)
       } catch (err) {
