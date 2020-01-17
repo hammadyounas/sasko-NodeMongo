@@ -12,6 +12,7 @@ const invoice = new Schema(
     postedStatus: { type: Boolean, default: false },
     balance: { type: Number, required: true },
     status: { type: Boolean, default: true },
+    returnStatus:{type:Boolean,default: false},
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
   },

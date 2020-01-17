@@ -1,10 +1,11 @@
-const ReturnInvoice = require('../models/return-invoice.model')
-const errorHandler = require('../utils/errorHandler')
-const sixDigits = require('../utils/sixDigits')
-const InvoiceDetails = require('../models/invoice-details.model')
-const StockDetails = require('../models/stock-details.model')
-const ReturnInvoiceDetail = require('../models/return-invoice.model')
-const jwt = require('jsonwebtoken')
+const ReturnInvoice = require('../models/return-invoice.model');
+const errorHandler = require('../utils/errorHandler');
+const sixDigits = require('../utils/sixDigits');
+const InvoiceDetails = require('../models/invoice-details.model');
+const Invoice = require('../models/invoice.model');
+const StockDetails = require('../models/stock-details.model');
+const ReturnInvoiceDetail = require('../models/return-invoice.model');
+const jwt = require('jsonwebtoken');
 
 module.exports.getReturnInvoice = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
@@ -134,6 +135,59 @@ module.exports.setReturnInvoice = async (req, res) => {
   })
 }
 
+module.exports.returnWholeInvoice = async (req,res) =>{
+  // jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  //   err,
+  //   payload
+  // ) {
+  //   if (err) {
+  //     return res.send(401).send({ message: 'not authentic user' })
+  //   } else {
+    try{
+      let invoiceDetails = await InvoiceDetails.find({invoiceId: req.params.invoiceId});
+      let invoice = await Invoice.findById(req.params.invoiceId);
+      
+
+        await Promise.all( invoiceDetails.map(async detail =>{
+          let stockDetails = await StockDetails.find({
+            itemId: detail.itemId,
+            brandId: detail.brandId,
+            modelNumber: detail.modelNumber,
+            color: detail.color
+          })
+
+          stockDetails.sort(function (a, b) {
+            return new Date(a.date) - new Date(b.date)
+          })
+
+          let updatedStockDetailsSoldQty = await decreaseSoldQtyStockDetails(
+            stockDetails,
+            detail.pieceQty
+          )
+        })
+        
+        )
+
+       let update = await Invoice.updateOne(
+         {_id: req.params.invoiceId},{$set:{returnStatus:true}});
+
+        if(!update) return res.status(401).send({msg:'Could not return invoice'});
+
+        let invoices = await Invoice.find({status:true,returnStatus:false}).exec();
+
+        if(!invoices) return res.status(404).send({msg:'Invoices not found'});
+
+        res.status(200).send(invoices);
+
+      }catch(err){
+        return res.status(500).send(err);
+      }
+        
+      // res.send(invoice);
+  //   }
+  // })
+}
+
 async function addDamageQty (stockDetails, damageQty) {
   Promise.all(
     stockDetails.map(async (obj, index) => {
@@ -171,7 +225,7 @@ async function decreaseSoldQtyStockDetails (stockDetails, returnQty) {
           obj.actualQty += returnQty
           obj.soldQty -= returnQty
           returnQty = 0
-        } else if (obj.actualQty == returnQty) {
+        } else if (obj.soldQty == returnQty) {
           obj.soldQty = 0
           obj.actualQty += returnQty
           returnQty = 0

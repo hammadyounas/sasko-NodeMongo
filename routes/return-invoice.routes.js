@@ -11,7 +11,8 @@ routes.get('/getReturnInvoiceId', returnInvoiceController.getReturnInvoiceId);
 // routes.get('/:id', invoiceController.getInvoiceById);
 // routes.get('/getInvoiceWithInvoiceDetails/:id', invoiceController.getInvoiceWithInvoiceDetails);
 // routes.get('/getCustomers', invoiceController.getCustomers);
-routes.post('/', returnInvoiceController.setReturnInvoice);
+// routes.post('/', returnInvoiceController.setReturnInvoice);
+routes.get('/returnWholeInvoice/:invoiceId',returnInvoiceController.returnWholeInvoice)
 // routes.put('/', invoiceController.editInvoice);
 // routes.delete('/:id', invoiceController.deleteInvoice);
 

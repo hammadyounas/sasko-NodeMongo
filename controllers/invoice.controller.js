@@ -18,18 +18,18 @@ module.exports.getInvoice = (req, res) => {
     } else {
       try{
 
-        let invoices = await Invoice.find({ status: true }).populate('customerId', 'companyName').lean().exec();
+        let invoices = await Invoice.find({ status: true , returnStatus:false},{status:0,returnStatus:0}).populate('customerId', 'companyName').lean().exec();
 
         if(!invoices.length) return res.status(404).send({ message: 'No Data Found' });
 
-        Promise.all(
+        await Promise.all(
           invoices.map((invoice,i) =>{
               invoices[i]['companyName'] = invoice.customerId.companyName;
               invoices[i]['customerId'] = invoice.customerId._id;
           })
-        ).then(data =>{
-           return res.status(200).send(invoices);
-        })        
+        )
+
+        return res.status(200).send(invoices);
 
       }catch(err){
         return res.status(500).send(err)
@@ -61,7 +61,10 @@ module.exports.getSummeryDetails = async (req,res) => {
       req.body.customerId ? (invoiceQuery['customerId'] = req.body.customerId ) : "";
       req.body.invoiceNo ? (invoiceQuery['invoiceNo'] = req.body.invoiceNo ) : "";
 
-      let invoices = await Invoice.find().count();
+      invoiceQuery['status'] = true;
+      invoiceQuery['returnStatus'] = false;
+
+      let invoices = await Invoice.find({ status: true ,returnStatus:false}).count();
       InvoiceDetails.find(detailQuery)
         .populate({
           path:'invoiceId',
@@ -111,32 +114,36 @@ module.exports.getInvoicesSummery = (req, res) => {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      let invoices = await Invoice.find().count();
-      InvoiceDetails.find()
-        .populate('invoiceId')
+      let invoices = await Invoice.find({ status: true , returnStatus:false}).count();
+      InvoiceDetails.find({})
+        .populate({
+          path:'invoiceId',
+          match:{ status: true , returnStatus:false }
+        })
         .then(details => {
+          let filterArray = details.filter(obj =>{return obj.invoiceId !== null});
           let obj = {
             invoices:invoices,
-            cost: details.reduce((acc, current) => {
+            cost: filterArray.reduce((acc, current) => {
               return acc + current.avgCost
             }, 0),
-            totalPieces: details.reduce((acc, current) => {
+            totalPieces: filterArray.reduce((acc, current) => {
               return acc + current.pieceQty
             }, 0),
-            sale: details.reduce((acc, current) => {
+            sale: filterArray.reduce((acc, current) => {
               return acc + current.totalCost
             }, 0),
-            netDiscount: details.reduce((acc, current) => {
+            netDiscount: filterArray.reduce((acc, current) => {
               return acc + (current.totalCost - current.afterDiscount)
             }, 0),
             netSale:
-              details.reduce((acc, current) => {
+              filterArray.reduce((acc, current) => {
                 return acc + current.totalCost
               }, 0) -
-              details.reduce((acc, current) => {
+              filterArray.reduce((acc, current) => {
                 return acc + (current.totalCost - current.afterDiscount)
               }, 0),
-            profitLoss: details.reduce((acc,current) =>{
+            profitLoss: filterArray.reduce((acc,current) =>{
               return acc + (current.afterDiscount - (current.avgCost * current.pieceQty))
             }, 0).toFixed(2) 
           }
@@ -174,7 +181,7 @@ module.exports.getInvoiceById = (req, res) => {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      Invoice.findById({ _id: req.params.id, status: true })
+      Invoice.findById({ _id: req.params.id, status: true,returnStatus:false })
         .then(invoice => {
           res.status(200).send(invoice)
         })
@@ -194,7 +201,7 @@ module.exports.getInvoiceWithInvoiceDetails = async (req, res) => {
       res.send(401).send({ message: 'not authentic user' })
     } else {
       try {
-        let invoice = await Invoice.findOne({ _id: req.params.id }).populate('customerId','companyName').lean();
+        let invoice = await Invoice.findOne({ _id: req.params.id,status:true,returnStatus:false }).populate('customerId','companyName').lean();
         
       if(!invoice) return res.status(404).send({msg:'Invoice not found'});
 
