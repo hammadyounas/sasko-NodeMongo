@@ -270,27 +270,9 @@ module.exports.getDamageStock = (req, res) => {
                arr = result.filter(object => {
                 return object.brandId == obj.brandId
               })
-            //   if (filter.length) {
-            //     let sum = filter.reduce((ac, cu) => {
-            //       return cu.brandId._id == obj.brandId._id
-            //         ? ac + cu.damageQty
-            //         : ac
-            //     }, 0)
-            //     obj.damageQty = sum
-            //     // arr.push(obj)
-            //   }
-              // result = result.filter(object => {
-              //   return object.brandId._id != obj.brandId._id
-              // })             
             })
           ).then(() => {
-            // if (arr.length) {
-              
-              // arr.map(obj =>{ return })
-              res.status(200).send(arr)
-            // } else {
-            //   res.status(404).send({ msg: 'No Data Found' })
-            // }
+              res.status(200).send(arr);
           })
         })
         .catch(error => {
