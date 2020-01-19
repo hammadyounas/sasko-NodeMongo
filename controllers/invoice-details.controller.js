@@ -7,6 +7,7 @@ const LedgerReport = require('../models/ledger-report.model')
 const Customer = require('../models/customer.model')
 const historyController = require('./history.controller')
 const jwt = require('jsonwebtoken')
+const ReturnInvoice = require('../models/return-invoice.model');
 
 module.exports.getInvoiceDetails = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
@@ -414,39 +415,51 @@ module.exports.modelColorWiseSale = async (req, res) => {
     } else {
       InvoiceDetails.find(
         { status: true },
-        { modelNumber: 1, color: 1, rate: 1, totalCost: 1 }
+        { modelNumber: 1, color: 1, rate: 1, totalCost: 1 , afterDiscount:1 , avgCost:1,discount:1}
       )
         .populate('itemId', 'name')
         .populate('brandId', 'brandName')
         .populate({
           path: 'invoiceId',
           select: 'invoiceNo totalQty date',
+          match:{ status: true , returnStatus:false },
           populate: { path: 'customerId', select: 'clientName' }
         })
         .lean()
-        .then(invoiceDetails => {
-          if (!invoiceDetails.length) {
-            res.status(404).send({ msg: 'data not found' })
-          } else {
-            Promise.all(
-              invoiceDetails.map((invoiceDetail, i) => {
-                invoiceDetails[i]['itemName'] = invoiceDetail.itemId.name
-                invoiceDetails[i]['brandName'] = invoiceDetail.brandId.brandName
-                invoiceDetails[i]['invoiceNo'] =
-                  invoiceDetail.invoiceId.invoiceNo
-                invoiceDetails[i]['totalQty'] = invoiceDetail.invoiceId.totalQty
-                invoiceDetails[i]['date'] = invoiceDetail.invoiceId.date
-                invoiceDetails[i]['brandName'] = invoiceDetail.brandId.brandName
-                invoiceDetails[i]['customerName'] =
-                  invoiceDetail.invoiceId.customerId.clientName
-                delete invoiceDetails[i]['itemId']
-                delete invoiceDetails[i]['brandId']
-                delete invoiceDetails[i].invoiceId
+        .then( async invoiceDetails => {
+          if (!invoiceDetails.length) return res.status(404).send({ msg: 'data not found' })
+          // } else {
+            let filterArray = invoiceDetails.filter(obj =>{return obj.invoiceId !== null});
+            await Promise.all(
+              filterArray.map(async (detail,i) =>{
+                let returnInvoiceDetail = await ReturnInvoice.find({invoiceDetailId:detail._id});
+                let returnQty = returnInvoiceDetail.reduce((acc,cu)=>{return acc + cu.totalReturnQty},0);
+                let totalCost = returnInvoiceDetail.reduce((acc,cu)=>{return acc + (cu.totalReturnQty * cu.rate)},0);
+                let afterDiscount = returnInvoiceDetail.reduce((acc,cu)=>{return acc + cu.returnAmmount},0);
+                if(detail._id.toString() == returnInvoiceDetail[0].invoiceDetailId.toString() ){
+                   filterArray[i].invoiceId.totalQty = filterArray[i].invoiceId.totalQty  - returnQty;
+                   filterArray[i].totalCost = filterArray[i].totalCost - totalCost ;
+                   filterArray[i].afterDiscount = filterArray[i].afterDiscount - afterDiscount;
+                }
               })
-            ).then(() => {
-              res.status(200).send(invoiceDetails)
-            })
-          }
+            )
+            await Promise.all(
+              filterArray.map((invoiceDetail, i) => {
+                filterArray[i]['itemName'] = invoiceDetail.itemId.name
+                filterArray[i]['brandName'] = invoiceDetail.brandId.brandName
+                filterArray[i]['invoiceNo'] = invoiceDetail.invoiceId.invoiceNo
+                filterArray[i]['totalQty'] = invoiceDetail.invoiceId.totalQty
+                filterArray[i]['date'] = invoiceDetail.invoiceId.date
+                filterArray[i]['customerName'] = invoiceDetail.invoiceId.customerId.clientName
+                delete filterArray[i]['itemId']
+                delete filterArray[i]['brandId']
+                delete filterArray[i].invoiceId
+              })
+            )
+            // .then(() => {
+              res.status(200).send(filterArray)
+            // })
+          // }
         })
         .catch(err => {
           res.status(500).json(errorHandler(err))
