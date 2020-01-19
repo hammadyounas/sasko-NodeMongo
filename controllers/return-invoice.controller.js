@@ -136,18 +136,16 @@ module.exports.setReturnInvoice = async (req, res) => {
 }
 
 module.exports.returnWholeInvoice = async (req,res) =>{
-  // jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
-  //   err,
-  //   payload
-  // ) {
-  //   if (err) {
-  //     return res.send(401).send({ message: 'not authentic user' })
-  //   } else {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      return res.send(401).send({ message: 'not authentic user' })
+    } else {
     try{
       let invoiceDetails = await InvoiceDetails.find({invoiceId: req.params.invoiceId});
       let invoice = await Invoice.findById(req.params.invoiceId);
-      
-
         await Promise.all( invoiceDetails.map(async detail =>{
           let stockDetails = await StockDetails.find({
             itemId: detail.itemId,
@@ -184,8 +182,8 @@ module.exports.returnWholeInvoice = async (req,res) =>{
       }
         
       // res.send(invoice);
-  //   }
-  // })
+    }
+  })
 }
 
 async function addDamageQty (stockDetails, damageQty) {
