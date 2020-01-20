@@ -45,7 +45,7 @@ module.exports.getSummeryDetails = async (req,res) => {
     payload
   ) {
     if (err) {
-      res.send(401).send({ message: 'not authentic user' })
+      return res.send(401).send({ message: 'not authentic user' })
     } else {
       let detailQuery = {};
       let invoiceQuery = {};
@@ -76,10 +76,10 @@ module.exports.getSummeryDetails = async (req,res) => {
           await Promise.all(
             filterArray.map(async (detail,i) =>{
               let returnInvoiceDetail = await ReturnInvoice.find({invoiceDetailId:detail._id});
-              let returnQty = returnInvoiceDetail.reduce((acc,cu)=>{return acc + cu.totalReturnQty},0);
-              let totalCost = returnInvoiceDetail.reduce((acc,cu)=>{return acc + (cu.totalReturnQty * cu.rate)},0);
-              let afterDiscount = returnInvoiceDetail.reduce((acc,cu)=>{return acc + cu.returnAmmount},0);
-              if(detail._id.toString() == returnInvoiceDetail[0].invoiceDetailId.toString() ){
+              if(returnInvoiceDetail.length && detail._id.toString() == returnInvoiceDetail[0].invoiceDetailId.toString() ){
+                let returnQty = returnInvoiceDetail.reduce((acc,cu)=>{return acc + cu.totalReturnQty},0);
+                let totalCost = returnInvoiceDetail.reduce((acc,cu)=>{return acc + (cu.totalReturnQty * cu.rate)},0);
+                let afterDiscount = returnInvoiceDetail.reduce((acc,cu)=>{return acc + cu.returnAmmount},0);
                  filterArray[i].pieceQty = filterArray[i].pieceQty  - returnQty;
                  filterArray[i].totalCost = filterArray[i].totalCost - totalCost ;
                  filterArray[i].afterDiscount = filterArray[i].afterDiscount - afterDiscount;
@@ -119,68 +119,6 @@ module.exports.getSummeryDetails = async (req,res) => {
       }
     })
 }
-
-// module.exports.getInvoicesSummery = async (req, res) => {
-//   // jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
-//   //   err,
-//   //   payload
-//   // ) {
-//   //   if (err) {
-//   //     res.send(401).send({ message: 'not authentic user' })
-//   //   } else {
-//       let invoices = await Invoice.find({ status: true , returnStatus:false}).count();
-//       InvoiceDetails.find({})
-//         .populate({
-//           path:'invoiceId',
-//           match:{ status: true , returnStatus:false }
-//         })
-//         .lean()
-//         .then(async details => {
-//           let filterArray = details.filter(obj =>{return obj.invoiceId !== null});
-//           await Promise.all(
-//             filterArray.map(async (detail,i) =>{
-//               let returnInvoiceDetail = await ReturnInvoice.find({invoiceDetailId:detail._id});
-//               let returnQty = returnInvoiceDetail.reduce((acc,cu)=>{return acc + cu.totalReturnQty},0);
-//               let totalCost = returnInvoiceDetail.reduce((acc,cu)=>{return acc + (cu.totalReturnQty * cu.rate)},0);
-//               let afterDiscount = returnInvoiceDetail.reduce((acc,cu)=>{return acc + cu.returnAmmount},0);
-//               if(detail._id.toString() == returnInvoiceDetail[0].invoiceDetailId.toString() ){
-//                  filterArray[i].pieceQty = filterArray[i].pieceQty  - returnQty;
-//                  filterArray[i].totalCost = filterArray[i].totalCost - totalCost ;
-//                  filterArray[i].afterDiscount = filterArray[i].afterDiscount - afterDiscount;
-//               }
-//             })
-//           )
-
-//           let obj = {
-//             invoices:invoices,
-//             cost: filterArray.reduce((acc, current) => {
-//               return acc + current.avgCost
-//             }, 0),
-//             totalPieces: filterArray.reduce((acc, current) => {
-//               return acc + current.pieceQty
-//             }, 0),
-//             sale: filterArray.reduce((acc, current) => {
-//               return acc + (current.rate * current.pieceQty)
-//             }, 0),
-//             netDiscount: filterArray.reduce((acc, current) => {
-//               return acc + (current.totalCost - current.afterDiscount)
-//             }, 0),
-//             netSale:
-//               filterArray.reduce((acc, current) => {
-//                 return acc + current.totalCost
-//               }, 0) -
-//               filterArray.reduce((acc, current) => {
-//                 return acc + (current.totalCost - current.afterDiscount)
-//               }, 0),
-//             profitLoss: filterArray.reduce((acc,current) =>{
-//               return acc + (current.afterDiscount - (current.avgCost * current.pieceQty))
-//             }, 0).toFixed(2) 
-//           }
-//           res.status(200).send(obj)
-//         })
-//     // }
-//   // })
-// }
 
 module.exports.getInvoiceId = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (

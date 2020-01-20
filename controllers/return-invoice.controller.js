@@ -171,17 +171,22 @@ module.exports.returnWholeInvoice = async (req,res) =>{
 
         if(!update) return res.status(401).send({msg:'Could not return invoice'});
 
-        let invoices = await Invoice.find({status:true,returnStatus:false}).exec();
+        let invoices = await Invoice.find({status:true,returnStatus:false}).populate('customerId', 'companyName').lean().exec();;
 
         if(!invoices) return res.status(404).send({msg:'Invoices not found'});
+
+        await Promise.all(
+          invoices.map((invoice,i) =>{
+              invoices[i]['companyName'] = invoice.customerId.companyName;
+              invoices[i]['customerId'] = invoice.customerId._id;
+          })
+        )
 
         res.status(200).send(invoices);
 
       }catch(err){
         return res.status(500).send(err);
-      }
-        
-      // res.send(invoice);
+      }        
     }
   })
 }
