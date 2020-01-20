@@ -436,7 +436,7 @@ module.exports.modelColorWiseSale = async (req, res) => {
                 let returnQty = returnInvoiceDetail.reduce((acc,cu)=>{return acc + cu.totalReturnQty},0);
                 let totalCost = returnInvoiceDetail.reduce((acc,cu)=>{return acc + (cu.totalReturnQty * cu.rate)},0);
                 let afterDiscount = returnInvoiceDetail.reduce((acc,cu)=>{return acc + cu.returnAmmount},0);
-                if(detail._id.toString() == returnInvoiceDetail[0].invoiceDetailId.toString() ){
+                if(returnInvoiceDetail.length && detail._id.toString() == returnInvoiceDetail[0].invoiceDetailId.toString() ){
                    filterArray[i].invoiceId.totalQty = filterArray[i].invoiceId.totalQty  - returnQty;
                    filterArray[i].totalCost = filterArray[i].totalCost - totalCost ;
                    filterArray[i].afterDiscount = filterArray[i].afterDiscount - afterDiscount;

@@ -20,18 +20,18 @@ module.exports.getStockDetails = (req, res) => {
     payload
   ) {
     if (err) {
-      res.send(401).send({ message: 'not authentic user' })
+      return res.send(401).send({ message: 'not authentic user' })
     } else {
       try {
         let stockDetails = await StockDetails.find()
           .populate('itemId', 'name')
           .populate('brandId', 'brandName')
           .populate('stock', 'stockId')
-        if (stockDetails.length) {
-          res.status(200).send(stockDetails)
-        } else {
-          res.status(404).send({ msg: 'No Data Found' })
-        }
+        
+          if(!stockDetails.length) return res.status(404).send({ msg: 'No Data Found' });
+          
+          res.status(200).send(stockDetails);
+
       } catch (err) {
         res.status(500).send({ msg: 'Internal Server Error' })
       }
