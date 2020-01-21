@@ -161,28 +161,28 @@ module.exports.getStockSecondReport = async (req, res) => {
     payload
   ) {
     if (err) {
-      res.send(401).send({ message: 'not authentic user' })
+      return res.send(401).send({ message: 'not authentic user' })
     } else {
       try {
-        let result = await StockDetails.find({}, { actualQty: 1 }).populate(
-          'itemId',
-          'name'
-        )
-        let arr = []
+        let result = await StockDetails.find({}, { modelNumber:1, actualQty: 1,color:1,unitCost:1 })
+        .populate('itemId','name')
+        .populate('brandId','brandName')
+        
+        let arr = [];
         Promise.all(
           result.map(obj => {
             let filter = result.filter(object => {
-              return object.itemId._id == obj.itemId._id
+              return object.itemId._id == obj.itemId._id && object.brandId._id == obj.brandId._id && object.modelNumber == obj.modelNumber && object.color == obj.color
             })
             if (filter.length) {
               let sum = filter.reduce((ac, cu) => {
-                return cu.itemId._id == obj.itemId._id ? ac + cu.actualQty : ac
+                return cu.itemId._id == obj.itemId._id && cu.brandId._id == obj.brandId._id && cu.modelNumber == obj.modelNumber && cu.color == obj.color ? ac + cu.actualQty : ac
               }, 0)
               obj.actualQty = sum
               arr.push(obj)
             }
             result = result.filter(object => {
-              return object.itemId._id != obj.itemId._id
+              return object.itemId._id != obj.itemId._id || object.brandId._id != obj.brandId._id || object.modelNumber != obj.modelNumber || object.color != obj.color
             })
           })
         ).then(() => {
