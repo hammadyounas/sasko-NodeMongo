@@ -167,9 +167,10 @@ module.exports.getStockSecondReport = async (req, res) => {
         let result = await StockDetails.find({}, { modelNumber:1, actualQty: 1,color:1,unitCost:1 })
         .populate('itemId','name')
         .populate('brandId','brandName')
+        .lean()
         
         let arr = [];
-        Promise.all(
+        await Promise.all(
           result.map(obj => {
             let filter = result.filter(object => {
               return object.itemId._id == obj.itemId._id && object.brandId._id == obj.brandId._id && object.modelNumber == obj.modelNumber && object.color == obj.color
@@ -185,13 +186,20 @@ module.exports.getStockSecondReport = async (req, res) => {
               return object.itemId._id != obj.itemId._id || object.brandId._id != obj.brandId._id || object.modelNumber != obj.modelNumber || object.color != obj.color
             })
           })
-        ).then(() => {
-          if (arr.length) {
-            res.status(200).send(arr)
-          } else {
-            res.status(404).send({ msg: 'No Data Found' })
-          }
-        })
+        )
+
+        await Promise.all(
+          arr.map((obj,i)=>{
+            arr[i]['itemName'] =  obj.itemId.name;
+            arr[i]['itemId'] = obj.itemId._id;
+            arr[i]['brandName'] = obj.brandId.brandName;
+            arr[i]['brandId'] = obj.brandId._id;
+          })
+        )
+
+        if(!arr.length) return res.status(404).send({ msg: 'No Stock Summery Found' })
+
+        return res.status(200).send(arr);
       } catch (err) {
         res.status(500).send({ msg: 'internal server error', err: err })
       }
