@@ -502,14 +502,15 @@ module.exports.getDamageOfColorModelItemAndBrand = async (req, res) => {
             brandId: req.body.brandId,
             modelNumber: req.body.modelNumber,
             color: req.body.color,
-            damageQty: { $gte: 1 }
+            damageQty:{$gte:1}
           },
-          { actualQty: 1, totalCost: 1, initialQty: 1, unitCost: 1, date: 1 }
+          { actualQty: 1, totalCost: 1, initialQty: 1, unitCost: 1, date: 1,damageQty:1 }
         )
           .sort('date')
           .exec()
         let calculate = result
           .reduce((ac, cu) => {
+            ac.damageQty += cu.damageQty
             ac.actualQty += cu.actualQty
             ac.initialQty += cu.initialQty
             ac.totalCost += cu.actualQty ? cu.totalCost : 0
@@ -517,14 +518,14 @@ module.exports.getDamageOfColorModelItemAndBrand = async (req, res) => {
           })
           .toObject()
         let final = {
-          stock: calculate.actualQty,
+          stock: calculate.damageQty,
           price: Math.round(calculate.totalCost / calculate.initialQty).toFixed(
             2
           )
         }
 
         return res.status(200).send(final);
-        
+
       } catch (err) {
         return res.status(500).send(err)
       }
