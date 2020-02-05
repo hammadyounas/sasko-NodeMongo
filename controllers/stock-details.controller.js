@@ -261,7 +261,7 @@ module.exports.getDamageStock = (req, res) => {
   //   if (err) {
   //     res.send(401).send({ message: 'not authentic user' })
   //   } else {
-      StockDetails.find({}, { date: 1, damageQty: 1, modelNumber:1, color:1, size:1 })
+      StockDetails.find({damageQty:{$gte:1}}, { date: 1, damageQty: 1, modelNumber:1, color:1, size:1 })
         .populate('itemId', 'name')
         .populate('brandId', 'brandName').lean()
         .then(async result => {
