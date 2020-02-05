@@ -280,6 +280,9 @@ module.exports.getDamageStock = (req, res) => {
               })
             })
           ).then(() => {
+            
+              if(!arr.length) return res.status(404).send({ msg: 'No Data Found' });
+
               res.status(200).send(arr);
           })
         })
