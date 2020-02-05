@@ -27,11 +27,11 @@ module.exports.getStockDetails = (req, res) => {
           .populate('itemId', 'name')
           .populate('brandId', 'brandName')
           .populate('stock', 'stockId')
-        
-          if(!stockDetails.length) return res.status(404).send({ msg: 'No Data Found' });
-          
-          res.status(200).send(stockDetails);
 
+        if (!stockDetails.length)
+          return res.status(404).send({ msg: 'No Data Found' })
+
+        res.status(200).send(stockDetails)
       } catch (err) {
         res.status(500).send({ msg: 'Internal Server Error' })
       }
@@ -77,8 +77,15 @@ module.exports.editStockDetails = (req, res) => {
               const stockDetails = await StockDetails.findByIdAndUpdate(
                 { _id: stockDetail._id },
                 stockDetail
-            )
-            if(stockDetail.history) await historyController.addHistory(stockDetail.history,payload,'stock','updateStockDetail',req.body.stockDetails.length - i)
+              )
+              if (stockDetail.history)
+                await historyController.addHistory(
+                  stockDetail.history,
+                  payload,
+                  'stock',
+                  'updateStockDetail',
+                  req.body.stockDetails.length - i
+                )
             } else {
               stockDetail['stock'] = stock._id
               const newStockDetail = new StockDetails(stockDetail)
@@ -116,7 +123,7 @@ module.exports.addStockDetailsWithStock = (req, res) => {
       res.send(401).send({ message: 'not authentic user' })
     } else {
       req.body.stock['_id'] = new mongoose.Types.ObjectId()
-      let stockHistory = req.body.stock.history;
+      let stockHistory = req.body.stock.history
 
       delete req.body.stock['history']
       const stock = new Stock(req.body.stock)
@@ -164,42 +171,61 @@ module.exports.getStockSecondReport = async (req, res) => {
       return res.send(401).send({ message: 'not authentic user' })
     } else {
       try {
-        let result = await StockDetails.find({}, { modelNumber:1, actualQty: 1,color:1,unitCost:1 })
-        .populate('itemId','name')
-        .populate('brandId','brandName')
-        .lean()
-        
-        let arr = [];
+        let result = await StockDetails.find(
+          {},
+          { modelNumber: 1, actualQty: 1, color: 1, unitCost: 1 }
+        )
+          .populate('itemId', 'name')
+          .populate('brandId', 'brandName')
+          .lean()
+
+        let arr = []
         await Promise.all(
           result.map(obj => {
             let filter = result.filter(object => {
-              return object.itemId._id == obj.itemId._id && object.brandId._id == obj.brandId._id && object.modelNumber == obj.modelNumber && object.color == obj.color
+              return (
+                object.itemId._id == obj.itemId._id &&
+                object.brandId._id == obj.brandId._id &&
+                object.modelNumber == obj.modelNumber &&
+                object.color == obj.color
+              )
             })
             if (filter.length) {
               let sum = filter.reduce((ac, cu) => {
-                return cu.itemId._id == obj.itemId._id && cu.brandId._id == obj.brandId._id && cu.modelNumber == obj.modelNumber && cu.color == obj.color ? ac + cu.actualQty : ac
+                return cu.itemId._id == obj.itemId._id &&
+                  cu.brandId._id == obj.brandId._id &&
+                  cu.modelNumber == obj.modelNumber &&
+                  cu.color == obj.color
+                  ? ac + cu.actualQty
+                  : ac
               }, 0)
               obj.actualQty = sum
               arr.push(obj)
             }
             result = result.filter(object => {
-              return object.itemId._id != obj.itemId._id || object.brandId._id != obj.brandId._id || object.modelNumber != obj.modelNumber || object.color != obj.color
+              return (
+                object.itemId._id != obj.itemId._id ||
+                object.brandId._id != obj.brandId._id ||
+                object.modelNumber != obj.modelNumber ||
+                object.color != obj.color
+              )
             })
           })
         )
 
         await Promise.all(
-          arr.map((obj,i)=>{
-            arr[i]['itemName'] =  obj.itemId.name;
-            arr[i]['itemId'] = obj.itemId._id;
-            arr[i]['brandName'] = obj.brandId.brandName;
-            arr[i]['brandId'] = obj.brandId._id;
+          arr.map((obj, i) => {
+            arr[i]['itemName'] = obj.itemId.name
+            arr[i]['itemId'] = obj.itemId._id
+            arr[i]['brandName'] = obj.brandId.brandName
+            arr[i]['brandId'] = obj.brandId._id
           })
         )
 
-        if(!arr.length) return res.status(404).send({ msg: 'No Stock Summery Found' })
+        if (!arr.length)
+          return res.status(404).send({ msg: 'No Stock Summery Found' })
 
-        return res.status(200).send(arr);
+        return res.status(200).send(arr)
       } catch (err) {
         res.status(500).send({ msg: 'internal server error', err: err })
       }
@@ -261,29 +287,33 @@ module.exports.getDamageStock = (req, res) => {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      StockDetails.find({damageQty:{$gte:1}}, { date: 1, damageQty: 1, modelNumber:1, color:1, size:1 })
+      StockDetails.find(
+        { damageQty: { $gte: 1 } },
+        { date: 1, damageQty: 1, modelNumber: 1, color: 1, size: 1 }
+      )
         .populate('itemId', 'name')
-        .populate('brandId', 'brandName').lean()
+        .populate('brandId', 'brandName')
+        .lean()
         .then(async result => {
-          let sendObj = result;
-          let arr = [];
+          let sendObj = result
+          let arr = []
           Promise.all(
             result.map((obj, i) => {
               result[i]['brandName'] = obj.brandId.brandName
               result[i]['brandId'] = obj.brandId._id
               result[i]['itemName'] = obj.itemId.name
               result[i]['itemId'] = obj.itemId._id
-              }),
+            }),
             result.map(obj => {
-               arr = result.filter(object => {
+              arr = result.filter(object => {
                 return object.brandId == obj.brandId
               })
             })
           ).then(() => {
-            
-              if(!arr.length) return res.status(404).send({ msg: 'No Data Found' });
+            if (!arr.length)
+              return res.status(404).send({ msg: 'No Data Found' })
 
-              res.status(200).send(arr);
+            res.status(200).send(arr)
           })
         })
         .catch(error => {
@@ -414,30 +444,89 @@ module.exports.getColorsOfModelsItemsAndBrands = (req, res) => {
 }
 
 module.exports.getStockOfColorModelItemAndBrand = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      try{
-          let result = await StockDetails.find({itemId: req.body.itemId,brandId: req.body.brandId, modelNumber: req.body.modelNumber,color: req.body.color},{ actualQty: 1, totalCost: 1, initialQty: 1, unitCost:1,date:1 }).sort('date').exec();
-          
-          let calculate = result
-            .reduce((ac, cu) => {
-              ac.actualQty += cu.actualQty
-              ac.initialQty += cu.initialQty
-              ac.totalCost += cu.actualQty  ? cu.totalCost : 0
-              return ac
-            })
-            .toObject()
-            let final = {
-            'stock': calculate.actualQty,
-            'price' : Math.round( calculate.totalCost / calculate.initialQty).toFixed(2)
-          }
+      try {
+        let result = await StockDetails.find(
+          {
+            itemId: req.body.itemId,
+            brandId: req.body.brandId,
+            modelNumber: req.body.modelNumber,
+            color: req.body.color
+          },
+          { actualQty: 1, totalCost: 1, initialQty: 1, unitCost: 1, date: 1 }
+        )
+          .sort('date')
+          .exec()
 
-          return res.status(200).send(final);
+        let calculate = result
+          .reduce((ac, cu) => {
+            ac.actualQty += cu.actualQty
+            ac.initialQty += cu.initialQty
+            ac.totalCost += cu.actualQty ? cu.totalCost : 0
+            return ac
+          })
+          .toObject()
+        let final = {
+          stock: calculate.actualQty,
+          price: Math.round(calculate.totalCost / calculate.initialQty).toFixed(
+            2
+          )
+        }
 
-      }catch(err){
-        return res.status(500).send(err);
+        return res.status(200).send(final)
+      } catch (err) {
+        return res.status(500).send(err)
+      }
+    }
+  })
+}
+
+module.exports.getDamageOfColorModelItemAndBrand = async (req, res) => {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      try {
+        let result = await StockDetails.find(
+          {
+            itemId: req.body.itemId,
+            brandId: req.body.brandId,
+            modelNumber: req.body.modelNumber,
+            color: req.body.color,
+            damageQty: { $gte: 1 }
+          },
+          { actualQty: 1, totalCost: 1, initialQty: 1, unitCost: 1, date: 1 }
+        )
+          .sort('date')
+          .exec()
+        let calculate = result
+          .reduce((ac, cu) => {
+            ac.actualQty += cu.actualQty
+            ac.initialQty += cu.initialQty
+            ac.totalCost += cu.actualQty ? cu.totalCost : 0
+            return ac
+          })
+          .toObject()
+        let final = {
+          stock: calculate.actualQty,
+          price: Math.round(calculate.totalCost / calculate.initialQty).toFixed(
+            2
+          )
+        }
+
+        return res.status(200).send(final);
+        
+      } catch (err) {
+        return res.status(500).send(err)
       }
     }
   })

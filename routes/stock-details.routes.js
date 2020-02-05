@@ -17,5 +17,6 @@ routes.get('/getItemsInStockDetails',stockDetails.getItemsInStockDetails);
 routes.get('/getBrandsOfItemsInStockDetails/:itemId',stockDetails.getBrandsOfItemsInStockDetails);
 routes.post('/getModelsOfItemsAndBrands',stockDetails.getModelsOfItemsAndBrands);
 routes.post('/getColorsOfModelsItemsAndBrands',stockDetails.getColorsOfModelsItemsAndBrands);
+routes.post('/getDamageOfColorModelItemAndBrand',stockDetails.getDamageOfColorModelItemAndBrand);
 routes.post('/getStockOfColorModelItemAndBrand',stockDetails.getStockOfColorModelItemAndBrand);
 module.exports = routes
