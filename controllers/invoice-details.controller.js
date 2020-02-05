@@ -423,7 +423,7 @@ module.exports.modelColorWiseSale = async (req, res) => {
           path: 'invoiceId',
           select: 'invoiceNo totalQty date',
           match:{ status: true , returnStatus:false },
-          populate: { path: 'customerId', select: 'clientName' }
+          populate: { path: 'customerId', select: 'companyName' }
         })
         .lean()
         .then( async invoiceDetails => {
@@ -450,7 +450,7 @@ module.exports.modelColorWiseSale = async (req, res) => {
                 filterArray[i]['invoiceNo'] = invoiceDetail.invoiceId.invoiceNo
                 filterArray[i]['totalQty'] = invoiceDetail.invoiceId.totalQty
                 filterArray[i]['date'] = invoiceDetail.invoiceId.date
-                filterArray[i]['customerName'] = invoiceDetail.invoiceId.customerId.clientName
+                filterArray[i]['companyName'] = invoiceDetail.invoiceId.customerId.companyName
                 delete filterArray[i]['itemId']
                 delete filterArray[i]['brandId']
                 delete filterArray[i].invoiceId

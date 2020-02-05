@@ -254,13 +254,13 @@ module.exports.getStockSummary = (req, res) => {
 }
 
 module.exports.getDamageStock = (req, res) => {
-  // jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
-  //   err,
-  //   payload
-  // ) {
-  //   if (err) {
-  //     res.send(401).send({ message: 'not authentic user' })
-  //   } else {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
       StockDetails.find({damageQty:{$gte:1}}, { date: 1, damageQty: 1, modelNumber:1, color:1, size:1 })
         .populate('itemId', 'name')
         .populate('brandId', 'brandName').lean()
@@ -287,8 +287,8 @@ module.exports.getDamageStock = (req, res) => {
           res.status(500).send(error)
         })
     }
-//   })
-// }
+  })
+}
 
 module.exports.getItemsInStockDetails = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
