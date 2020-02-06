@@ -90,7 +90,7 @@ module.exports.getSummeryDetails = async (req,res) => {
           let obj = {
             invoices:invoices,
             cost: filterArray.reduce((acc, current) => {
-              return acc + current.avgCost
+              return acc + (current.avgCost * current.pieceQty)
             }, 0),
             totalPieces: filterArray.reduce((acc, current) => {
               return acc + current.pieceQty
