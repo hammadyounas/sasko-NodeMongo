@@ -76,6 +76,7 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
       res.send(401).send({ message: 'not authentic user' })
     } else {
       try {
+
         let invoiceDetailsArray, invoiceVar
 
         req.body.invoice['_id'] = new mongoose.Types.ObjectId()
@@ -464,6 +465,120 @@ module.exports.modelColorWiseSale = async (req, res) => {
         .catch(err => {
           res.status(500).json(errorHandler(err))
         })
+    }
+  })
+}
+
+
+module.exports.addDamageSaleInvoiceDetailsWithInvoice = async (req,res) =>{
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      try {
+        
+        let invoiceDetailsArray, invoiceVar
+
+        req.body.invoice['_id'] = new mongoose.Types.ObjectId()
+        let invoiceHistory = req.body.invoice.history
+        delete req.body.invoice['history']
+        const invoice = new Invoice(req.body.invoice)
+        invoice.save().then(async result => {
+          if (!result) {
+            return error
+          } else {
+            invoiceVar = result
+            let ledgerReport = await addLedgerReport(result)
+            req.body.invoiceDetails.map((x, i) => {
+              historyController.addHistory(
+                x.history,
+                payload,
+                'invoice',
+                'addInvoiceDetail',
+                req.body.invoiceDetails.length - i
+              )
+              x['invoiceId'] = invoice._id
+            })
+            Promise.all(
+              req.body.invoiceDetails.map(async detail => {
+                let stockDetails = await StockDetails.find(
+                  {
+                    itemId: detail.itemId,
+                    brandId: detail.brandId,
+                    modelNumber: detail.modelNumber,
+                    color: detail.color,
+                    damageQty:{$gte:1}
+                  },
+                  { actualQty: 1, soldQty: 1, date: 1,damageQty:1 }
+                )
+                stockDetails.sort(function (a, b) {
+                  return new Date(a.date) - new Date(b.date)
+                })
+                let pieceQty = detail.pieceQty
+                Promise.all(
+                  stockDetails.map(async (obj, index) => {
+                    if (pieceQty != 0 && obj.damageQty > 0) {
+                      if (obj.damageQty < pieceQty) {
+                        pieceQty -= obj.damageQty
+                        obj.soldQty += obj.damageQty
+                        obj.damageQty = 0
+                      } else if (obj.damageQty > pieceQty) {
+                        obj.damageQty -= pieceQty
+                        obj.soldQty += pieceQty
+                        damageQty = 0
+                      } else if (obj.damageQty == pieceQty) {
+                        obj.damageQty = 0
+                        obj.soldQty += pieceQty
+                        pieceQty = 0
+                      }
+                      stockDetails[index] = obj
+                      let update = await StockDetails.updateOne(
+                        { _id: obj.id },
+                        {
+                          $set: {
+                            damageQty: obj.damageQty,
+                            soldQty: obj.soldQty
+                          }
+                        }
+                      )
+                    }
+                  })
+                )
+              })
+            ).then(() => {
+              const promise = InvoiceDetails.insertMany(req.body.invoiceDetails)
+                .then(data => {
+                  historyController.addHistory(
+                    invoiceHistory,
+                    payload,
+                    'invoice',
+                    'add',
+                    0
+                  )
+                  invoiceDetailsArray = data
+                })
+                .catch(err => {
+                  res.status(500).json(errorHandler(err))
+                })
+              Promise.all([promise])
+                .then(() => {
+                  res.status(200).send({
+                    invoice: invoiceVar,
+                    invoiceDetails: invoiceDetailsArray
+                  })
+                })
+                .catch(err => {
+                  res.status(500).json(errorHandler(err))
+                })
+            })
+          }
+        })
+      } catch (err) {
+        res.status(500).json(errorHandler(err))
+      }
     }
   })
 }

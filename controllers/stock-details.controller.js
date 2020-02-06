@@ -457,7 +457,8 @@ module.exports.getStockOfColorModelItemAndBrand = (req, res) => {
             itemId: req.body.itemId,
             brandId: req.body.brandId,
             modelNumber: req.body.modelNumber,
-            color: req.body.color
+            color: req.body.color,
+            actualQty:{$gte:1}
           },
           { actualQty: 1, totalCost: 1, initialQty: 1, unitCost: 1, date: 1 }
         )
@@ -468,7 +469,7 @@ module.exports.getStockOfColorModelItemAndBrand = (req, res) => {
           .reduce((ac, cu) => {
             ac.actualQty += cu.actualQty
             ac.initialQty += cu.initialQty
-            ac.totalCost += cu.actualQty ? cu.totalCost : 0
+            ac.totalCost += cu.totalCost
             return ac
           })
           .toObject()
@@ -508,12 +509,14 @@ module.exports.getDamageOfColorModelItemAndBrand = async (req, res) => {
         )
           .sort('date')
           .exec()
+
+        if(!result.length) return res.status(404).send({msg:'Damage not found'});
+
         let calculate = result
           .reduce((ac, cu) => {
             ac.damageQty += cu.damageQty
-            ac.actualQty += cu.actualQty
             ac.initialQty += cu.initialQty
-            ac.totalCost += cu.actualQty ? cu.totalCost : 0
+            ac.totalCost +=  cu.totalCost
             return ac
           })
           .toObject()
