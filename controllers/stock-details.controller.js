@@ -5,14 +5,8 @@ const Item = require('../models/item.model')
 const Brands = require('../models/brand.model')
 const historyController = require('./history.controller')
 const jwt = require('jsonwebtoken')
+const errorHandler = require('../utils/errorHandler')
 
-let errorHandler = error => {
-  return {
-    stack: error.stack,
-    code: error.code,
-    message: error.message
-  }
-}
 
 module.exports.getStockDetails = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
@@ -29,11 +23,11 @@ module.exports.getStockDetails = (req, res) => {
           .populate('stock', 'stockId')
 
         if (!stockDetails.length)
-          return res.status(404).send({ msg: 'No Data Found' })
+          return res.status(404).send({ message: 'No Data Found' })
 
         res.status(200).send(stockDetails)
       } catch (err) {
-        res.status(500).send({ msg: 'Internal Server Error' })
+        res.status(500).json(errorHandler(err))
       }
     }
   })
@@ -154,7 +148,7 @@ module.exports.addStockDetailsWithStock = (req, res) => {
               res.status(200).send(data)
             })
             .catch(error => {
-              res.status(500).send({ msg: 'internal server error', err: err })
+              res.status(500).json(errorHandler(err))
             })
         }
       })
@@ -223,11 +217,11 @@ module.exports.getStockSecondReport = async (req, res) => {
         )
 
         if (!arr.length)
-          return res.status(404).send({ msg: 'No Stock Summery Found' })
+          return res.status(404).send({ message: 'No Stock Summery Found' })
 
         return res.status(200).send(arr)
       } catch (err) {
-        res.status(500).send({ msg: 'internal server error', err: err })
+        res.status(500).json(errorHandler(err))
       }
     }
   })
@@ -268,12 +262,12 @@ module.exports.getStockSummary = (req, res) => {
             if (arr.length) {
               res.status(200).send(arr)
             } else {
-              res.status(404).send({ msg: 'No Data Found' })
+              res.status(404).send({ message: 'No Data Found' })
             }
           })
         })
         .catch(error => {
-          res.status(500).send(error)
+          res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -311,13 +305,13 @@ module.exports.getDamageStock = (req, res) => {
             })
           ).then(() => {
             if (!arr.length)
-              return res.status(404).send({ msg: 'No Data Found' })
+              return res.status(404).send({ message: 'No Data Found' })
 
             res.status(200).send(arr)
           })
         })
         .catch(error => {
-          res.status(500).send(error)
+          res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -341,11 +335,11 @@ module.exports.getItemsInStockDetails = (req, res) => {
             }, [])
             res.status(200).send(finalResult)
           } else {
-            res.status(404).send({ msg: 'No Data Found' })
+            res.status(404).send({ message: 'No Data Found' })
           }
         })
         .catch(error => {
-          res.status(500).send(error)
+          res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -369,11 +363,11 @@ module.exports.getBrandsOfItemsInStockDetails = (req, res) => {
             }, [])
             res.status(200).send(finalResult)
           } else {
-            res.status(404).send({ msg: 'No Data Found' })
+            res.status(404).send({ message: 'No Data Found' })
           }
         })
         .catch(error => {
-          res.status(500).send(error)
+          res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -399,11 +393,11 @@ module.exports.getModelsOfItemsAndBrands = (req, res) => {
             }, [])
             res.status(200).send(finalResult)
           } else {
-            res.status(404).send({ msg: 'No Data Found' })
+            res.status(404).send({ message: 'No Data Found' })
           }
         })
         .catch(error => {
-          res.status(500).send(error)
+          res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -433,11 +427,11 @@ module.exports.getColorsOfModelsItemsAndBrands = (req, res) => {
             }, [])
             res.status(200).send(finalResult)
           } else {
-            res.status(404).send({ msg: 'No Data Found' })
+            res.status(404).send({ message: 'No Data Found' })
           }
         })
         .catch(error => {
-          res.status(500).send(error)
+          res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -482,7 +476,7 @@ module.exports.getStockOfColorModelItemAndBrand = (req, res) => {
 
         return res.status(200).send(final)
       } catch (err) {
-        return res.status(500).send(err)
+        res.status(500).json(errorHandler(err))
       }
     }
   })
@@ -510,7 +504,7 @@ module.exports.getDamageOfColorModelItemAndBrand = async (req, res) => {
           .sort('date')
           .exec()
 
-        if(!result.length) return res.status(404).send({msg:'Damage not found'});
+        if(!result.length) return res.status(404).send({message:'Damage not found'});
 
         let calculate = result
           .reduce((ac, cu) => {
@@ -530,7 +524,7 @@ module.exports.getDamageOfColorModelItemAndBrand = async (req, res) => {
         return res.status(200).send(final);
 
       } catch (err) {
-        return res.status(500).send(err)
+        res.status(500).json(errorHandler(err))
       }
     }
   })

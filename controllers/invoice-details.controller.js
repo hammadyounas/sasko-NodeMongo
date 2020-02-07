@@ -486,11 +486,11 @@ module.exports.addDamageSaleInvoiceDetailsWithInvoice = async (req,res) =>{
         let invoiceHistory = req.body.invoice.history
         delete req.body.invoice['history']
         const invoice = new Invoice(req.body.invoice)
-        invoice.save().then(async result => {
+        let result = await invoice.save()
           if (!result) {
             return error
           } else {
-            invoiceVar = result
+            invoiceVar = result;
             let ledgerReport = await addLedgerReport(result)
             req.body.invoiceDetails.map((x, i) => {
               historyController.addHistory(
@@ -573,9 +573,11 @@ module.exports.addDamageSaleInvoiceDetailsWithInvoice = async (req,res) =>{
                 .catch(err => {
                   res.status(500).json(errorHandler(err))
                 })
+            }).catch(err=>{
+              return res.status(500).send(errorHandler(err));
             })
           }
-        })
+        // })
       } catch (err) {
         res.status(500).json(errorHandler(err))
       }
