@@ -48,29 +48,33 @@ module.exports.getBankListing = (req, res) => {
 }
 
 module.exports.setBank = (req, res) => {
-      jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
-        err,
-        payload
-      ) {
-        if (err) {
-          res.send(401).send({ message: 'not authentic user' })
-        } else {
-          Bank.create(req.body)
-            .then(async bank => {
-              let record = await historyController.addHistory(
-                req.body.history,
-                payload,
-                'Bank',
-                'add',
-                0
-              )
-              res.status(200).send(bank)
-            })
-            .catch(err => {
-              res.status(500).json(errorHandler(err))
-            })
-        }
-      })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    if (err) {
+      res.send(401).send({ message: 'not authentic user' })
+    } else {
+      try {
+        let addBank = await Bank.create(req.body)
+
+        let record = await historyController.addHistory(
+          req.body.history,
+          payload,
+          'Bank',
+          'add',
+          0
+        )
+        let banks = await Bank.find({ status: true })
+
+        if (!banks) return res.status(404).send({ message: 'Banks Not Found' })
+
+        return res.status(200).send(banks)
+      } catch (err) {
+        return res.status(500).json(errorHandler(err))
+      }
+    }
+  })
 }
 
 module.exports.editBank = (req, res) => {
@@ -81,26 +85,27 @@ module.exports.editBank = (req, res) => {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      Bank.findByIdAndUpdate({ _id: req.body._id, status: true }, req.body)
-        .then(() => {
-          Bank.findById({ _id: req.body._id })
-            .then(async bank => {
-              let record = await historyController.addHistory(
-                req.body.history,
-                payload,
-                'Bank',
-                'update',
-                0
-              )
-              res.status(200).send(bank)
-            })
-            .catch(err => {
-              res.status(500).json(errorHandler(err))
-            })
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+      try {
+        await Bank.findByIdAndUpdate(
+          { _id: req.body._id, status: true },
+          req.body
+        )
+
+        await historyController.addHistory(
+          req.body.history,
+          payload,
+          'Bank',
+          'update',
+          0
+        )
+        let banks = await Bank.find({ status: true })
+
+        if (!banks) return res.status(404).send({ message: 'Banks Not Found' })
+
+        return res.status(200).send(banks)
+      } catch (err) {
+        return res.status(500).json(errorHandler(err))
+      }
     }
   })
 }
@@ -113,15 +118,15 @@ module.exports.getBankById = (req, res) => {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-  Bank.findById({ _id: req.params.id, status: true })
-    .then(bank => {
-      res.status(200).send(bank)
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
-  }
-})
+      Bank.findById({ _id: req.params.id, status: true })
+        .then(bank => {
+          res.status(200).send(bank)
+        })
+        .catch(err => {
+          res.status(500).json(errorHandler(err))
+        })
+    }
+  })
 }
 
 module.exports.deleteBank = (req, res) => {
