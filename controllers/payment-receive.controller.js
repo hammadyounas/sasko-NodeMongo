@@ -156,14 +156,14 @@ module.exports.deletePaymentReceive = (req, res) => {
         .then(() => {
           PaymentReceive.findById({ _id: req.params.id })
             .then(payment_receive => {
-              res.status(200).send(payment_receive)
+              res.status(200).send(payment_receive);
             })
             .catch(err => {
-              res.status(500).json(errorHandler(err))
+              res.status(500).json(errorHandler(err));
             })
         })
         .catch(err => {
-          res.status(500).json(errorHandler(err))
+          res.status(500).json(errorHandler(err));
         })
     }
   })
@@ -184,11 +184,12 @@ module.exports.getLedgerReport = (req, res) => {
           } else {
             Promise.all(
               result.map((report, i) => {
-                result[i]['companyName'] = report.customerId.companyName
-                result[i]['customerId'] = report.customerId._id
+                result[i]['companyName'] = report.customerId.companyName;
+                result[i]['customerId'] = report.customerId._id;
               })
             ).then(() => {
-              res.status(200).send(result)
+              result = result.reverse();
+              res.status(200).send(result);
             })
           }
         })
