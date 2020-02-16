@@ -13,6 +13,7 @@ const invoiceDetails = new Schema(
     rate: { type: Number, required: true },
     pieceQty: { type: Number, required: true },
     discount: { type: Number, required: true },
+    returnQty: { type: Number, default: 0 },
     afterDiscount: { type: Number, required: true },
     totalCost: { type: Number, required: true },
     status: { type: Boolean, default: true },

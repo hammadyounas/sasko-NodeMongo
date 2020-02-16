@@ -95,9 +95,9 @@ module.exports.setReturnInvoice = async (req, res) => {
       try {
         let invoiceDetail = await InvoiceDetails.findOne({
           _id: req.body.invoiceDetailId
-        })
+        }).lean()
         if (invoiceDetail.pieceQty < req.body.totalReturnQty) {
-          res.status(400).send({
+          return res.status(400).send({
             msg: 'return quantity can not be greater then selling quantity'
           })
         } else {
@@ -118,6 +118,8 @@ module.exports.setReturnInvoice = async (req, res) => {
             stockDetails,
             req.body.returnQty
           )
+          invoiceDetail['returnQty'] += req.body.totalReturnQty;
+          await InvoiceDetails.updateOne({_id:invoiceDetail._id},{$set:{returnQty:invoiceDetail.returnQty}})
           let createReturnInvoiceDetail = new ReturnInvoiceDetail(req.body)
           createReturnInvoiceDetail
             .save()
