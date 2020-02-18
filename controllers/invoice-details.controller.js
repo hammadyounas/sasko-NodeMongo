@@ -89,6 +89,10 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
           } else {
             invoiceVar = result
             let ledgerReport = await addLedgerReport(result)
+            // if(!ledgerReport){
+            //   await Invoice.deleteOne({_id:invoice._id});
+            //   return res.status(409).send({message:'Error is creating ledger of this invoice'});
+            // }
             req.body.invoiceDetails.map((x, i) => {
               historyController.addHistory(
                 x.history,

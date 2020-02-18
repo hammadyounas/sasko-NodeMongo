@@ -11,8 +11,8 @@ module.exports.getPaymentReceive = (req, res) => {
       res.send(401).send({ message: 'not authentic user' })
     } else {
       PaymentReceive.find({ status: true })
-        .populate('customerId','companyName')
-        .populate('bankId','name')
+        .populate('customerId', 'companyName')
+        .populate('bankId', 'name')
         .then(payment_receives => {
           if (!payment_receives.length) {
             res.status(404).send({ message: 'No Data Found' })
@@ -37,13 +37,13 @@ module.exports.setPaymentReceive = (req, res) => {
     } else {
       PaymentReceive.create(req.body)
         .then(async payment_receive => {
-          let record = await historyController.addHistory(
-            req.body.history,
-            payload,
-            'Payment Recieve',
-            'add',
-            0
-          )
+          // let record = await historyController.addHistory(
+          //   req.body.history,
+          //   payload,
+          //   'Payment Recieve',
+          //   'add',
+          //   0
+          // )
           let ledgerReport = await setLedgerReport(payment_receive)
           res.status(200).send(payment_receive)
         })
@@ -64,6 +64,7 @@ async function setLedgerReport (receivedPayment) {
     debit: receivedPayment.amount,
     date: receivedPayment.date,
     customerId: receivedPayment.customerId,
+    bankId: receivedPayment.bankId,
     paymentId: receivedPayment._id
   }
   if (list.length) {
@@ -156,14 +157,14 @@ module.exports.deletePaymentReceive = (req, res) => {
         .then(() => {
           PaymentReceive.findById({ _id: req.params.id })
             .then(payment_receive => {
-              res.status(200).send(payment_receive);
+              res.status(200).send(payment_receive)
             })
             .catch(err => {
-              res.status(500).json(errorHandler(err));
+              res.status(500).json(errorHandler(err))
             })
         })
         .catch(err => {
-          res.status(500).json(errorHandler(err));
+          res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -177,6 +178,7 @@ module.exports.getLedgerReport = (req, res) => {
       LedgerReport.find()
         .sort({ createdAt: -1 })
         .populate('customerId', 'companyName')
+        .populate('bankId', 'name')
         .lean()
         .then(result => {
           if (!result.length) {
@@ -184,12 +186,16 @@ module.exports.getLedgerReport = (req, res) => {
           } else {
             Promise.all(
               result.map((report, i) => {
-                result[i]['companyName'] = report.customerId.companyName;
-                result[i]['customerId'] = report.customerId._id;
+                result[i]['companyName'] = report.customerId.companyName
+                result[i]['customerId'] = report.customerId._id
+                if (result[i].bankId) {
+                  result[i]['bankName'] = report.bankId.name
+                  result[i]['bankId'] = report.bankId._id
+                }
               })
             ).then(() => {
-              result = result.reverse();
-              res.status(200).send(result);
+              result = result.reverse()
+              res.status(200).send(result)
             })
           }
         })

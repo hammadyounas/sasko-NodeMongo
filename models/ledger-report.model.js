@@ -9,6 +9,7 @@ const ledgerReport = mongoose.Schema(
     date: { type: Date, required: true },
     description: { type: String },
     customerId: { type: String, required: true, ref: 'customer' },
+    bankId:{ type: String, ref: 'bank' },
     paymentReceiveId: { type: String, ref: 'payment-receive' },
     invoiceId: { type: String, ref: 'invoice' },
     createdAt: { type: Date, default: Date.now },
