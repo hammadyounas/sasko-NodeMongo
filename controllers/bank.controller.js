@@ -26,23 +26,24 @@ module.exports.getBankListing = (req, res) => {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      PaymentRecieve.find(
-        {},
-        { createdAt: 0, updatedAt: 0, status: 0, __v: 0, customerId: 0 },
-        (err, data) => {
-          if (err) {
-            res.status(500).send(errorHandler(err))
-          } else {
-            if (!data.length) {
-              res.status(404).send({ message: 'no data found' })
-            } else {
-              res.status(200).send(data)
-            }
-          }
-        }
-      )
-        .populate('bankId', 'name')
-        .lean()
+      try{
+        
+        let data = await PaymentRecieve.find({},{ createdAt: 0, updatedAt: 0, status: 0, __v: 0, customerId: 0 }).populate('bankId', 'name').lean()
+
+        if(!data.length) return res.status(404).send({ message: 'no data found' })
+
+        await Promise.all(
+          data.map((list,i)=>{
+            data[i]['bankName'] = list.bankId.name;
+            data[i]['bankId'] = list.bankId._id
+          })
+        )
+
+        return res.status(200).send(data);
+
+      }catch(err){
+        return res.status(500).send(errorHandler(err))
+      }
     }
   })
 }
