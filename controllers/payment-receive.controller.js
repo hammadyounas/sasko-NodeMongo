@@ -33,25 +33,56 @@ module.exports.setPaymentReceive = (req, res) => {
     payload
   ) {
     if (err) {
-      res.send(401).send({ message: 'not authentic user' })
+      return res.send(401).send({ message: 'not authentic user' })
     } else {
-      PaymentReceive.create(req.body)
-        .then(async payment_receive => {
-          // let record = await historyController.addHistory(
-          //   req.body.history,
-          //   payload,
-          //   'Payment Recieve',
-          //   'add',
-          //   0
-          // )
+      try {
+        if ((req.body.requestType == 'debit')) {
+          let payment_receive = await PaymentReceive.create(req.body)
+          // .then(async payment_receive => {
           let ledgerReport = await setLedgerReport(payment_receive)
           res.status(200).send(payment_receive)
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+          // })
+          // .catch(err => {
+          //   res.status(500).json(errorHandler(err))
+          // })
+        } else if ((req.body.requestType == 'credit')) {
+          let updateLedger = await setCreditLedgerReport(req.body)
+
+          if (!updateLedger) return res.status(409).send({ message: 'Ledger Update Error. Could not update ledger' })
+
+          return res.status(200).send(updateLedger)
+        
+        } else {
+          return res.status(409).send({ message: 'Invalid Request Type' })
+        }
+      } catch (err) {
+        return res.status(500).json(errorHandler(err))
+      }
     }
   })
+}
+
+async function setCreditLedgerReport (body) {
+  try {
+    let list = await LedgerReport.find({
+      customerId: body.customerId
+    })
+      .sort({ createdAt: -1 })
+      .limit(1)
+    let newObj = {
+      balance: list[0].balance + body.amount,
+      description: body.description,
+      debit: 0,
+      date: body.date,
+      customerId: body.customerId,
+      credit: list[0].credit + body.amount
+    }
+
+    let updated = await LedgerReport.create(newObj)
+    return updated
+  } catch (err) {
+    throw new Error(err)
+  }
 }
 
 async function setLedgerReport (receivedPayment) {
