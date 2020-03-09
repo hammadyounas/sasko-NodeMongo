@@ -125,19 +125,11 @@ module.exports.setReturnInvoice = async (req, res) => {
             { _id: invoiceDetail._id },
             { $set: { returnQty: invoiceDetail.returnQty } }
           )
-          // let createReturnInvoiceDetail = new ReturnInvoiceDetail(req.body)
-          // createReturnInvoiceDetail
-          //   .save()
-          // .then(result => {
           let createdReturnInvoice = await ReturnInvoiceDetail.create(req.body)
 
           await addLedgerReport(createdReturnInvoice)
 
           res.status(200).send({message:'Return Invoice Genrated'})
-          // })
-          // .catch(err => {
-          //   res.status(500).json(errorHandler(err))
-          // })
         }
       } catch (err) {
         res.status(500).json(errorHandler(err))
