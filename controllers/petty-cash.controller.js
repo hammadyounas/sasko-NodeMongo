@@ -37,71 +37,87 @@ module.exports.setPettyCash = (req, res) => {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      PettyCash.findOne({
-        pettyCashTransactionId: req.body.pettyCashTransactionId,
-        date: req.body.date,
-        pettyCashName: req.body.pettyCashName,
-        cash: req.body.cash
-      })
-        .then(result => {
-          if (!result) {
-            PettyCash.create(req.body)
-              .then(async createPettyCash => {
-                let record = await historyController.addHistory(
-                  req.body.history,
-                  payload,
-                  'Petty Cash',
-                  'add',
-                  0
-                )
-                res.status(200).send(createPettyCash)
-              })
-              .catch(err => {
-                res.status(500).json(errorHandler(err))
-              })
-          } else {
-            res.status(409).send({ msg: 'already exist this petty cash' })
-          }
+      try {
+        let createPettyCash = await PettyCash.create(req.body)
+        
+        await historyController.addHistory(
+          JSON.stringify(req.body.history),
+          payload,
+          'Petty Cash',
+          'add',
+          0
+        )
+
+        if(!createPettyCash) return res.status(409).send({message:'Could not add Petty Cash'});
+        
+        let pettyList = await PettyCash.find().populate('bankId', 'name').lean();
+
+        if(!pettyList.length) return res.status(404).send({message:"Petty List Not Found"});
+
+        pettyList.map((pettyCash,i)=>{
+          pettyList[i]['bankName'] = pettyCash.bankId.name;
+          pettyList[i]['bankId'] = pettyCash.bankId._id;
         })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+
+        return res.status(200).send(pettyList)
+
+      } catch (err) {
+        return res.status(500).send(errorHandler(err))
+      }
+
+      // })
     }
   })
 }
 
 module.exports.getPettyCashList = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders',async function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      PettyCash.find()
-        .then(result => {
-          if (result.length) {
-            res.status(200).send(result)
-          } else {
-            res.status(404).send({ msg: 'No Data Found' })
-          }
+      try{
+        let pettyList = await PettyCash.find().populate('bankId', 'name').lean();
+
+        if(!pettyList.length) return res.status(404).send({message:"Petty List Not Found"});
+
+        pettyList.map((pettyCash,i)=>{
+          pettyList[i]['bankName'] = pettyCash.bankId.name;
+          pettyList[i]['bankId'] = pettyCash.bankId._id;
         })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+
+        return res.status(200).send(pettyList)
+      }catch(err){
+        return res.status(500).send(errorHandler(err))
+      }
     }
   })
 }
 
 module.exports.getPettyCashById = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, 'secretOfSasscoTraders',async function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      PettyCash.findOne({ _id: req.params.id })
-        .then(result => {
-          res.status(200).send(result)
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+      try{
+
+        let pettyCash = await  PettyCash.findOne({ _id: req.params.id }).populate('bankId', 'name').lean()
+
+          if(!pettyCash) return res.status(404).send({message:"Petty Cash with this id not found"});
+
+        
+          pettyCash['bankName']  = pettyCash.bankId.name;
+          pettyCash['bankId'] = pettyCash.bankId._id;
+          
+          return res.status(200).send(pettyCash);
+
+        }catch(err){
+          return res.status(500).send(errorHandler(err))
+
+        }
+          // })
+        // .catch(err => {
+        //   res.status(500).json(errorHandler(err))
+        // })
     }
   })
 }
@@ -114,12 +130,7 @@ module.exports.updatePettyCash = (req, res) => {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      // PettyCash.findOne({
-      //   date: req.body.date,
-      //   pettyCashName: req.body.pettyCashName,
-      //   cash: req.body.cash
-      // }).then(response => {
-      //   if (!response) {
+
       PettyCash.findByIdAndUpdate({ _id: req.body._id }, req.body)
         .then(() => {
           PettyCash.findById({ _id: req.body._id })
@@ -140,12 +151,6 @@ module.exports.updatePettyCash = (req, res) => {
         .catch(err => {
           res.status(500).json(errorHandler(err))
         })
-      // } else {
-      //   res
-      //     .status(409)
-      //     .send({ msg: 'this data is already exist on another petty cash' })
-      // }
-      // })
     }
   })
 }

@@ -8,6 +8,7 @@ const pettyCash = mongoose.Schema(
     pettyCashName: { type: String, required: true },
     cash: { type: Number, required: true },
     description: { type: String },
+    bankId:{ type: String, ref: 'bank' },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
   },
