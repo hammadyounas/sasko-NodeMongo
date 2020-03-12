@@ -107,17 +107,13 @@ module.exports.getPettyCashById = (req, res) => {
         
           pettyCash['bankName']  = pettyCash.bankId.name;
           pettyCash['bankId'] = pettyCash.bankId._id;
-          
+
           return res.status(200).send(pettyCash);
 
         }catch(err){
           return res.status(500).send(errorHandler(err))
 
         }
-          // })
-        // .catch(err => {
-        //   res.status(500).json(errorHandler(err))
-        // })
     }
   })
 }
