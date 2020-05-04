@@ -13,18 +13,19 @@ let errorHandler = error => {
 }
 
 module.exports.getPettyCashTransactionId = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      PettyCash.count()
-        .then(length => {
-          let id = sixDigits((length + 1).toString())
-          res.status(200).send({ pettyCashTransactionId: id })
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
+    try{
+
+      if (err) return res.send(401).send({ message: 'not authentic user' })
+
+      let length = await PettyCash.count();
+
+      let id = sixDigits((length + 1).toString())
+
+      return res.status(200).send({ pettyCashTransactionId: id })
+
+    }catch(err){
+      return res.status(500).send(errorHandler(err))
     }
   })
 }
@@ -118,7 +119,11 @@ module.exports.getPettyCashById = (req, res) => {
   })
 }
 
-module.exports.updatePettyCash = (req, res) => {
+/*
+  this api is not using now
+  */
+
+/*module.exports.updatePettyCash = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
     err,
     payload
@@ -149,9 +154,13 @@ module.exports.updatePettyCash = (req, res) => {
         })
     }
   })
-}
+}*/
 
-module.exports.deletePettyCash = (req, res) => {
+/*
+  this api is not using now
+  */
+
+/*module.exports.deletePettyCash = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
@@ -165,4 +174,4 @@ module.exports.deletePettyCash = (req, res) => {
         })
     }
   })
-}
+}*/

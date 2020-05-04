@@ -10,7 +10,7 @@ module.exports = () => {
   mongoose
     .connect(process.env.MONGO_URL, { useNewUrlParser: true })
     .then(data => {
-      console.log('Connected');
+      console.log('mongo Connected');
       // mongoose.close();
 
     })
