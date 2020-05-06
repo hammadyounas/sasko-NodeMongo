@@ -7,7 +7,7 @@ routes.get('/getPettyCashTransactionId',PettyCashController.getPettyCashTransact
 routes.get('/', PettyCashController.getPettyCashList);
 routes.get('/:id', PettyCashController.getPettyCashById);
 routes.post('/',PettyCashController.setPettyCash );
-// routes.put('/', PettyCashController.updatePettyCash);
+routes.put('/', PettyCashController.updatePettyCash);
 // routes.delete('/:id', PettyCashController.deletePettyCash);
 
 module.exports = routes;

@@ -119,11 +119,7 @@ module.exports.getPettyCashById = (req, res) => {
   })
 }
 
-/*
-  this api is not using now
-  */
-
-/*module.exports.updatePettyCash = (req, res) => {
+module.exports.updatePettyCash = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
     err,
     payload
@@ -154,7 +150,7 @@ module.exports.getPettyCashById = (req, res) => {
         })
     }
   })
-}*/
+}
 
 /*
   this api is not using now

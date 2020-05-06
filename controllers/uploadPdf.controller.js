@@ -22,23 +22,24 @@ module.exports.setUploadPdf = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      UploadPdf.create(req.body)
-        .then(async pdf => {
-          let record = await historyController.addHistory(
-            req.body.history,
-            payload,
-            'PDF',
-            'add',
-            0
-          )
-          res.status(200).send(pdf)
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+    try{
+
+      if(err) return res.send(401).send({ message: 'not authentic user' })
+
+      let pdf = await UploadPdf.create(req.body);
+
+      await historyController.addHistory(
+        req.body.history,
+        payload,
+        'PDF',
+        'add',
+        0
+      )
+
+      return res.status(200).send(pdf)
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
   })
 }
@@ -48,20 +49,18 @@ module.exports.getUploadPdf = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      UploadPdf.find()
-        .then(pdfFiles => {
-          if (!pdfFiles.length) {
-            res.status(404).send({ msg: 'No Data Found' })
-          } else {
-            res.status(200).send(pdfFiles)
-          }
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+    try{
+      
+      if(err) return res.send(401).send({ message: 'not authentic user' })
+
+      let pdfFiles = await UploadPdf.find();
+
+      if (!pdfFiles.length) return res.status(404).send({ msg: 'No Data Found' })
+
+      return res.status(200).send(pdfFiles)
+
+    }catch(err){
+      res.status(500).json(errorHandler(err))
     }
   })
 }
@@ -71,20 +70,18 @@ module.exports.deleteUploadedPdf = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      UploadPdf.findByIdAndRemove({ _id: req.params.id })
-        .then(resp => {
-          res.status(200).send(resp)
-          if (res.status(200)) {
-            cloudinary.v2.uploader.destroy(_id, function (error, result) {
-            })
-          }
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+    try{
+
+      if(err) return res.send(401).send({ message: 'not authentic user' })
+
+      let resp = await UploadPdf.findByIdAndRemove({ _id: req.params.id });
+
+      if(resp) cloudinary.v2.uploader.destroy(_id, function (error, result) {})
+
+      return res.status(200).send(resp)
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
   })
 }
