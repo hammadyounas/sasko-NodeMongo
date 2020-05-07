@@ -65,8 +65,6 @@ module.exports.setPettyCash = (req, res) => {
       } catch (err) {
         return res.status(500).send(errorHandler(err))
       }
-
-      // })
     }
   })
 }
@@ -87,6 +85,7 @@ module.exports.getPettyCashList = (req, res) => {
         })
 
         return res.status(200).send(pettyList)
+
       }catch(err){
         return res.status(500).send(errorHandler(err))
       }
@@ -96,10 +95,9 @@ module.exports.getPettyCashList = (req, res) => {
 
 module.exports.getPettyCashById = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders',async function (err, payload) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
       try{
+
+        if (err) return res.send(401).send({ message: 'not authentic user' })
 
         let pettyCash = await  PettyCash.findOne({ _id: req.params.id }).populate('bankId', 'name').lean()
 
@@ -115,7 +113,6 @@ module.exports.getPettyCashById = (req, res) => {
           return res.status(500).send(errorHandler(err))
 
         }
-    }
   })
 }
 
@@ -124,30 +121,27 @@ module.exports.updatePettyCash = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
 
-      PettyCash.findByIdAndUpdate({ _id: req.body._id }, req.body)
-        .then(() => {
-          PettyCash.findById({ _id: req.body._id })
-            .then(async updatePettyCash => {
-              let record = await historyController.addHistory(
-                req.body.history,
-                payload,
-                'Payment Recieve',
-                'update',
-                0
-              )
-              res.status(200).send(updatePettyCash)
-            })
-            .catch(err => {
-              res.status(500).json(errorHandler(err))
-            })
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+    try{
+
+      if (err) return res.send(401).send({ message: 'not authentic user' })
+
+      await PettyCash.findByIdAndUpdate({ _id: req.body._id }, req.body)
+
+      let updatePettyCash = await PettyCash.findById({ _id: req.body._id });
+    
+      await historyController.addHistory(
+        req.body.history,
+        payload,
+        'Payment Recieve',
+        'update',
+        0
+      )
+
+      return res.status(200).send(updatePettyCash)
+
+    }catch(err){
+      return res.status(500).send(errorHandler(err))
     }
   })
 }
