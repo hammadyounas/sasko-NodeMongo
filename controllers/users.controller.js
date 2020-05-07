@@ -17,53 +17,85 @@ module.exports.setUser = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      User.findOne({ userName: req.body.userName }).then(userExist => {
-        if (userExist != null) {
-          res
-            .status(409)
-            .send({ msg: 'user with this user name already exists' })
-        } else {
-          let obj = { password: req.body.password }
-          const hash = bcryptService().password(obj)
-          req.body['password'] = hash
-          UserRoles.create({}).then(rolesCreated => {
-            // debugger
-            req.body['userRoles'] = rolesCreated._id
-            User.create(req.body)
-              .then(userCreated => {
-                // let obj = { userId: userCreated._id }
-                // UserRoles.create(obj).then(rolesCreated => {
-                const JWTToken = jwt.sign(
-                  {
-                    userName: userCreated.userName,
-                    _id: userCreated._id,
-                    role: userCreated.role
-                  },
-                  'secretOfSasscoTraders',
-                  {
-                    expiresIn: '2h'
-                  }
-                )
-                res.status(200).json({
-                  success: 'New user has been created',
-                  token: JWTToken
-                })
-                // })
-              })
-              .catch(error => {
-                res.status(500).json({
-                  stack: error.stack,
-                  code: error.code,
-                  message: error.message
-                })
-              })
-          })
+    try{
+
+      if(err) return res.send(401).send({ message: 'not authentic user' });
+
+      let userExist = await User.findOne({ userName: req.body.userName })
+
+      if(userExist) res.status(409).send({ msg: 'user with this user name already exists' })
+      
+      let obj = { password: req.body.password }
+      
+      const hash = bcryptService().password(obj)
+
+      req.body['password'] = hash
+
+      let rolesCreated = await UserRoles.create({})
+
+      req.body['userRoles'] = rolesCreated._id
+
+      let userCreated = await User.create(req.body)
+
+      const JWTToken = jwt.sign(
+        {
+          userName: userCreated.userName,
+          _id: userCreated._id,
+          role: userCreated.role
+        },
+        'secretOfSasscoTraders',
+        {
+          expiresIn: '2h'
         }
-      })
+      )
+
+      return res.status(200).json({success: 'New user has been created',token: JWTToken})
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
+    // if (err) {
+    //   res.send(401).send({ message: 'not authentic user' })
+    // } else {
+    //   User.findOne({ userName: req.body.userName }).then(userExist => {
+    //     if (userExist != null) {
+    //       res.status(409).send({ msg: 'user with this user name already exists' })
+    //     } else {
+    //       let obj = { password: req.body.password }
+    //       const hash = bcryptService().password(obj)
+    //       req.body['password'] = hash
+    //       UserRoles.create({}).then(rolesCreated => {
+    //         req.body['userRoles'] = rolesCreated._id
+    //         User.create(req.body)
+    //           .then(userCreated => {
+    //             const JWTToken = jwt.sign(
+    //               {
+    //                 userName: userCreated.userName,
+    //                 _id: userCreated._id,
+    //                 role: userCreated.role
+    //               },
+    //               'secretOfSasscoTraders',
+    //               {
+    //                 expiresIn: '2h'
+    //               }
+    //             )
+    //             res.status(200).json({
+    //               success: 'New user has been created',
+    //               token: JWTToken
+    //             })
+    //             // })
+    //           })
+    //           .catch(error => {
+    //             res.status(500).json({
+    //               stack: error.stack,
+    //               code: error.code,
+    //               message: error.message
+    //             })
+    //           })
+    //       })
+    //     }
+    //   })
+    // }
   })
 }
 
@@ -72,20 +104,18 @@ module.exports.getUser = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      User.find({ status: true }, { password: 0 })
-        .then(user => {
-          if (user.length > 0) {
-            res.status(200).send(user)
-          } else {
-            res.status(404).send({ msg: 'No Data Found' })
-          }
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+    try{
+
+      if(err) return res.send(401).send({ message: 'not authentic user' })
+
+      let user = await User.find({ status: true }, { password: 0 })
+
+      if(!user) return res.status(404).send({ msg: 'No Data Found' })
+
+      return res.status(200).send(user)
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
   })
 }
@@ -95,20 +125,18 @@ module.exports.getUserNameList = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      User.find({ status: true }, { userName: 1 })
-        .then(user => {
-          if (user.length > 0) {
-            res.status(200).send(user)
-          } else {
-            res.status(404).send({ msg: 'No Data Found' })
-          }
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+    try{
+
+      if(err) return res.send(401).send({ message: 'not authentic user' })
+
+      let user = await User.find({ status: true }, { userName: 1 })
+
+      if(!user) return res.status(404).send({ msg: 'No Data Found' })
+
+      return res.status(200).send(user)
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
   })
 }
@@ -118,32 +146,55 @@ module.exports.updateUser = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      User.findOne({ _id: req.body._id }).then(user => {
-        if (req.body.password && req.body.password != '') {
-          let obj = { password: req.body.password }
-          const hash = bcryptService().password(obj)
-          req.body['password'] = hash
-          User.findOneAndUpdate({ _id: req.body._id }, req.body)
-            .then(updatedUser => {
-              res.status(200).send(updatedUser)
-            })
-            .catch(err => {
-              res.status(500).json(errorHandler(err))
-            })
-        } else {
-          User.findOneAndUpdate({ _id: req.body._id }, req.body)
-            .then(updatedUser => {
-              res.status(200).send(updatedUser)
-            })
-            .catch(err => {
-              res.status(500).json(errorHandler(err))
-            })
-        }
-      })
+    try{
+
+      if(err) return res.status(401).send({ message: 'not authentic user' })
+
+      let user = await User.findOne({ _id: req.body._id })
+
+      if (user && req.body.password && req.body.password != '' ) {
+        let obj = { password: req.body.password }
+        const hash = bcryptService().password(obj)
+        req.body['password'] = hash
+        let updatedUserPassword = await User.findOneAndUpdate({ _id: req.body._id }, req.body)
+        return res.status(200).send(updatedUserPassword)
+
+      }else{
+        let updatedUser = await User.findOneAndUpdate({ _id: req.body._id }, req.body)
+
+        return res.status(200).send(updatedUser)
+        // return res.status(401).send({message:'something error occured'})
+      }
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
+
+    // if (err) {
+    //   res.send(401).send({ message: 'not authentic user' })
+    // } else {
+    //   User.findOne({ _id: req.body._id }).then(user => {
+    //     if (req.body.password && req.body.password != '') {
+    //       let obj = { password: req.body.password }
+    //       const hash = bcryptService().password(obj)
+    //       req.body['password'] = hash
+    //       User.findOneAndUpdate({ _id: req.body._id }, req.body)
+    //         .then(updatedUser => {
+    //           res.status(200).send(updatedUser)
+    //         })
+    //         .catch(err => {
+    //           res.status(500).json(errorHandler(err))
+    //         })
+    //     } else {
+    //       User.findOneAndUpdate({ _id: req.body._id }, req.body)
+    //         .then(updatedUser => {
+    //           res.status(200).send(updatedUser)
+    //         })
+    //         .catch(err => {
+    //           res.status(500).json(errorHandler(err))
+    //         })
+    //     }
+    //   })
+    // }
   })
 }
 
@@ -159,12 +210,3 @@ module.exports.getAuth = (req, res) => {
       encodeURIComponent('https://404app.000webhostapp.com/')
   )
 }
-// module.exports.deleteUploadedPdf = (req, res) => {
-//     User.findByIdAndRemove({ _id: req.params.id })
-//         .then(resp => {
-//             res.status(200).send(resp)
-//         })
-//         .catch(err => {
-//             res.status(500).json(errorHandler(err))
-//         })
-// }

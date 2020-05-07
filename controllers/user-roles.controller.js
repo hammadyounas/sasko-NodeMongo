@@ -17,31 +17,30 @@ module.exports.getUserRoles = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      if (payload.role == 'admin') {
-        User.findOne({ _id: req.params.userId })
-          .populate('userRoles')
-          .lean()
-          .then(roles => {
-            if (roles != null) {
-              let userRoles = roles.userRoles
-              userRoles['userId'] = req.params.userId
+    try{
+      
+      if(err) return res.send(401).send({ message: 'not authentic user' })
 
-              res.status(200).send(userRoles)
-            } else {
-              res.status(404).send({ msg: 'roles not found' })
-            }
-          })
-          .catch(err => {
-            res.status(500).json(errorHandler(err))
-          })
-      } else {
-        res
-          .send(404)
-          .send({ message: 'You have no permission to access the roles' })
+      if (payload.role == 'admin') {
+
+      let roles = await User.findOne({ _id: req.params.userId }).populate('userRoles').lean()
+
+      if(!roles) return res.status(404).send({ msg: 'roles not found' })
+
+      let userRoles = roles.userRoles
+      
+      userRoles['userId'] = req.params.userId
+      
+      return res.status(200).send(userRoles)
+
+      }else{
+          return res.status(404).send({ message: 'You have no permission to access the roles' }) 
       }
+
+    }catch(err){
+      
+      return res.status(500).json(errorHandler(err)).populate('userRoles').lean()
+
     }
   })
 }
@@ -51,22 +50,22 @@ module.exports.updateUserRoles = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
+    try{
+
+      if(err) return res.send(401).send({ message: 'not authentic user' });
+
       if (payload.role == 'admin') {
-        UserRoles.findOneAndUpdate({ _id: req.body._id }, req.body)
-          .then(updatedUserRoles => {
-            res.status(200).send(updatedUserRoles)
-          })
-          .catch(err => {
-            res.status(500).json(errorHandler(err))
-          })
-      } else {
-        res
-          .send(404)
-          .send({ message: 'You have no permission to access the roles' })
+
+      let updatedUserRoles = await UserRoles.findOneAndUpdate({ _id: req.body._id }, req.body)
+
+      return res.status(200).send(updatedUserRoles)
+
+      }else{
+        return res.status(404).send({ message: 'You have no permission to access the roles' })
       }
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
   })
 }
