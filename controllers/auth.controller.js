@@ -28,10 +28,10 @@ module.exports.login = (req, res) => {
           userType: user.userType
         })
       } else {
-        throw new Error('Incorrect Password!')
+        return res.status(404).json({message:'Incorrect Password!'})
       }
     })
-    .catch(error => {
+    .catch(err => {
       return res.status(500).json(errorHandler(err))
     })
 }
@@ -50,7 +50,7 @@ module.exports.currentUser = (req, res) => {
           ;(obj['userName'] = user.userName), (obj['role'] = user.role)
           res.status(200).send(obj)
         })
-        .catch(error => {
+        .catch(err => {
           return res.status(500).json(errorHandler(err))
         })
     }
