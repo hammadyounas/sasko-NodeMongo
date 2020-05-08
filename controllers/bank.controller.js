@@ -5,17 +5,24 @@ const historyController = require('./history.controller')
 const jwt = require('jsonwebtoken')
 
 module.exports.getBank = (req, res) => {
-  Bank.find({ status: true })
-    .then(banks => {
-      if (banks.length) {
-        res.status(200).send(banks)
-      } else {
-        res.status(404).send({ msg: 'No Data Found' })
-      }
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    try{
+      
+      if(err) return res.status(401).send({ message: 'not authentic user' })
+
+      let banks = await Bank.find({ status: true });
+
+      if(!banks) return res.status(404).send({ msg: 'No Banks Data Found' });
+
+      return res.status(200).send(banks)
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
+    }
+  })
 }
 
 module.exports.getBankListing = (req, res) => {
@@ -23,14 +30,13 @@ module.exports.getBankListing = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
       try{
+
+        if(err) return res.status(401).send({ message: 'not authentic user' })
         
         let data = await PaymentRecieve.find({},{ createdAt: 0, updatedAt: 0, status: 0, __v: 0, customerId: 0 }).populate('bankId', 'name').lean()
 
-        if(!data.length) return res.status(404).send({ message: 'no data found' })
+        if(!data.length) return res.status(404).send({ message: 'no Banks data found' })
 
         await Promise.all(
           data.map((list,i)=>{
@@ -44,7 +50,6 @@ module.exports.getBankListing = (req, res) => {
       }catch(err){
         return res.status(500).send(errorHandler(err))
       }
-    }
   })
 }
 
@@ -53,28 +58,29 @@ module.exports.setBank = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
       try {
-        let addBank = await Bank.create(req.body)
 
-        let record = await historyController.addHistory(
+        if(err) return res.status(401).send({ message: 'not authentic user' })
+
+        await Bank.create(req.body)
+
+        await historyController.addHistory(
           req.body.history,
           payload,
           'Bank',
           'add',
           0
         )
+
         let banks = await Bank.find({ status: true })
 
-        if (!banks) return res.status(404).send({ message: 'Banks Not Found' })
+        if (!banks) return res.status(404).send({ message: 'Banks Not Found' });
 
-        return res.status(200).send(banks)
+        return res.status(200).send(banks);
+
       } catch (err) {
         return res.status(500).json(errorHandler(err))
       }
-    }
   })
 }
 
@@ -83,10 +89,10 @@ module.exports.editBank = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
       try {
+
+        if(err) return res.status(401).send({ message: 'not authentic user' })
+
         await Bank.findByIdAndUpdate(
           { _id: req.body._id, status: true },
           req.body
@@ -99,15 +105,16 @@ module.exports.editBank = (req, res) => {
           'update',
           0
         )
+
         let banks = await Bank.find({ status: true })
 
         if (!banks) return res.status(404).send({ message: 'Banks Not Found' })
 
         return res.status(200).send(banks)
+
       } catch (err) {
         return res.status(500).json(errorHandler(err))
       }
-    }
   })
 }
 
@@ -116,35 +123,41 @@ module.exports.getBankById = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      Bank.findById({ _id: req.params.id, status: true })
-        .then(bank => {
-          res.status(200).send(bank)
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+    try{
+
+      if(err) return res.status(401).send({ message: 'not authentic user' });
+
+      let bank = await Bank.findById({ _id: req.params.id, status: true });
+
+      if(!bank) return res.status(404).send({message:'No Bank Detail Found'});
+
+      return res.status(200).send(bank)
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
   })
 }
 
 module.exports.deleteBank = (req, res) => {
-  Bank.findByIdAndUpdate(
-    { _id: req.params.id, status: true },
-    { $set: { status: false } }
-  )
-    .then(() => {
-      Bank.findById({ _id: req.params.id })
-        .then(bank => {
-          res.status(200).send(bank)
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
-    })
-    .catch(err => {
-      res.status(500).json(errorHandler(err))
-    })
+
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+    err,
+    payload
+  ) {
+    try{
+
+      if(err) return res.status(401).send({ message: 'not authentic user' });
+
+      await Bank.findByIdAndUpdate(
+        { _id: req.params.id, status: true },
+        { $set: { status: false } }
+      )
+
+      return res.status(200).send({message:'Bank deleted succuessfully'})
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
+    }
+  })
 }
