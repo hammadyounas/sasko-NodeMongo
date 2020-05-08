@@ -2,7 +2,6 @@ const PaymentReceive = require('../models/payment-receive.model')
 const errorHandler = require('../utils/errorHandler')
 const sixDigits = require('../utils/sixDigits')
 const LedgerReport = require('../models/ledger-report.model')
-const historyController = require('./history.controller')
 const jwt = require('jsonwebtoken')
 
 module.exports.getPaymentReceive = (req, res) => {

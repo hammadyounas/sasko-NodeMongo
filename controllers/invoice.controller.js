@@ -3,11 +3,8 @@ const InvoiceDetails = require('../models/invoice-details.model')
 const ReturnInvoice = require('../models/return-invoice.model');
 const Customer = require('../models/customer.model')
 const errorHandler = require('../utils/errorHandler')
-const getInvoiceNumber = require('../utils/invoiceNumberGenerator')
 const sixDigits = require('../utils/sixDigits')
-const historyController = require('./history.controller')
 const jwt = require('jsonwebtoken')
-const mongoose = require('mongoose')
 
 module.exports.getInvoice = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
@@ -274,16 +271,18 @@ module.exports.getCustomers = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      Customer.find({}, { _id: 1, clientName: 1 })
-        .then(customers => {
-          res.status(200).send(customers)
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+    try{
+      
+      if(err) return res.status(401).send({ message: 'not authentic user' })
+
+      let customers = await Customer.find({}, { _id: 1, clientName: 1 })
+
+      if(!customers) return res.status(404).send({ msg: 'No Customers Found' })
+
+      return res.status(200).send(customers)
+
+    }catch(err){
+      res.status(500).json(errorHandler(err))
     }
   })
 }

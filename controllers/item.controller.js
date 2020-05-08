@@ -1,11 +1,9 @@
 const Items = require('../models/item.model')
 const jwt = require('jsonwebtoken')
-const History = require('../models/history.model')
 const historyController = require('./history.controller')
 const errorHandler = require('../utils/errorHandler')
 
 module.exports.getItems = (req, res) => {
-  if (req.query.token != undefined) {
     jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
       err,
       payload
@@ -24,9 +22,6 @@ module.exports.getItems = (req, res) => {
           res.status(500).json(errorHandler(err))
         }
     })
-  }else{
-    return res.status(401).send({ message: 'not authentic user' });
-  }
 }
 
 module.exports.deleteItems = (req, res) => {

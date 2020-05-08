@@ -1,16 +1,9 @@
-const mongoose = require('mongoose')
 const PettyCash = require('../models/petty-cash.model')
 const sixDigits = require('../utils/sixDigits')
 const historyController = require('./history.controller')
 const jwt = require('jsonwebtoken')
+const errorHandler = require('../utils/errorHandler')
 
-let errorHandler = error => {
-  return {
-    stack: error.stack,
-    code: error.code,
-    message: error.message
-  }
-}
 
 module.exports.getPettyCashTransactionId = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
@@ -101,13 +94,12 @@ module.exports.getPettyCashById = (req, res) => {
 
         let pettyCash = await  PettyCash.findOne({ _id: req.params.id }).populate('bankId', 'name').lean()
 
-          if(!pettyCash) return res.status(404).send({message:"Petty Cash with this id not found"});
+        if(!pettyCash) return res.status(404).send({message:"Petty Cash with this id not found"});
 
-        
-          pettyCash['bankName']  = pettyCash.bankId.name;
-          pettyCash['bankId'] = pettyCash.bankId._id;
+        pettyCash['bankName']  = pettyCash.bankId.name;
+        pettyCash['bankId'] = pettyCash.bankId._id;
 
-          return res.status(200).send(pettyCash);
+        return res.status(200).send(pettyCash);
 
         }catch(err){
           return res.status(500).send(errorHandler(err))
@@ -121,7 +113,6 @@ module.exports.updatePettyCash = (req, res) => {
     err,
     payload
   ) {
-
     try{
 
       if (err) return res.send(401).send({ message: 'not authentic user' })

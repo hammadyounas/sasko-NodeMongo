@@ -1,16 +1,9 @@
-const mongoose = require('mongoose')
 const User = require('../models/users.model')
 const jwt = require('jsonwebtoken')
 const bcryptService = require('./../services/bcrypt.service')
 const UserRoles = require('./../models/user-roles.model')
+const errorHandler = require('../utils/errorHandler')
 
-let errorHandler = error => {
-  return {
-    stack: error.stack,
-    code: error.code,
-    message: error.message
-  }
-}
 
 module.exports.setUser = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (

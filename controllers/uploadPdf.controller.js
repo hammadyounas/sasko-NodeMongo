@@ -1,16 +1,10 @@
-const mongoose = require('mongoose')
 const UploadPdf = require('../models/uploadPdf.model')
 const cloudinary = require('cloudinary')
 const historyController = require('./history.controller')
 const jwt = require('jsonwebtoken')
+const errorHandler = require('../utils/errorHandler')
 
-let errorHandler = error => {
-  return {
-    stack: error.stack,
-    code: error.code,
-    message: error.message
-  }
-}
+
 cloudinary.config({
   cloud_name: 'techon',
   api_key: '527597425984315',
