@@ -2,8 +2,8 @@ const mongoose = require('mongoose')
 
 const customer = mongoose.Schema(
   {
-    companyName: { type: String, required: true },
-    clientName: { type: String, required: true },
+    companyName: { type: String, required: [true, "Please add company name"] },
+    clientName: { type: String, required: [true, "Please add customer name"] },
     address: { type: String },
     contact1: { type: String },
     contact2: { type: String },

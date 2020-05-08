@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const bank = mongoose.Schema(
   {
-    name: { type: String, required: true },
+    name: { type: String, required: [true, "Please add bank name"] },
     address: { type: String},
     accountNo: { type: String },
     status: { type: Boolean, default: true },
