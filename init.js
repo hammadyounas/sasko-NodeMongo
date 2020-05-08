@@ -11,7 +11,6 @@ module.exports = () => {
     .connect(process.env.MONGO_URL, { useNewUrlParser: true })
     .then(data => {
       console.log('mongo Connected');
-      // mongoose.close();
 
     })
     .catch(err => {
