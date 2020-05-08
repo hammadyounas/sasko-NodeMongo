@@ -8,6 +8,9 @@ const jwt = require('jsonwebtoken')
 module.exports.getPaymentReceive = (req, res) => {
   jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
     try{
+
+      if(err) return res.send(401).send({ message: 'not authentic user' })
+
       let payment_receives = await PaymentReceive.find({ status: true })
       .populate('customerId', 'companyName')
       .populate('bankId', 'name')
@@ -27,10 +30,10 @@ module.exports.setPaymentReceive = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      return res.send(401).send({ message: 'not authentic user' })
-    } else {
       try {
+
+        if(err) return res.send(401).send({ message: 'not authentic user' })
+
         if (req.body.requestType == 'debit') {
           let payment_receive = await PaymentReceive.create(req.body)
 
@@ -52,17 +55,18 @@ module.exports.setPaymentReceive = (req, res) => {
       } catch (err) {
         return res.status(500).json(errorHandler(err))
       }
-    }
   })
 }
 
 async function setCreditLedgerReport (body) {
   try {
+
     let list = await LedgerReport.find({
       customerId: body.customerId
     })
       .sort({ createdAt: -1 })
       .limit(1)
+
     let newObj = {
       balance: list[0].balance + body.amount,
       description: body.description,
@@ -73,16 +77,20 @@ async function setCreditLedgerReport (body) {
     }
 
     let updated = await LedgerReport.create(newObj)
+    
     return updated
+
   } catch (err) {
     throw new Error(err)
   }
 }
 
 async function setLedgerReport (receivedPayment) {
+
   let list = await LedgerReport.find({ customerId: receivedPayment.customerId })
     .sort({ createdAt: -1 })
     .limit(1)
+
   let newObj = {
     balance: 0,
     description: receivedPayment.description,
@@ -92,26 +100,30 @@ async function setLedgerReport (receivedPayment) {
     bankId: receivedPayment.bankId,
     paymentId: receivedPayment._id
   }
+
   if (list.length) {
     newObj['balance'] = list[0].balance - receivedPayment.amount
   }
+
   let updated = await LedgerReport.create(newObj)
+
   return updated
 }
 
 module.exports.getTransactionId = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      PaymentReceive.count()
-        .then(length => {
-          let id = sixDigits((length + 1).toString())
-          res.status(200).send({ trasactionsId: id })
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
+    try{
+
+      if(err) return res.send(401).send({ message: 'not authentic user' })
+
+      let length = await  PaymentReceive.count();
+
+      let id = sixDigits((length + 1).toString())
+
+      return res.status(200).send({ trasactionsId: id })
+
+    }catch(err){
+      res.status(500).json(errorHandler(err))
     }
   })
 }
@@ -211,10 +223,9 @@ module.exports.getLedgerReport = (req, res) => {
     err,
     payload
   ) {
+    try {
 
     if (err) return res.send(401).send({ message: 'not authentic user' })
-
-    try {
 
       let result = await LedgerReport.find()
         .sort({ createdAt: -1 })
@@ -237,6 +248,7 @@ module.exports.getLedgerReport = (req, res) => {
       )
 
       result = result.reverse()
+
       return res.status(200).send(result)
 
     } catch (err) {
