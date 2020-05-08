@@ -2,7 +2,6 @@ const errorHandler = require('../utils/errorHandler')
 const User = require('../models/users.model')
 const jwt = require('jsonwebtoken')
 const bcryptService = require('./../services/bcrypt.service')
-const UserRoles = require('./../models/user-roles.model')
 
 module.exports.login = (req, res) => {
   User.findOne({ userName: req.body.userName })
@@ -33,11 +32,7 @@ module.exports.login = (req, res) => {
       }
     })
     .catch(error => {
-      res.status(500).json({
-        stack: error.stack,
-        code: error.code,
-        message: error.message
-      })
+      return res.status(500).json(errorHandler(err))
     })
 }
 
@@ -56,11 +51,7 @@ module.exports.currentUser = (req, res) => {
           res.status(200).send(obj)
         })
         .catch(error => {
-          res.status(500).json({
-            stack: error.stack,
-            code: error.code,
-            message: error.message
-          })
+          return res.status(500).json(errorHandler(err))
         })
     }
   })

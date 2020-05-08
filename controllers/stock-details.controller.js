@@ -23,9 +23,9 @@ module.exports.getStockDetails = (req, res) => {
         if (!stockDetails.length)
           return res.status(404).send({ message: 'No Data Found' })
 
-        res.status(200).send(stockDetails)
+        return res.status(200).send(stockDetails)
       } catch (err) {
-        res.status(500).json(errorHandler(err))
+        return res.status(500).json(errorHandler(err))
       }
     }
   })
@@ -38,10 +38,10 @@ module.exports.deleteStockDetails = (req, res) => {
     } else {
       StockDetails.findOneAndRemove({ _id: req.params.id })
         .then(StockDetails => {
-          res.send(StockDetails)
+          return res.status(200).send(StockDetails)
         })
-        .catch(error => {
-          res.send(error)
+        .catch(err => {
+          return res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -103,7 +103,7 @@ module.exports.editStockDetails = (req, res) => {
           res.status(200).send({ msg: 'updated' })
         })
       } catch (err) {
-        res.status(500).send(err.message)
+        return res.status(500).json(errorHandler(err))
       }
     }
   })
@@ -146,7 +146,7 @@ module.exports.addStockDetailsWithStock = (req, res) => {
               res.status(200).send(data)
             })
             .catch(error => {
-              res.status(500).json(errorHandler(err))
+              return res.status(500).json(errorHandler(err))
             })
         }
       })
@@ -219,7 +219,7 @@ module.exports.getStockSecondReport = async (req, res) => {
 
         return res.status(200).send(arr)
       } catch (err) {
-        res.status(500).json(errorHandler(err))
+        return res.status(500).json(errorHandler(err))
       }
     }
   })
@@ -264,7 +264,7 @@ module.exports.getStockSummary = (req, res) => {
             }
           })
         })
-        .catch(error => {
+        .catch(err => {
           res.status(500).json(errorHandler(err))
         })
     }
@@ -308,8 +308,8 @@ module.exports.getDamageStock = (req, res) => {
             res.status(200).send(arr)
           })
         })
-        .catch(error => {
-          res.status(500).json(errorHandler(err))
+        .catch(err => {
+          return res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -336,8 +336,8 @@ module.exports.getItemsInStockDetails = (req, res) => {
             res.status(404).send({ message: 'No Data Found' })
           }
         })
-        .catch(error => {
-          res.status(500).json(errorHandler(err))
+        .catch(err => {
+          return res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -364,8 +364,8 @@ module.exports.getBrandsOfItemsInStockDetails = (req, res) => {
             res.status(404).send({ message: 'No Data Found' })
           }
         })
-        .catch(error => {
-          res.status(500).json(errorHandler(err))
+        .catch(err => {
+          return res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -394,8 +394,8 @@ module.exports.getModelsOfItemsAndBrands = (req, res) => {
             res.status(404).send({ message: 'No Data Found' })
           }
         })
-        .catch(error => {
-          res.status(500).json(errorHandler(err))
+        .catch(err => {
+          return res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -428,8 +428,8 @@ module.exports.getColorsOfModelsItemsAndBrands = (req, res) => {
             res.status(404).send({ message: 'No Data Found' })
           }
         })
-        .catch(error => {
-          res.status(500).json(errorHandler(err))
+        .catch(err => {
+          return res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -474,7 +474,7 @@ module.exports.getStockOfColorModelItemAndBrand = (req, res) => {
 
         return res.status(200).send(final)
       } catch (err) {
-        res.status(500).json(errorHandler(err))
+        return res.status(500).json(errorHandler(err))
       }
     }
   })
@@ -522,7 +522,7 @@ module.exports.getDamageOfColorModelItemAndBrand = async (req, res) => {
         return res.status(200).send(final);
 
       } catch (err) {
-        res.status(500).json(errorHandler(err))
+        return res.status(500).json(errorHandler(err))
       }
     }
   })

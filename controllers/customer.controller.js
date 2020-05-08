@@ -16,7 +16,7 @@ module.exports.getCustomer = (req, res) => {
       return res.status(200).send(customers)
 
     }catch(err){
-      res.status(500).json(errorHandler(err))
+      return res.status(500).json(errorHandler(err))
     }
   })
 }

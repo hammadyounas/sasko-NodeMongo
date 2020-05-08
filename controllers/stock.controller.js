@@ -15,7 +15,7 @@ module.exports.getStock = (req, res) => {
           res.send(Stock)
         })
         .catch(error => {
-          res.send(error)
+          return res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -32,7 +32,7 @@ module.exports.getStockId = (req, res) => {
           res.status(200).send({ stockId: id })
         })
         .catch(err => {
-          res.status(500).json(errorHandler(err))
+          return res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -48,7 +48,7 @@ module.exports.deleteStock = (req, res) => {
           res.send(Stock)
         })
         .catch(error => {
-          res.send(error)
+          return res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -64,7 +64,7 @@ module.exports.editStock = (req, res) => {
           res.send(Stock)
         })
         .catch(error => {
-          res.send(error)
+          return res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -79,12 +79,8 @@ module.exports.addStock = (req, res) => {
         .then(function (ninja) {
           res.send(ninja)
         })
-        .catch(error => {
-          res.send(500).json({
-            stack: error.stack,
-            code: error.code,
-            message: error.message
-          })
+        .catch(err => {
+          return res.status(500).json(errorHandler(err))
         })
     }
   })
@@ -118,7 +114,7 @@ module.exports.getStockWithStockDetails = (req, res) => {
           res.status(200).send(obj)
         })
       } catch (err) {
-        res.status(500).send(errorHandler(err))
+        return res.status(500).json(errorHandler(err))
       }
     }
   })

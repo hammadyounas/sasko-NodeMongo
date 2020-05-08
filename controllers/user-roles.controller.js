@@ -31,7 +31,7 @@ module.exports.getUserRoles = (req, res) => {
 
     }catch(err){
       
-      return res.status(500).json(errorHandler(err)).populate('userRoles').lean()
+      return res.status(500).json(errorHandler(err))
 
     }
   })

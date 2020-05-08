@@ -19,7 +19,7 @@ module.exports.getItems = (req, res) => {
           return res.status(200).send(list);
   
         }catch(err){
-          res.status(500).json(errorHandler(err))
+          return res.status(500).json(errorHandler(err))
         }
     })
 }
@@ -36,10 +36,10 @@ module.exports.deleteItems = (req, res) => {
 
         if(!list.length) return res.status(404).send({message:'Items Not Found'});
         
-        res.status(200).send(list);
+        return res.status(200).send(list);
 
       }catch(err){
-        res.status(500).json(errorHandler(err))
+        return res.status(500).json(errorHandler(err))
       }
   })
 }
@@ -62,10 +62,10 @@ module.exports.editItems = (req, res) => {
 
         if(!list.length) return res.status(404).send({message:'Items Not Found'});
         
-        res.status(200).send(list);
+        return res.status(200).send(list);
 
       }catch(err){
-        res.status(500).json(errorHandler(err))
+        return res.status(500).json(errorHandler(err))
       }
   })
 }
@@ -91,7 +91,7 @@ module.exports.addItems = (req, res) => {
         return res.status(200).send(list)
 
       }catch(err){
-        res.status(500).json(errorHandler(err))
+        return res.status(500).json(errorHandler(err))
       }
   })
 }

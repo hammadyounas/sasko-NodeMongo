@@ -122,7 +122,7 @@ module.exports.getTransactionId = (req, res) => {
       return res.status(200).send({ trasactionsId: id })
 
     }catch(err){
-      res.status(500).json(errorHandler(err))
+      return res.status(500).json(errorHandler(err))
     }
   })
 }
