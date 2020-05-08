@@ -7,7 +7,7 @@ const sixDigits = require('../utils/sixDigits')
 const jwt = require('jsonwebtoken')
 
 module.exports.getInvoice = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -37,7 +37,7 @@ module.exports.getInvoice = (req, res) => {
 }
 
 module.exports.getSummeryDetails = async (req,res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -118,7 +118,7 @@ module.exports.getSummeryDetails = async (req,res) => {
 }
 
 module.exports.getInvoiceId = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -138,7 +138,7 @@ module.exports.getInvoiceId = (req, res) => {
 }
 
 module.exports.getInvoiceById = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -157,7 +157,7 @@ module.exports.getInvoiceById = (req, res) => {
 }
 
 module.exports.getInvoiceWithInvoiceDetails = async (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -195,7 +195,7 @@ module.exports.getInvoiceWithInvoiceDetails = async (req, res) => {
 }
 
 module.exports.setInvoice = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -214,7 +214,7 @@ module.exports.setInvoice = (req, res) => {
 }
 
 module.exports.editInvoice = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -239,7 +239,7 @@ module.exports.editInvoice = (req, res) => {
 }
 
 module.exports.deleteInvoice = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -267,7 +267,7 @@ module.exports.deleteInvoice = (req, res) => {
 }
 
 module.exports.getCustomers = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {

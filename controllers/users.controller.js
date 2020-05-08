@@ -6,7 +6,7 @@ const errorHandler = require('../utils/errorHandler')
 
 
 module.exports.setUser = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -36,7 +36,7 @@ module.exports.setUser = (req, res) => {
           _id: userCreated._id,
           role: userCreated.role
         },
-        'secretOfSasscoTraders',
+        process.env.login_key,
         {
           expiresIn: '2h'
         }
@@ -51,7 +51,7 @@ module.exports.setUser = (req, res) => {
 }
 
 module.exports.getUser = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -72,7 +72,7 @@ module.exports.getUser = (req, res) => {
 }
 
 module.exports.getUserNameList = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -93,7 +93,7 @@ module.exports.getUserNameList = (req, res) => {
 }
 
 module.exports.updateUser = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -125,15 +125,15 @@ module.exports.updateUser = (req, res) => {
   })
 }
 
-module.exports.getAuth = (req, res) => {
-  var scopes = 'user-read-private user-read-email'
-  res.redirect(
-    'https://accounts.spotify.com/authorize' +
-      '?response_type=code' +
-      '&client_id=' +
-      '3ca99f839cf54b80a810a2af0d5dac36' +
-      (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
-      '&redirect_uri=' +
-      encodeURIComponent('https://404app.000webhostapp.com/')
-  )
-}
+// module.exports.getAuth = (req, res) => {
+//   var scopes = 'user-read-private user-read-email'
+//   res.redirect(
+//     'https://accounts.spotify.com/authorize' +
+//       '?response_type=code' +
+//       '&client_id=' +
+//       '3ca99f839cf54b80a810a2af0d5dac36' +
+//       (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
+//       '&redirect_uri=' +
+//       encodeURIComponent('https://404app.000webhostapp.com/')
+//   )
+// }

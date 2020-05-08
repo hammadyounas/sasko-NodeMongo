@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken')
 const LedgerReport = require('../models/ledger-report.model')
 
 module.exports.getReturnInvoice = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -57,14 +57,14 @@ module.exports.getReturnInvoice = (req, res) => {
 }
 
 module.exports.getReturnInvoiceId = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
-      jwt.verify(req.query.token, 'secretOfSasscoTraders', function (
+      jwt.verify(req.query.token, process.env.login_key, function (
         err,
         payload
       ) {
@@ -86,7 +86,7 @@ module.exports.getReturnInvoiceId = (req, res) => {
 }
 
 module.exports.setReturnInvoice = async (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -161,7 +161,7 @@ async function addLedgerReport (invoiceDetail) {
 }
 
 module.exports.returnWholeInvoice = async (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {

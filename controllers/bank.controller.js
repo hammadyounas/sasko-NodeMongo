@@ -5,7 +5,7 @@ const historyController = require('./history.controller')
 const jwt = require('jsonwebtoken')
 
 module.exports.getBank = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -26,7 +26,7 @@ module.exports.getBank = (req, res) => {
 }
 
 module.exports.getBankListing = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -54,7 +54,7 @@ module.exports.getBankListing = (req, res) => {
 }
 
 module.exports.setBank = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -85,7 +85,7 @@ module.exports.setBank = (req, res) => {
 }
 
 module.exports.editBank = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -119,7 +119,7 @@ module.exports.editBank = (req, res) => {
 }
 
 module.exports.getBankById = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -141,7 +141,7 @@ module.exports.getBankById = (req, res) => {
 
 module.exports.deleteBank = (req, res) => {
 
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {

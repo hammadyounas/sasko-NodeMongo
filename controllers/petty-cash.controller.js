@@ -6,7 +6,7 @@ const errorHandler = require('../utils/errorHandler')
 
 
 module.exports.getPettyCashTransactionId = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {
     try{
 
       if (err) return res.send(401).send({ message: 'not authentic user' })
@@ -24,7 +24,7 @@ module.exports.getPettyCashTransactionId = (req, res) => {
 }
 
 module.exports.setPettyCash = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -63,7 +63,7 @@ module.exports.setPettyCash = (req, res) => {
 }
 
 module.exports.getPettyCashList = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders',async function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key,async function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
@@ -87,7 +87,7 @@ module.exports.getPettyCashList = (req, res) => {
 }
 
 module.exports.getPettyCashById = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders',async function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key,async function (err, payload) {
       try{
 
         if (err) return res.send(401).send({ message: 'not authentic user' })
@@ -109,7 +109,7 @@ module.exports.getPettyCashById = (req, res) => {
 }
 
 module.exports.updatePettyCash = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -142,7 +142,7 @@ module.exports.updatePettyCash = (req, res) => {
   */
 
 /*module.exports.deletePettyCash = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {

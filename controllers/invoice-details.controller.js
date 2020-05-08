@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken')
 const ReturnInvoice = require('../models/return-invoice.model');
 
 module.exports.getInvoiceDetails = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -29,7 +29,7 @@ module.exports.getInvoiceDetails = (req, res) => {
 }
 
 module.exports.getInvoiceDetailWithInvoice = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -68,7 +68,7 @@ module.exports.getInvoiceDetailWithInvoice = (req, res) => {
 }
 
 module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -205,7 +205,7 @@ async function addLedgerReport (invoiceDetail) {
 }
 
 module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -383,7 +383,7 @@ async function increaseSoldQtyStockDetails (stockDetails, pieceQty) {
 }
 
 module.exports.deleteInvoiceDetails = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -411,7 +411,7 @@ module.exports.deleteInvoiceDetails = (req, res) => {
 }
 
 module.exports.modelColorWiseSale = async (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -475,7 +475,7 @@ module.exports.modelColorWiseSale = async (req, res) => {
 
 
 module.exports.addDamageSaleInvoiceDetailsWithInvoice = async (req,res) =>{
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {

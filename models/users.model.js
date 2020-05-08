@@ -7,7 +7,7 @@ const user = mongoose.Schema(
     userName: { type: String, required: [true, "username cannot be empty"] },
     password: { type: String, required: [true, "Please add password"] },
     role: { type: String, required: [true, "role must be assign."] },
-    status: { type: Boolean, default: [true, "Please add user status"] },
+    status: { type: Boolean, default: true },
     userRoles: { type: Schema.Types.ObjectId, ref: 'userRoles' },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }

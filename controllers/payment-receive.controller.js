@@ -5,7 +5,7 @@ const LedgerReport = require('../models/ledger-report.model')
 const jwt = require('jsonwebtoken')
 
 module.exports.getPaymentReceive = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {
     try{
 
       if(err) return res.send(401).send({ message: 'not authentic user' })
@@ -25,7 +25,7 @@ module.exports.getPaymentReceive = (req, res) => {
 }
 
 module.exports.setPaymentReceive = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -110,7 +110,7 @@ async function setLedgerReport (receivedPayment) {
 }
 
 module.exports.getTransactionId = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {
     try{
 
       if(err) return res.send(401).send({ message: 'not authentic user' })
@@ -128,7 +128,7 @@ module.exports.getTransactionId = (req, res) => {
 }
 
 module.exports.getPaymentDetailById = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {
     try{
       
       if (err) return res.send(401).send({ message: 'not authentic user' });
@@ -154,7 +154,7 @@ module.exports.getPaymentDetailById = (req, res) => {
 */
 
 /*module.exports.editPaymentReceive = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -193,7 +193,7 @@ module.exports.getPaymentDetailById = (req, res) => {
 */
 
 /*module.exports.deletePaymentReceive = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
@@ -218,7 +218,7 @@ module.exports.getPaymentDetailById = (req, res) => {
 }*/
 
 module.exports.getLedgerReport = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {

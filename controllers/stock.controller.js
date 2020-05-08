@@ -6,7 +6,7 @@ const errorHandler = require('../utils/errorHandler')
 
 
 module.exports.getStock = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
@@ -22,7 +22,7 @@ module.exports.getStock = (req, res) => {
 }
 
 module.exports.getStockId = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
@@ -39,7 +39,7 @@ module.exports.getStockId = (req, res) => {
 }
 
 module.exports.deleteStock = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
@@ -55,7 +55,7 @@ module.exports.deleteStock = (req, res) => {
 }
 
 module.exports.editStock = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
@@ -71,7 +71,7 @@ module.exports.editStock = (req, res) => {
 }
 
 module.exports.addStock = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
@@ -87,7 +87,7 @@ module.exports.addStock = (req, res) => {
 }
 
 module.exports.getStockWithStockDetails = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {

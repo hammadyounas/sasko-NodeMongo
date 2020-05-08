@@ -4,7 +4,7 @@ const historyController = require('./history.controller')
 const jwt = require('jsonwebtoken')
 
 module.exports.getCustomer = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {
     try{
       
       if(err) return res.status(401).send({ message: 'not authentic user' })
@@ -22,7 +22,7 @@ module.exports.getCustomer = (req, res) => {
 }
 
 module.exports.getCustomerById = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {
     try{
       
       if(err) return res.status(401).send({ message: 'not authentic user' })
@@ -40,7 +40,7 @@ module.exports.getCustomerById = (req, res) => {
 }
 
 module.exports.setCustomer = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -69,7 +69,7 @@ module.exports.setCustomer = (req, res) => {
 }
 
 module.exports.editCustomer = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -96,7 +96,7 @@ module.exports.editCustomer = (req, res) => {
 }
 
 module.exports.deleteCustomer = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {
     try{
 
       if(err) return res.send(401).send({ message: 'not authentic user' })

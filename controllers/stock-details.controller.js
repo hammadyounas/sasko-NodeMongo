@@ -7,7 +7,7 @@ const errorHandler = require('../utils/errorHandler')
 
 
 module.exports.getStockDetails = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -32,7 +32,7 @@ module.exports.getStockDetails = (req, res) => {
 }
 
 module.exports.deleteStockDetails = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
@@ -48,7 +48,7 @@ module.exports.deleteStockDetails = (req, res) => {
 }
 
 module.exports.editStockDetails = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -110,7 +110,7 @@ module.exports.editStockDetails = (req, res) => {
 }
 
 module.exports.addStockDetailsWithStock = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
@@ -155,7 +155,7 @@ module.exports.addStockDetailsWithStock = (req, res) => {
 }
 
 module.exports.getStockSecondReport = async (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -226,7 +226,7 @@ module.exports.getStockSecondReport = async (req, res) => {
 }
 
 module.exports.getStockSummary = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -272,7 +272,7 @@ module.exports.getStockSummary = (req, res) => {
 }
 
 module.exports.getDamageStock = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -316,7 +316,7 @@ module.exports.getDamageStock = (req, res) => {
 }
 
 module.exports.getItemsInStockDetails = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
@@ -344,7 +344,7 @@ module.exports.getItemsInStockDetails = (req, res) => {
 }
 
 module.exports.getBrandsOfItemsInStockDetails = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
@@ -372,7 +372,7 @@ module.exports.getBrandsOfItemsInStockDetails = (req, res) => {
 }
 
 module.exports.getModelsOfItemsAndBrands = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
@@ -402,7 +402,7 @@ module.exports.getModelsOfItemsAndBrands = (req, res) => {
 }
 
 module.exports.getColorsOfModelsItemsAndBrands = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, function (err, payload) {
     if (err) {
       res.send(401).send({ message: 'not authentic user' })
     } else {
@@ -436,7 +436,7 @@ module.exports.getColorsOfModelsItemsAndBrands = (req, res) => {
 }
 
 module.exports.getStockOfColorModelItemAndBrand = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -481,7 +481,7 @@ module.exports.getStockOfColorModelItemAndBrand = (req, res) => {
 }
 
 module.exports.getDamageOfColorModelItemAndBrand = async (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {

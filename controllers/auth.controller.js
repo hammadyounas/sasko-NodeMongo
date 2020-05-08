@@ -17,7 +17,7 @@ module.exports.login = (req, res) => {
             _id: user._id,
             role:user.role
           },
-          'secretOfSasscoTraders',
+          process.env.login_key,
           {
             expiresIn: '9h'
           }
@@ -37,7 +37,7 @@ module.exports.login = (req, res) => {
 }
 
 module.exports.currentUser = (req, res) => {
-  jwt.verify(req.params.token, 'secretOfSasscoTraders', function (err, payload) {
+  jwt.verify(req.params.token, process.env.login_key, function (err, payload) {
     if (err) {
       throw new Error('unauthorized user')
     } else {

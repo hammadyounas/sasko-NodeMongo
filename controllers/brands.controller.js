@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken')
 const errorHandler = require('../utils/errorHandler')
 
 module.exports.getBrandsWithItems = async (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -42,7 +42,7 @@ module.exports.getBrandsWithItems = async (req, res) => {
 }
 
 module.exports.getBrands = async (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -64,7 +64,7 @@ module.exports.getBrands = async (req, res) => {
 }
 
 module.exports.addBrands = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -109,7 +109,7 @@ module.exports.addBrands = (req, res) => {
 }
 
 module.exports.editBrands = async (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -145,7 +145,7 @@ module.exports.editBrands = async (req, res) => {
 }
 
 module.exports.deleteBrands = async (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (err, payload) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {
     try{
 
       if(err) return res.send(401).send({ message: 'not authentic user' })
@@ -162,7 +162,7 @@ module.exports.deleteBrands = async (req, res) => {
 }
 
 module.exports.getItemBrands = async (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {

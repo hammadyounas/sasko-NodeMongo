@@ -6,13 +6,13 @@ const errorHandler = require('../utils/errorHandler')
 
 
 cloudinary.config({
-  cloud_name: 'techon',
-  api_key: '527597425984315',
-  api_secret: 'X4RWf4qfZ-BHhz9UDNQac3hT6vM'
+  cloud_name: process.env.cloud_name,
+  api_key: process.env.api_key,
+  api_secret: process.env.api_secret
 })
 
 module.exports.setUploadPdf = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -39,7 +39,7 @@ module.exports.setUploadPdf = (req, res) => {
 }
 
 module.exports.getUploadPdf = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -60,7 +60,7 @@ module.exports.getUploadPdf = (req, res) => {
 }
 
 module.exports.deleteUploadedPdf = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {

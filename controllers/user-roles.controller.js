@@ -5,7 +5,7 @@ const errorHandler = require('../utils/errorHandler')
 
 
 module.exports.getUserRoles = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
@@ -38,7 +38,7 @@ module.exports.getUserRoles = (req, res) => {
 }
 
 module.exports.updateUserRoles = (req, res) => {
-  jwt.verify(req.query.token, 'secretOfSasscoTraders', async function (
+  jwt.verify(req.query.token, process.env.login_key, async function (
     err,
     payload
   ) {
