@@ -36,7 +36,7 @@ module.exports.getBrandsWithItems = async (req, res) => {
       return res.status(200).send(arr)
 
     }catch(err){
-      return res.status(500).json(errorHandler(error))
+      return res.status(500).json(errorHandler(err))
     }
   })
 }
@@ -57,7 +57,7 @@ module.exports.getBrands = async (req, res) => {
         return res.status(200).send(brands)
 
       } catch (err) {
-        return res.status(500).json(errorHandler(error))
+        return res.status(500).json(errorHandler(err))
       }
 
   })
@@ -100,7 +100,7 @@ module.exports.addBrands = (req, res) => {
         return res.status(200).send(currentBrands);
 
       }catch(err){
-        return res.status(500).json(errorHandler(error))
+        return res.status(500).json(errorHandler(err))
       }
      
       
