@@ -3,9 +3,6 @@ const express = require('express')
 const routes = express.Router()
 const stockController = require('../controllers/stock.controller')
 
-
-console.log("Stock Route Loaded");
-
 routes.get('/', stockController.getStock);
 routes.get('/getStockId',stockController.getStockId)
 routes.post('/', stockController.addStock);

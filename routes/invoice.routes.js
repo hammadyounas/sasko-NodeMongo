@@ -3,9 +3,6 @@ const express = require('express');
 const routes = express.Router();
 const invoiceController = require('../controllers/invoice.controller');
 
-
-console.log("Invoice Route Loaded");
-
 routes.get('/', invoiceController.getInvoice);
 // routes.get('/getInvoicesSummery',invoiceController.getInvoicesSummery);
 routes.post('/getSummeryDetails',invoiceController.getSummeryDetails)

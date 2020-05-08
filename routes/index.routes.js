@@ -17,7 +17,6 @@ const authRoutes = require('./auth.routes');
 const historyRoutes = require('./history.routes');
 
 const routes = express.Router();
-console.log("iteeeemmms");
 
 routes.use('/item', items);
 routes.use('/brand', brands);

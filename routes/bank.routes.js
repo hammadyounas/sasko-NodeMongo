@@ -3,9 +3,6 @@ const express = require('express');
 const routes = express.Router();
 const bankController = require('../controllers/bank.controller');
 
-
-console.log("Bank Route Loaded");
-
 routes.get('/', bankController.getBank);
 routes.get('/getBankLedgerListing',bankController.getBankListing);
 routes.get('/:id', bankController.getBankById);

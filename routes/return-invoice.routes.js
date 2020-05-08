@@ -3,9 +3,6 @@ const express = require('express');
 const routes = express.Router();
 const returnInvoiceController = require('../controllers/return-invoice.controller');
 
-
-console.log("Invoice Route Loaded");
-
 routes.get('/', returnInvoiceController.getReturnInvoice);
 routes.get('/getReturnInvoiceId', returnInvoiceController.getReturnInvoiceId);
 // routes.get('/:id', invoiceController.getInvoiceById);
