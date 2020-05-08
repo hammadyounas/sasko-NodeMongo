@@ -104,6 +104,7 @@ module.exports.updateUser = (req, res) => {
       let user = await User.findOne({ _id: req.body._id })
 
       if (user && req.body.password && req.body.password != '' ) {
+        
         let obj = { password: req.body.password }
         
         const hash = bcryptService().password(obj)

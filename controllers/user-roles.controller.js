@@ -46,15 +46,11 @@ module.exports.updateUserRoles = (req, res) => {
 
       if(err) return res.send(401).send({ message: 'not authentic user' });
 
-      if (payload.role == 'admin') {
+      if (payload.role != 'admin') return res.status(404).send({ message: 'You have no permission to access the roles' })
 
       let updatedUserRoles = await UserRoles.findOneAndUpdate({ _id: req.body._id }, req.body)
 
       return res.status(200).send(updatedUserRoles)
-
-      }else{
-        return res.status(404).send({ message: 'You have no permission to access the roles' })
-      }
 
     }catch(err){
       return res.status(500).json(errorHandler(err))
