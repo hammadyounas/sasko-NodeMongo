@@ -14,7 +14,7 @@ module.exports.getPaymentReceive = (req, res) => {
       .populate('customerId', 'companyName')
       .populate('bankId', 'name')
 
-      if (!payment_receives.length) return res.status(404).send({ message: 'No Data Found' })
+      if (!payment_receives.length) return res.status(404).send({ message: 'Payment recieve list not found' })
 
       return res.status(200).send(payment_receives)
 
@@ -138,7 +138,7 @@ module.exports.getPaymentDetailById = (req, res) => {
         { __v: 0, createdAt: 0, updatedAt: 0 }
       )
 
-      if(!bank) return res.status(404).send({ message: 'No Data Found' })
+      if(!bank) return res.status(404).send({ message: 'Payment detail not found' })
 
       return res.status(200).send(bank);
       

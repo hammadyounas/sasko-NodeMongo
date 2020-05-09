@@ -21,7 +21,7 @@ module.exports.getStockDetails = (req, res) => {
           .populate('stock', 'stockId')
 
         if (!stockDetails.length)
-          return res.status(404).send({ message: 'No Data Found' })
+          return res.status(404).send({ message: 'stock details not found' })
 
         return res.status(200).send(stockDetails)
       } catch (err) {
@@ -260,7 +260,7 @@ module.exports.getStockSummary = (req, res) => {
             if (arr.length) {
               res.status(200).send(arr)
             } else {
-              res.status(404).send({ message: 'No Data Found' })
+              res.status(404).send({ message: 'stock summery not found' })
             }
           })
         })
@@ -303,7 +303,7 @@ module.exports.getDamageStock = (req, res) => {
             })
           ).then(() => {
             if (!arr.length)
-              return res.status(404).send({ message: 'No Data Found' })
+              return res.status(404).send({ message: 'Damage stock not found' })
 
             res.status(200).send(arr)
           })
@@ -333,7 +333,7 @@ module.exports.getItemsInStockDetails = (req, res) => {
             }, [])
             res.status(200).send(finalResult)
           } else {
-            res.status(404).send({ message: 'No Data Found' })
+            res.status(404).send({ message: 'items not found in stock list' })
           }
         })
         .catch(err => {
@@ -361,7 +361,7 @@ module.exports.getBrandsOfItemsInStockDetails = (req, res) => {
             }, [])
             res.status(200).send(finalResult)
           } else {
-            res.status(404).send({ message: 'No Data Found' })
+            res.status(404).send({ message: 'Brands not found in stock details.' })
           }
         })
         .catch(err => {
@@ -391,7 +391,7 @@ module.exports.getModelsOfItemsAndBrands = (req, res) => {
             }, [])
             res.status(200).send(finalResult)
           } else {
-            res.status(404).send({ message: 'No Data Found' })
+            res.status(404).send({ message: 'Models not found' })
           }
         })
         .catch(err => {
@@ -425,7 +425,7 @@ module.exports.getColorsOfModelsItemsAndBrands = (req, res) => {
             }, [])
             res.status(200).send(finalResult)
           } else {
-            res.status(404).send({ message: 'No Data Found' })
+            res.status(404).send({ message: 'Colors not found' })
           }
         })
         .catch(err => {

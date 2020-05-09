@@ -18,7 +18,7 @@ module.exports.getInvoice = (req, res) => {
 
         let invoices = await Invoice.find({ status: true , returnStatus:false},{status:0,returnStatus:0}).populate('customerId', 'companyName').lean().exec();
 
-        if(!invoices.length) return res.status(404).send({ message: 'No Data Found' });
+        if(!invoices.length) return res.status(404).send({ message: 'Invoices Data Found' });
 
         await Promise.all(
           invoices.map((invoice,i) =>{

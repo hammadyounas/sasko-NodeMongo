@@ -61,7 +61,7 @@ module.exports.getUser = (req, res) => {
 
       let user = await User.find({ status: true }, { password: 0 })
 
-      if(!user) return res.status(404).send({ msg: 'No Data Found' })
+      if(!user) return res.status(404).send({ msg: 'User data not found' })
 
       return res.status(200).send(user)
 
@@ -82,7 +82,7 @@ module.exports.getUserNameList = (req, res) => {
 
       let user = await User.find({ status: true }, { userName: 1 })
 
-      if(!user) return res.status(404).send({ msg: 'No Data Found' })
+      if(!user) return res.status(404).send({ msg: 'User name not found' })
 
       return res.status(200).send(user)
 

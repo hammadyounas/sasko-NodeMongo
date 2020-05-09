@@ -52,7 +52,7 @@ module.exports.getBrands = async (req, res) => {
 
         let brands = await Brands.find().populate('itemId','name');
 
-        if(!brands.length) return res.status(404).send({ msg: 'No Data Found' })
+        if(!brands.length) return res.status(404).send({ msg: 'Brands Data Found' })
           
         return res.status(200).send(brands)
 
