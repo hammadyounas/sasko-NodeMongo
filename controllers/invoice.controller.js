@@ -18,7 +18,7 @@ module.exports.getInvoice = (req, res) => {
 
         let invoices = await Invoice.find({ status: true , returnStatus:false},{status:0,returnStatus:0}).populate('customerId', 'companyName').lean().exec();
 
-        if(!invoices.length) return res.status(404).send({ message: 'Invoices Data Found' });
+        if(!invoices.length) return res.status(404).send({ message: 'Invoices data not found' });
 
         await Promise.all(
           invoices.map((invoice,i) =>{
@@ -167,7 +167,7 @@ module.exports.getInvoiceWithInvoiceDetails = async (req, res) => {
       try {
         let invoice = await Invoice.findOne({ _id: req.params.id,status:true,returnStatus:false }).populate('customerId','companyName').lean();
         
-        if(!invoice) return res.status(404).send({msg:'Invoice not found'});
+        if(!invoice) return res.status(404).send({message:'Invoice not found'});
 
         invoice['companyName'] = invoice.customerId.companyName;
         invoice['customerId'] = invoice.customerId._id;
@@ -178,7 +178,7 @@ module.exports.getInvoiceWithInvoiceDetails = async (req, res) => {
           .populate('itemId', 'name')
           .populate('brandId', 'brandName')
 
-        if(!invoiceDetails) return res.status(404).send({msg:'Details not found'});
+        if(!invoiceDetails) return res.status(404).send({message:'Details not found'});
 
         invoice['totalAmmount'] = invoiceDetails.reduce((acc,cu)=>{return acc + cu.totalCost},0) ;
         invoice['profitLoss'] = invoiceDetails.reduce((acc,current) =>{
@@ -277,7 +277,7 @@ module.exports.getCustomers = (req, res) => {
 
       let customers = await Customer.find({}, { _id: 1, clientName: 1 })
 
-      if(!customers) return res.status(404).send({ msg: 'No Customers Found' })
+      if(!customers) return res.status(404).send({ message: 'No Customers Found' })
 
       return res.status(200).send(customers)
 

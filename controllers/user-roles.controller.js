@@ -17,7 +17,7 @@ module.exports.getUserRoles = (req, res) => {
 
       let roles = await User.findOne({ _id: req.params.userId }).populate('userRoles').lean()
 
-      if(!roles) return res.status(404).send({ msg: 'roles not found' })
+      if(!roles) return res.status(404).send({ message: 'roles not found' })
 
       let userRoles = roles.userRoles
       

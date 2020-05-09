@@ -49,7 +49,7 @@ module.exports.getUploadPdf = (req, res) => {
 
       let pdfFiles = await UploadPdf.find();
 
-      if (!pdfFiles.length) return res.status(404).send({ msg: 'Pdf list not found' })
+      if (!pdfFiles.length) return res.status(404).send({ message: 'Pdf list not found' })
 
       return res.status(200).send(pdfFiles)
 

@@ -16,7 +16,7 @@ module.exports.setUser = (req, res) => {
 
       let userExist = await User.findOne({ userName: req.body.userName })
 
-      if(userExist) res.status(409).send({ msg: 'user with this user name already exists' })
+      if(userExist) res.status(409).send({ message: 'user with this user name already exists' })
       
       let obj = { password: req.body.password }
       
@@ -61,7 +61,7 @@ module.exports.getUser = (req, res) => {
 
       let user = await User.find({ status: true }, { password: 0 })
 
-      if(!user) return res.status(404).send({ msg: 'User data not found' })
+      if(!user) return res.status(404).send({ message: 'User data not found' })
 
       return res.status(200).send(user)
 
@@ -82,7 +82,7 @@ module.exports.getUserNameList = (req, res) => {
 
       let user = await User.find({ status: true }, { userName: 1 })
 
-      if(!user) return res.status(404).send({ msg: 'User name not found' })
+      if(!user) return res.status(404).send({ message: 'User name not found' })
 
       return res.status(200).send(user)
 

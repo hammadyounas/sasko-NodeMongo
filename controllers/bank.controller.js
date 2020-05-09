@@ -15,7 +15,7 @@ module.exports.getBank = (req, res) => {
 
       let banks = await Bank.find({ status: true });
 
-      if(!banks) return res.status(404).send({ msg: 'No Banks Data Found' });
+      if(!banks.length) return res.status(404).send({ message: 'No Banks Data Found' });
 
       return res.status(200).send(banks)
 

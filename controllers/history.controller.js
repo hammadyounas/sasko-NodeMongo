@@ -10,7 +10,7 @@ module.exports.getHistory = (req,res)=>{
             if(data.length){
                 res.status(200).send(data);
             }else{
-                res.status(404).send({message:'Data not found'});
+                res.status(404).send({message:'history data not found'});
             }
         })
     }else {
@@ -18,7 +18,7 @@ module.exports.getHistory = (req,res)=>{
             if(data.length){
                 res.status(200).send(data);
             }else{
-                res.status(404).send({message:'Data not found'});
+                res.status(404).send({message:'history data not found'});
             }
         })
     }

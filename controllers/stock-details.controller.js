@@ -100,7 +100,7 @@ module.exports.editStockDetails = (req, res) => {
             'update',
             0
           )
-          res.status(200).send({ msg: 'updated' })
+          res.status(200).send({ message: 'updated' })
         })
       } catch (err) {
         return res.status(500).json(errorHandler(err))
@@ -260,7 +260,7 @@ module.exports.getStockSummary = (req, res) => {
             if (arr.length) {
               res.status(200).send(arr)
             } else {
-              res.status(404).send({ message: 'stock summery not found' })
+              res.status(404).send({ message: 'stock details not found' })
             }
           })
         })

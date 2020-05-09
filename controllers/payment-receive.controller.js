@@ -233,7 +233,7 @@ module.exports.getLedgerReport = (req, res) => {
         .lean()
 
       if (!result.length)
-        return res.status(404).send({ msg: 'ledger not found' })
+        return res.status(404).send({ message: 'ledger not found' })
 
       await Promise.all(
         result.map((report, i) => {

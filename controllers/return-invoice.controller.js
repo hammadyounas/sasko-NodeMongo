@@ -31,7 +31,7 @@ module.exports.getReturnInvoice = (req, res) => {
           .lean()
 
         if (!invoices.length)
-          return res.status(404).send({ msg: 'return invoices not found' })
+          return res.status(404).send({ message: 'return invoices not found' })
 
         invoices.map((obj, i) => {
           obj['brandName'] = obj.brandId.brandName
@@ -100,7 +100,7 @@ module.exports.setReturnInvoice = async (req, res) => {
         let currentPiece = invoiceDetail.pieceQty - invoiceDetail.returnQty
         if (req.body.totalReturnQty > currentPiece) {
           return res.status(400).send({
-            msg: 'return quantity can not be greater then selling quantity'
+            message: 'return quantity can not be greater then selling quantity'
           })
         } else {
           let stockDetails = await StockDetails.find({
@@ -199,7 +199,7 @@ module.exports.returnWholeInvoice = async (req, res) => {
         )
 
         if (!update)
-          return res.status(401).send({ msg: 'Could not return invoice' })
+          return res.status(401).send({ message: 'Could not return invoice' })
 
         let invoices = await Invoice.find({ status: true, returnStatus: false })
           .populate('customerId', 'companyName')
@@ -207,7 +207,7 @@ module.exports.returnWholeInvoice = async (req, res) => {
           .exec()
 
         if (!invoices)
-          return res.status(404).send({ msg: 'Invoices not found' })
+          return res.status(404).send({ message: 'Invoices not found' })
 
         await Promise.all(
           invoices.map((invoice, i) => {

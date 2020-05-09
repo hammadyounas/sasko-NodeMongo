@@ -57,7 +57,7 @@ module.exports.getInvoiceDetailWithInvoice = (req, res) => {
             obj['invoiceDetail'] = result;
             res.status(200).send(obj);
           } else {
-            res.status(404).send({ msg: 'data not found' })
+            res.status(404).send({ message: 'invoice details not found' })
           }
         })
         .catch(err => {
@@ -214,7 +214,7 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
     } else {
       try {
         if (req.body.posted) {
-          res.status(404).send({ msg: 'can not edit this invoice detail' })
+          res.status(404).send({ message: 'can not edit this invoice detail' })
         } else {
           let invoiceHistory = req.body.invoice.history
           delete req.body.invoice['history']
@@ -306,7 +306,7 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
               'update',
               0
             )
-            res.status(200).send({ msg: 'invoice updated' })
+            res.status(200).send({ message: 'invoice updated' })
           })
         }
       } catch (err) {
@@ -432,7 +432,7 @@ module.exports.modelColorWiseSale = async (req, res) => {
         })
         .lean()
         .then( async invoiceDetails => {
-          if (!invoiceDetails.length) return res.status(404).send({ msg: 'data not found' })
+          if (!invoiceDetails.length) return res.status(404).send({ message: 'invoice details not found' })
           // } else {
             let filterArray = invoiceDetails.filter(obj =>{return obj.invoiceId !== null});
             await Promise.all(

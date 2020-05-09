@@ -11,7 +11,7 @@ module.exports.getCustomer = (req, res) => {
 
       let customers = await Customer.find({ status: true })
 
-      if(!customers) return res.status(404).send({ msg: 'No Customers Found' })
+      if(!customers.length) return res.status(404).send({ message: 'No Customers Found' })
 
       return res.status(200).send(customers)
 
@@ -29,7 +29,7 @@ module.exports.getCustomerById = (req, res) => {
 
       let customer = await Customer.findById({ _id: req.params.id, status: true })
 
-      if(!customer) return res.status(404).send({ msg: 'No customer Found' })
+      if(!customer) return res.status(404).send({ message: 'No customer Found' })
 
       return res.status(200).send(customer)
 
@@ -51,7 +51,7 @@ module.exports.setCustomer = (req, res) => {
 
         let result = await Customer.findOne({clientName: req.body.clientName,companyName: req.body.companyName});
 
-        if(result) return res.status(409).send({ msg: 'customer already exist' });
+        if(result) return res.status(409).send({ message: 'customer already exist' });
 
         await Customer.create(req.body);
 
@@ -79,7 +79,7 @@ module.exports.editCustomer = (req, res) => {
 
       let result = await Customer.findById({ _id: req.body._id });
 
-      if(!result) return res.status(409).send({ msg: 'customer not exist' });
+      if(!result) return res.status(409).send({ message: 'customer not exist' });
 
       await Customer.findByIdAndUpdate({ _id: req.body._id, status: true },req.body);
 
