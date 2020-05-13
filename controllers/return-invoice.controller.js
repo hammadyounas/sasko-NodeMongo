@@ -7,6 +7,7 @@ const StockDetails = require('../models/stock-details.model')
 const ReturnInvoiceDetail = require('../models/return-invoice.model')
 const jwt = require('jsonwebtoken')
 const LedgerReport = require('../models/ledger-report.model')
+const historyController = require('./history.controller')
 
 module.exports.getReturnInvoice = (req, res) => {
   jwt.verify(req.query.token, process.env.login_key, async function (
@@ -90,50 +91,47 @@ module.exports.setReturnInvoice = async (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      try {
-        let invoiceDetail = await InvoiceDetails.findOne({
-          _id: req.body.invoiceDetailId
-        }).lean()
-        let currentPiece = invoiceDetail.pieceQty - invoiceDetail.returnQty
-        if (req.body.totalReturnQty > currentPiece) {
-          return res.status(400).send({
-            message: 'return quantity can not be greater then selling quantity'
-          })
-        } else {
-          let stockDetails = await StockDetails.find({
-            itemId: req.body.itemId,
-            brandId: req.body.brandId,
-            modelNumber: req.body.modelNumber,
-            color: req.body.color
-          })
-          stockDetails.sort(function (a, b) {
-            return new Date(a.date) - new Date(b.date)
-          })
-          let updatedStockDetails = await addDamageQty(
-            stockDetails,
-            req.body.damageQty
-          )
-          let updatedStockDetailsSoldQty = await decreaseSoldQtyStockDetails(
-            stockDetails,
-            req.body.returnQty
-          )
-          invoiceDetail['returnQty'] += req.body.totalReturnQty
-          await InvoiceDetails.updateOne(
-            { _id: invoiceDetail._id },
-            { $set: { returnQty: invoiceDetail.returnQty } }
-          )
-          let createdReturnInvoice = await ReturnInvoiceDetail.create(req.body)
+    try{
 
-          await addLedgerReport(createdReturnInvoice)
+      if(err) return res.send(401).send({ message: 'not authentic user' })
 
-          res.status(200).send({message:'Return Invoice Genrated'})
-        }
-      } catch (err) {
-        res.status(500).json(errorHandler(err))
-      }
+      let invoiceDetail = await InvoiceDetails.findOne({_id: req.body.invoiceDetailId}).lean()
+
+      let currentPiece = invoiceDetail.pieceQty - invoiceDetail.returnQty;
+
+      if (req.body.totalReturnQty > currentPiece) return res.status(400).send({message: 'return quantity can not be greater then selling quantity'});
+
+      let stockDetails = await StockDetails.find({itemId: req.body.itemId,brandId: req.body.brandId,modelNumber: req.body.modelNumber,color: req.body.color});
+
+      stockDetails.sort(function (a, b) {return new Date(a.date) - new Date(b.date)})
+
+      await addDamageQty(stockDetails,req.body.damageQty)
+
+      await decreaseSoldQtyStockDetails(stockDetails,req.body.returnQty)
+
+      invoiceDetail['returnQty'] += req.body.totalReturnQty
+
+      await InvoiceDetails.updateOne(
+        { _id: invoiceDetail._id },
+        { $set: { returnQty: invoiceDetail.returnQty } }
+      )
+
+      let createdReturnInvoice = await ReturnInvoiceDetail.create(req.body)
+
+      await addLedgerReport(createdReturnInvoice)
+
+      await historyController.addHistory(
+        req.body.history,
+        payload,
+        'Return Invoice',
+        'add',
+        0
+      )
+
+      return res.status(200).send({message:'Return Invoice Genrated'})
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
   })
 }
@@ -151,12 +149,13 @@ async function addLedgerReport (invoiceDetail) {
     customerId: invoiceDetail.customerId,
     invoiceId: invoiceDetail._id
   }
-  if (!ledger.length) {
-    newObj['balance'] = invoiceDetail.returnAmmount
-  } else {
-    newObj['balance'] = ledger[0].balance - invoiceDetail.returnAmmount
-  }
-  let updated = await LedgerReport.create(newObj)
+
+  if (!ledger.length) newObj['balance'] = invoiceDetail.returnAmmount;
+
+  newObj['balance'] = ledger[0].balance - invoiceDetail.returnAmmount;
+
+  let updated = await LedgerReport.create(newObj);
+  
   return updated
 }
 
