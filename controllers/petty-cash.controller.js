@@ -35,7 +35,7 @@ module.exports.setPettyCash = (req, res) => {
         let createPettyCash = await PettyCash.create(req.body)
         
         await historyController.addHistory(
-          JSON.stringify(req.body.history),
+          req.body.history,
           payload,
           'Petty Cash',
           'add',

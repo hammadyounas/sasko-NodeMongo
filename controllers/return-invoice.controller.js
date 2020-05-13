@@ -62,27 +62,27 @@ module.exports.getReturnInvoiceId = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      jwt.verify(req.query.token, process.env.login_key, function (
-        err,
-        payload
-      ) {
-        if (err) {
-          res.send(401).send({ message: 'not authentic user' })
-        } else {
-          ReturnInvoice.count()
-            .then(length => {
-              let id = sixDigits((length + 1).toString())
-              res.status(200).send({ invoiceId: id })
-            })
-            .catch(err => {
-              res.status(500).json(errorHandler(err))
-            })
-        }
-      })
+    try {
+
+      if (err) return res.send(401).send({ message: 'not authentic user' })
+
+      let length = await ReturnInvoice.count()
+
+      let id = sixDigits((length + 1).toString())
+
+      return res.status(200).send({ invoiceId: id })
+
+    } catch (err) {
+      return res.status(500).json(errorHandler(err))
     }
+    // ReturnInvoice.count()
+    //   .then(length => {
+    //     let id = sixDigits((length + 1).toString())
+    //     res.status(200).send({ invoiceId: id })
+    //   })
+    //   .catch(err => {
+    //     res.status(500).json(errorHandler(err))
+    //   })
   })
 }
 
@@ -91,23 +91,34 @@ module.exports.setReturnInvoice = async (req, res) => {
     err,
     payload
   ) {
-    try{
+    try {
+      if (err) return res.send(401).send({ message: 'not authentic user' })
 
-      if(err) return res.send(401).send({ message: 'not authentic user' })
+      let invoiceDetail = await InvoiceDetails.findOne({
+        _id: req.body.invoiceDetailId
+      }).lean()
 
-      let invoiceDetail = await InvoiceDetails.findOne({_id: req.body.invoiceDetailId}).lean()
+      let currentPiece = invoiceDetail.pieceQty - invoiceDetail.returnQty
 
-      let currentPiece = invoiceDetail.pieceQty - invoiceDetail.returnQty;
+      if (req.body.totalReturnQty > currentPiece)
+        return res.status(400).send({
+          message: 'return quantity can not be greater then selling quantity'
+        })
 
-      if (req.body.totalReturnQty > currentPiece) return res.status(400).send({message: 'return quantity can not be greater then selling quantity'});
+      let stockDetails = await StockDetails.find({
+        itemId: req.body.itemId,
+        brandId: req.body.brandId,
+        modelNumber: req.body.modelNumber,
+        color: req.body.color
+      })
 
-      let stockDetails = await StockDetails.find({itemId: req.body.itemId,brandId: req.body.brandId,modelNumber: req.body.modelNumber,color: req.body.color});
+      stockDetails.sort(function (a, b) {
+        return new Date(a.date) - new Date(b.date)
+      })
 
-      stockDetails.sort(function (a, b) {return new Date(a.date) - new Date(b.date)})
+      await addDamageQty(stockDetails, req.body.damageQty)
 
-      await addDamageQty(stockDetails,req.body.damageQty)
-
-      await decreaseSoldQtyStockDetails(stockDetails,req.body.returnQty)
+      await decreaseSoldQtyStockDetails(stockDetails, req.body.returnQty)
 
       invoiceDetail['returnQty'] += req.body.totalReturnQty
 
@@ -128,16 +139,14 @@ module.exports.setReturnInvoice = async (req, res) => {
         0
       )
 
-      return res.status(200).send({message:'Return Invoice Genrated'})
-
-    }catch(err){
+      return res.status(200).send({ message: 'Return Invoice Genrated' })
+    } catch (err) {
       return res.status(500).json(errorHandler(err))
     }
   })
 }
 
 async function addLedgerReport (invoiceDetail) {
-  
   let ledger = await LedgerReport.find({ customerId: invoiceDetail.customerId })
     .sort({ createdAt: -1 })
     .limit(1)
@@ -150,12 +159,12 @@ async function addLedgerReport (invoiceDetail) {
     invoiceId: invoiceDetail._id
   }
 
-  if (!ledger.length) newObj['balance'] = invoiceDetail.returnAmmount;
+  if (!ledger.length) newObj['balance'] = invoiceDetail.returnAmmount
 
-  newObj['balance'] = ledger[0].balance - invoiceDetail.returnAmmount;
+  newObj['balance'] = ledger[0].balance - invoiceDetail.returnAmmount
 
-  let updated = await LedgerReport.create(newObj);
-  
+  let updated = await LedgerReport.create(newObj)
+
   return updated
 }
 
@@ -164,67 +173,64 @@ module.exports.returnWholeInvoice = async (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      return res.send(401).send({ message: 'not authentic user' })
-    } else {
-      try {
-        let invoiceDetails = await InvoiceDetails.find({
-          invoiceId: req.params.invoiceId
+    try {
+      if (err) return res.send(401).send({ message: 'not authentic user' })
+
+      let invoiceDetails = await InvoiceDetails.find({
+        invoiceId: req.params.invoiceId
+      })
+
+      await Invoice.findById(req.params.invoiceId)
+
+      await Promise.all(
+        invoiceDetails.map(async detail => {
+          let stockDetails = await StockDetails.find({
+            itemId: detail.itemId,
+            brandId: detail.brandId,
+            modelNumber: detail.modelNumber,
+            color: detail.color
+          })
+
+          stockDetails.sort(function (a, b) {
+            return new Date(a.date) - new Date(b.date)
+          })
+
+          await decreaseSoldQtyStockDetails(stockDetails, detail.pieceQty)
         })
-        let invoice = await Invoice.findById(req.params.invoiceId)
-        await Promise.all(
-          invoiceDetails.map(async detail => {
-            let stockDetails = await StockDetails.find({
-              itemId: detail.itemId,
-              brandId: detail.brandId,
-              modelNumber: detail.modelNumber,
-              color: detail.color
-            })
+      )
 
-            stockDetails.sort(function (a, b) {
-              return new Date(a.date) - new Date(b.date)
-            })
+      let update = await Invoice.updateOne(
+        { _id: req.params.invoiceId },
+        { $set: { returnStatus: true } }
+      )
 
-            let updatedStockDetailsSoldQty = await decreaseSoldQtyStockDetails(
-              stockDetails,
-              detail.pieceQty
-            )
-          })
-        )
+      if (!update)
+        return res.status(401).send({ message: 'Could not return invoice' })
 
-        let update = await Invoice.updateOne(
-          { _id: req.params.invoiceId },
-          { $set: { returnStatus: true } }
-        )
+      let invoices = await Invoice.find({ status: true, returnStatus: false })
+        .populate('customerId', 'companyName')
+        .lean()
+        .exec()
 
-        if (!update)
-          return res.status(401).send({ message: 'Could not return invoice' })
+      if (!invoices)
+        return res.status(404).send({ message: 'Invoices not found' })
 
-        let invoices = await Invoice.find({ status: true, returnStatus: false })
-          .populate('customerId', 'companyName')
-          .lean()
-          .exec()
+      await Promise.all(
+        invoices.map((invoice, i) => {
+          invoices[i]['companyName'] = invoice.customerId.companyName
+          invoices[i]['customerId'] = invoice.customerId._id
+        })
+      )
 
-        if (!invoices)
-          return res.status(404).send({ message: 'Invoices not found' })
-
-        await Promise.all(
-          invoices.map((invoice, i) => {
-            invoices[i]['companyName'] = invoice.customerId.companyName
-            invoices[i]['customerId'] = invoice.customerId._id
-          })
-        )
-
-        res.status(200).send(invoices)
-      } catch (err) {
-        return res.status(500).send(err)
-      }
+      res.status(200).send(invoices)
+    } catch (err) {
+      return res.status(500).send(err)
     }
   })
 }
 
 async function addDamageQty (stockDetails, damageQty) {
-  Promise.all(
+  await Promise.all(
     stockDetails.map(async (obj, index) => {
       if (damageQty != 0 && obj.soldQty > 0) {
         if (damageQty <= obj.soldQty) {
@@ -238,14 +244,15 @@ async function addDamageQty (stockDetails, damageQty) {
         }
       }
       stockDetails[index] = obj
-      let update = await StockDetails.updateOne(
+      await StockDetails.updateOne(
         { _id: obj.id },
         { $set: { damageQty: obj.damageQty, soldQty: obj.soldQty } }
       )
     })
-  ).then(() => {
-    return stockDetails
-  })
+  )
+  // .then(() => {
+  return stockDetails
+  // })
 }
 
 async function decreaseSoldQtyStockDetails (stockDetails, returnQty) {
@@ -267,22 +274,18 @@ async function decreaseSoldQtyStockDetails (stockDetails, returnQty) {
             returnQty = 0
           }
           stockDetails[index] = obj
-           try{
-
-           
-          let update = await StockDetails.updateOne(
-            { _id: obj.id },
-            { $set: { actualQty: obj.actualQty, soldQty: obj.soldQty } }
-          )
-          }catch(err){
+          try {
+            let update = await StockDetails.updateOne(
+              { _id: obj.id },
+              { $set: { actualQty: obj.actualQty, soldQty: obj.soldQty } }
+            )
+          } catch (err) {
             throw err
           }
         }
       })
     )
-    // .then(() => {
-      return true
-    // })
+    return true
   } catch (err) {
     throw err
   }
