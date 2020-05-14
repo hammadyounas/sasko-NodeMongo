@@ -3,6 +3,7 @@ const errorHandler = require('../utils/errorHandler')
 const sixDigits = require('../utils/sixDigits')
 const LedgerReport = require('../models/ledger-report.model')
 const jwt = require('jsonwebtoken')
+const historyController = require('./history.controller')
 
 module.exports.getPaymentReceive = (req, res) => {
   jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {
@@ -38,16 +39,35 @@ module.exports.setPaymentReceive = (req, res) => {
 
           await setLedgerReport(payment_receive)
 
-          return res.status(200).send(payment_receive)
+          await historyController.addHistory(
+            req.body.history,
+            payload,
+            'debit payment',
+            'add',
+            0
+          )
+
+          return res.status(200).send(payment_receive);
+
         } else if (req.body.requestType == 'credit') {
+
           let updateLedger = await setCreditLedgerReport(req.body)
 
           if (!updateLedger)
             return res
               .status(409)
-              .send({ message: 'Ledger Update Error. Could not update ledger' })
+              .send({ message: 'Ledger Update Error. Could not update ledger' });
 
-          return res.status(200).send(updateLedger)
+            await historyController.addHistory(
+                req.body.history,
+                payload,
+                'credit payment',
+                'add',
+                0
+              )
+
+          return res.status(200).send(updateLedger);
+          
         } else {
           return res.status(409).send({ message: 'Invalid Request Type' })
         }

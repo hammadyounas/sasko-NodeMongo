@@ -2,25 +2,24 @@ const History = require('./../models/history.model');
 const errorHandler = require('../utils/errorHandler');
 const ObjectId = require('mongodb').ObjectID;
 
-module.exports.getHistory = (req,res)=>{
-    let userId =  req.query.userId;
-    // let 
-    if(userId != ''){
-        History.find({userId:ObjectId(userId)}).sort({ createdAt: -1 }).skip(parseInt(req.query.skip)).limit(parseInt( req.query.limit)).then(data =>{
-            if(data.length){
-                res.status(200).send(data);
-            }else{
-                res.status(404).send({message:'history data not found'});
-            }
-        })
-    }else {
-        History.find().sort({ createdAt: -1 }).skip(parseInt(req.query.skip)).limit(parseInt( 15)).then(data =>{
-            if(data.length){
-                res.status(200).send(data);
-            }else{
-                res.status(404).send({message:'history data not found'});
-            }
-        })
+module.exports.getHistory = async (req,res)=>{
+    try{
+        let day = req.query.toDate ?  parseInt(req.query.toDate.slice(8,10))+1 : '';
+        let toDate = req.query.toDate ? `${req.query.toDate.slice(0,7)}-${day.toString()}` : '';
+        let query = {};
+        (req.query.userId) ? (query.userId = ObjectId(req.query.userId)) : '';
+        (req.query.toDate && !req.query.fromDate)  ? (query.createdAt = {$lte: new Date(toDate).toISOString()}) : '';
+        (!req.query.toDate && req.query.fromDate)  ? (query.createdAt = {$gte: new Date(req.query.fromDate).toISOString()}) : '';
+        (req.query.toDate && req.query.fromDate)  ? (query.createdAt = {$gte:new Date(req.query.fromDate).toISOString(), $lte:new Date(toDate).toISOString()}) : '';
+
+        let data = await History.find(query).sort({ createdAt: -1 }).skip(parseInt(req.query.skip)).limit(parseInt( 15));
+
+        if(!data.length) return res.status(404).send({message:'history data not found'});
+
+        return res.status(200).send(data);
+
+    }catch(err){
+        return res.status(500).json(errorHandler(err))
     }
 }
 
