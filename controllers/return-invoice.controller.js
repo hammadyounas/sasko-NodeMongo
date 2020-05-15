@@ -98,7 +98,7 @@ module.exports.setReturnInvoice = async (req, res) => {
         _id: req.body.invoiceDetailId
       }).lean()
 
-      let currentPiece = invoiceDetail.pieceQty - invoiceDetail.returnQty
+      let currentPiece = invoiceDetail.pieceQty - invoiceDetail.returnQty;
 
       if (req.body.totalReturnQty > currentPiece)
         return res.status(400).send({
@@ -116,11 +116,12 @@ module.exports.setReturnInvoice = async (req, res) => {
         return new Date(a.date) - new Date(b.date)
       })
 
-      await addDamageQty(stockDetails, req.body.damageQty)
+      await addDamageQty(stockDetails, req.body.damageQty);
 
-      await decreaseSoldQtyStockDetails(stockDetails, req.body.returnQty)
+      await decreaseSoldQtyStockDetails(stockDetails, req.body.returnQty);
 
-      invoiceDetail['returnQty'] += req.body.totalReturnQty
+
+      invoiceDetail['returnQty'] += req.body.totalReturnQty;
 
       await InvoiceDetails.updateOne(
         { _id: invoiceDetail._id },
@@ -129,7 +130,10 @@ module.exports.setReturnInvoice = async (req, res) => {
 
       let createdReturnInvoice = await ReturnInvoiceDetail.create(req.body)
 
-      await addLedgerReport(createdReturnInvoice)
+      await addLedgerReport(createdReturnInvoice);
+
+      await checkReturnDetails(req.body.invoiceId);
+
 
       await historyController.addHistory(
         req.body.history,
@@ -140,6 +144,7 @@ module.exports.setReturnInvoice = async (req, res) => {
       )
 
       return res.status(200).send({ message: 'Return Invoice Genrated' })
+
     } catch (err) {
       return res.status(500).json(errorHandler(err))
     }
@@ -174,6 +179,7 @@ module.exports.returnWholeInvoice = async (req, res) => {
     payload
   ) {
     try {
+
       if (err) return res.send(401).send({ message: 'not authentic user' })
 
       let invoiceDetails = await InvoiceDetails.find({
@@ -234,25 +240,38 @@ async function addDamageQty (stockDetails, damageQty) {
     stockDetails.map(async (obj, index) => {
       if (damageQty != 0 && obj.soldQty > 0) {
         if (damageQty <= obj.soldQty) {
-          obj.damageQty += damageQty
-          obj.soldQty -= damageQty
-          damageQty = 0
+          obj.damageQty += damageQty;
+          obj.soldQty -= damageQty;
+          damageQty = 0;
         } else if (damageQty > obj.soldQty) {
-          obj.damageQty += obj.soldQty
-          damageQty -= obj.soldQty
-          obj.soldQty = 0
+          obj.damageQty += obj.soldQty;
+          damageQty -= obj.soldQty;
+          obj.soldQty = 0;
         }
       }
-      stockDetails[index] = obj
+      stockDetails[index] = obj;
       await StockDetails.updateOne(
         { _id: obj.id },
         { $set: { damageQty: obj.damageQty, soldQty: obj.soldQty } }
       )
     })
   )
-  // .then(() => {
-  return stockDetails
-  // })
+  return stockDetails;
+}
+
+async function checkReturnDetails(invoiceId) {
+  let details = await InvoiceDetails.find({invoiceId:invoiceId}).lean()
+
+  let result = details.filter(obj => { return obj.pieceQty != obj.returnQty });
+
+  if(result.length) return 
+
+  let update = await Invoice.updateOne(
+    { _id: invoiceId },
+    { $set: { returnStatus: true } }
+  )
+
+  return update
 }
 
 async function decreaseSoldQtyStockDetails (stockDetails, returnQty) {
@@ -275,7 +294,7 @@ async function decreaseSoldQtyStockDetails (stockDetails, returnQty) {
           }
           stockDetails[index] = obj
           try {
-            let update = await StockDetails.updateOne(
+            await StockDetails.updateOne(
               { _id: obj.id },
               { $set: { actualQty: obj.actualQty, soldQty: obj.soldQty } }
             )
