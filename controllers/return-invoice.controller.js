@@ -75,14 +75,6 @@ module.exports.getReturnInvoiceId = (req, res) => {
     } catch (err) {
       return res.status(500).json(errorHandler(err))
     }
-    // ReturnInvoice.count()
-    //   .then(length => {
-    //     let id = sixDigits((length + 1).toString())
-    //     res.status(200).send({ invoiceId: id })
-    //   })
-    //   .catch(err => {
-    //     res.status(500).json(errorHandler(err))
-    //   })
   })
 }
 
