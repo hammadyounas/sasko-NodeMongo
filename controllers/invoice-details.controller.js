@@ -33,36 +33,35 @@ module.exports.getInvoiceDetailWithInvoice = (req, res) => {
     err,
     payload
   ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      InvoiceDetails.findOne({ status: true, _id: req.params.id })
-        .populate('brandId', 'brandName')
-        .populate('itemId', 'name')
-        .populate({
-          path: 'invoiceId',
-          populate: { path: 'customerId', select: 'clientName' }
-        })
-        .lean()
-        .then(result => {
-          if (result) {
-            let obj = { invoice: result.invoiceId }
-            obj.invoice['customerName'] = obj.invoice.customerId.clientName;
-            obj.invoice['customerId'] = obj.invoice.customerId._id;
-            result['brandName'] = result.brandId.brandName;
-            result.brandId = result.brandId._id;
-            result['itemName'] = result.itemId.name;
-            result.itemId = result.itemId._id;
-            delete result['invoiceId'];
-            obj['invoiceDetail'] = result;
-            res.status(200).send(obj);
-          } else {
-            res.status(404).send({ message: 'invoice details not found' })
-          }
-        })
-        .catch(err => {
-          res.status(500).json(errorHandler(err))
-        })
+    try{
+
+      if(err) return res.send(401).send({ message: 'not authentic user' })
+
+      let result = await InvoiceDetails.findOne({ status: true, _id: req.params.id }).populate('brandId', 'brandName').populate('itemId', 'name')
+      .populate({
+        path: 'invoiceId',
+        populate: { path: 'customerId', select: 'companyName' }
+      }).lean()
+
+      if(!result) return res.status(404).send({ message: 'invoice details not found' });
+
+      let obj = { invoice: result.invoiceId }
+      obj.invoice['companyName'] = obj.invoice.customerId.companyName;
+      obj.invoice['customerId'] = obj.invoice.customerId._id;
+      
+      result['brandName'] = result.brandId.brandName;
+      result.brandId = result.brandId._id;
+      
+      result['itemName'] = result.itemId.name;
+      result.itemId = result.itemId._id;
+      
+      delete result['invoiceId'];
+      obj['invoiceDetail'] = result;
+      
+      return res.status(200).send(obj);
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
   })
 }
@@ -89,10 +88,6 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
           } else {
             invoiceVar = result
             let ledgerReport = await addLedgerReport(result)
-            // if(!ledgerReport){
-            //   await Invoice.deleteOne({_id:invoice._id});
-            //   return res.status(409).send({message:'Error is creating ledger of this invoice'});
-            // }
             req.body.invoiceDetails.map((x, i) => {
               historyController.addHistory(
                 x.history,
@@ -279,7 +274,6 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
                   { _id: invoiceDetail._id },
                   invoiceDetail
                 )
-                // let upadatePieceQty = invoiceDetail.pieceQty - oldInvoiceDetail.pieceQty
               } else {
                 let pieceQty = invoiceDetail.pieceQty
                 let updateStockDetails = await increaseSoldQtyStockDetails(
