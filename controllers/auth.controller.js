@@ -19,7 +19,7 @@ module.exports.login = (req, res) => {
           },
           process.env.login_key,
           {
-            expiresIn: '9h'
+            expiresIn: '10h'
           }
         )
         return res.status(200).json({
