@@ -11,7 +11,7 @@ module.exports.getUserRoles = (req, res) => {
   ) {
     try{
       
-      if(err) return res.send(401).send({ message: 'not authentic user' })
+      if(err) return res.status(401).send({ message: 'not authentic user' })
 
       if (payload.role == 'admin') {
 
