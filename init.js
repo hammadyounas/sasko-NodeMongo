@@ -5,7 +5,7 @@ module.exports = () => {
   const cors = require('cors');
 
   const app = express()
-  const PORT = process.env.PORT || 3001
+  const PORT = process.env.PORT || 3005
 
   mongoose
     .connect(process.env.MONGO_URL, { useNewUrlParser: true,useUnifiedTopology: true })
