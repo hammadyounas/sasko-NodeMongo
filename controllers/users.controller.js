@@ -3,20 +3,21 @@ const jwt = require('jsonwebtoken')
 const bcryptService = require('./../services/bcrypt.service')
 const UserRoles = require('./../models/user-roles.model')
 const errorHandler = require('../utils/errorHandler')
+const adminAccess = require('../utils/adminAccess')
 
 
-module.exports.setUser = (req, res) => {
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
+module.exports.setUser = async (req, res) => {
+  // jwt.verify(req.query.token, process.env.login_key, async function (
+  //   err,
+  //   payload
+  // ) {
     try{
 
-      if(err) return res.send(401).send({ message: 'not authentic user' });
+  //     if(err) return res.send(401).send({ message: 'not authentic user' });
 
       let userExist = await User.findOne({ userName: req.body.userName })
 
-      if(userExist) res.status(409).send({ message: 'user with this user name already exists' })
+      if(userExist) return res.status(409).send({ message: 'user with this user name already exists' })
       
       let obj = { password: req.body.password }
       
@@ -24,30 +25,18 @@ module.exports.setUser = (req, res) => {
 
       req.body['password'] = hash
 
-      let rolesCreated = await UserRoles.create({})
+      let rolesCreated =  req.body.role == 'admin' ? await UserRoles.create(adminAccess) : await UserRoles.create({});
 
       req.body['userRoles'] = rolesCreated._id
 
-      let userCreated = await User.create(req.body)
+      await User.create(req.body)
 
-      const JWTToken = jwt.sign(
-        {
-          userName: userCreated.userName,
-          _id: userCreated._id,
-          role: userCreated.role
-        },
-        process.env.login_key,
-        {
-          expiresIn: '2h'
-        }
-      )
-
-      return res.status(200).json({success: 'New user has been created',token: JWTToken})
+      return res.status(200).json({success: 'New user has been created'})
 
     }catch(err){
       return res.status(500).json(errorHandler(err))
     }
-  })
+  // })
 }
 
 module.exports.getUser = (req, res) => {
