@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken')
 const bcryptService = require('./../services/bcrypt.service')
 
 module.exports.login = (req, res) => {
-  User.findOne({ userName: req.body.userName })
+  User.findOne({ userName: req.body.userName,status:true })
     .then(function (user) {
       if (!user) {
         throw new Error('user not found!')

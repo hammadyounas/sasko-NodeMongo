@@ -50,7 +50,7 @@ module.exports.getUser = (req, res) => {
 
       let user = await User.find({ status: true }, { password: 0 })
 
-      if(!user) return res.status(404).send({ message: 'User data not found' })
+      if(!user) return res.status(404).send({ message: 'Users data not found' })
 
       return res.status(200).send(user)
 
@@ -71,7 +71,7 @@ module.exports.getUserNameList = (req, res) => {
 
       let user = await User.find({ status: true }, { userName: 1 })
 
-      if(!user) return res.status(404).send({ message: 'User name not found' })
+      if(!user) return res.status(404).send({ message: 'Users name not found' })
 
       return res.status(200).send(user)
 
@@ -90,7 +90,7 @@ module.exports.updateUser = (req, res) => {
 
       if(err) return res.status(401).send({ message: 'not authentic user' })
 
-      let user = await User.findOne({ _id: req.body._id })
+      let user = await User.findOne({ _id: req.body._id,status:true })
 
       if (user && req.body.password && req.body.password != '' ) {
         
@@ -100,7 +100,7 @@ module.exports.updateUser = (req, res) => {
         
         req.body['password'] = hash
         
-        let updatedUserPassword = await User.findOneAndUpdate({ _id: req.body._id }, req.body)
+          let updatedUserPassword = await User.findOneAndUpdate({ _id: req.body._id }, req.body)
         
         return res.status(200).send(updatedUserPassword)
 
@@ -115,15 +115,28 @@ module.exports.updateUser = (req, res) => {
   })
 }
 
-// module.exports.getAuth = (req, res) => {
-//   var scopes = 'user-read-private user-read-email'
-//   res.redirect(
-//     'https://accounts.spotify.com/authorize' +
-//       '?response_type=code' +
-//       '&client_id=' +
-//       '3ca99f839cf54b80a810a2af0d5dac36' +
-//       (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
-//       '&redirect_uri=' +
-//       encodeURIComponent('https://404app.000webhostapp.com/')
-//   )
-// }
+module.exports.deleteUser = (req, res) => {
+  jwt.verify(req.query.token, process.env.login_key, async function (
+    err,
+    payload
+  ) {
+    try{
+
+      if(err) return res.status(401).send({ message: 'not authentic user' })
+
+      if (payload.role != 'admin') return res.status(404).send({ message: 'You have no permission to delete the user' });
+
+      await User.findOneAndUpdate({ _id: req.body.userId },{status:false});
+
+      let users = await User.find({ status: true }, { password: 0 })
+
+      if(!users) return res.status(404).send({ message: 'Users data not found' })
+
+      return res.status(200).send(users)
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
+    }
+  })
+}
+
