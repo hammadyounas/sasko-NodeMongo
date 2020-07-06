@@ -32,5 +32,9 @@
   },
   "devDependencies": {
     "nodemon": "^1.19.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/hammadyounas/sasko-NodeMongo.git"
   }
 }

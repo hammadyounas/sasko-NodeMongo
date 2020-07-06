@@ -46,8 +46,9 @@ module.exports.currentUser = (req, res) => {
         .lean()
         .then(user => {
           let obj = user.userRoles
-          obj['name'] = user.name
-          ;(obj['userName'] = user.userName), (obj['role'] = user.role)
+          obj['name'] = user.name;
+          obj['userName'] = user.userName; 
+          obj['role'] = user.role;
           res.status(200).send(obj)
         })
         .catch(err => {
