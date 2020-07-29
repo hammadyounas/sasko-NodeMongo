@@ -26,26 +26,18 @@ module.exports.getPaymentReceive = (req, res) => {
 }
 
 module.exports.setPaymentReceive = (req, res) => {
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
       try {
 
         if(err) return res.send(401).send({ message: 'not authentic user' })
 
         if (req.body.requestType == 'debit') {
+          
           let payment_receive = await PaymentReceive.create(req.body)
 
           await setLedgerReport(payment_receive)
 
-          await historyController.addHistory(
-            req.body.history,
-            payload,
-            'debit payment',
-            'add',
-            0
-          )
+          await historyController.addHistory(req.body.history,payload,'debit payment','add',0)
 
           return res.status(200).send(payment_receive);
 
@@ -53,23 +45,16 @@ module.exports.setPaymentReceive = (req, res) => {
 
           let updateLedger = await setCreditLedgerReport(req.body)
 
-          if (!updateLedger)
-            return res
-              .status(409)
-              .send({ message: 'Ledger Update Error. Could not update ledger' });
+          if (!updateLedger) return res.status(409).send({ message: 'Ledger Update Error. Could not update ledger' });
 
-            await historyController.addHistory(
-                req.body.history,
-                payload,
-                'credit payment',
-                'add',
-                0
-              )
+          await historyController.addHistory(req.body.history,payload,'credit payment','add',0)
 
           return res.status(200).send(updateLedger);
           
         } else {
+
           return res.status(409).send({ message: 'Invalid Request Type' })
+       
         }
       } catch (err) {
         return res.status(500).json(errorHandler(err))
@@ -80,19 +65,15 @@ module.exports.setPaymentReceive = (req, res) => {
 async function setCreditLedgerReport (body) {
   try {
 
-    let list = await LedgerReport.find({
-      customerId: body.customerId
-    })
-      .sort({ createdAt: -1 })
-      .limit(1)
+    let list = await LedgerReport.find({customerId: body.customerId}).sort({ createdAt: -1 }).limit(1)
 
     let newObj = {
-      balance: list[0].balance + body.amount,
+      balance: (list.length ? list[0].balance : 0) + body.amount,
       description: body.description,
       debit: 0,
       date: body.date,
       customerId: body.customerId,
-      credit: list[0].credit + body.amount
+      credit: (list.length ? list[0].credit : 0) + body.amount
     }
 
     let updated = await LedgerReport.create(newObj)

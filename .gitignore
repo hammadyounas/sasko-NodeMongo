@@ -7,6 +7,10 @@ node_modules/
 /dist
 /tmp
 /out-tsc
+
+# credentials
+/.env
+
 # Only exists if Bazel was run
 /bazel-out
 
