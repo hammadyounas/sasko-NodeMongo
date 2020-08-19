@@ -22,4 +22,4 @@ const paymentReceive = mongoose.Schema(
   }
 )
 
-module.exports = mongoose.model('payment-receive', paymentReceive)
+module.exports = mongoose.model('paymentReceives', paymentReceive)
