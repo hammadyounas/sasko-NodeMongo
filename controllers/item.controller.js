@@ -4,10 +4,7 @@ const historyController = require('./history.controller')
 const errorHandler = require('../utils/errorHandler')
 
 module.exports.getItems = (req, res) => {
-    jwt.verify(req.query.token, process.env.login_key, async function (
-      err,
-      payload
-    ) {
+    jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
         try{
 
           if(err) return res.status(401).send({ message: 'not authentic user' })

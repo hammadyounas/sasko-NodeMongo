@@ -43,21 +43,19 @@ module.exports.setPaymentReceive = (req, res) => {
 
         } else if (req.body.requestType == 'credit') {
 
-          let updateLedger = await setCreditLedgerReport(req.body)
+          let updateLedger = await setCreditLedgerReport(req.body);
 
           if (!updateLedger) return res.status(409).send({ message: 'Ledger Update Error. Could not update ledger' });
 
-          await historyController.addHistory(req.body.history,payload,'credit payment','add',0)
+          await historyController.addHistory( req.body.history,payload,'credit payment','add',0);
 
           return res.status(200).send(updateLedger);
           
         } else {
-
-          return res.status(409).send({ message: 'Invalid Request Type' })
-       
+          return res.status(409).send({ message: 'Invalid Request Type' });
         }
       } catch (err) {
-        return res.status(500).json(errorHandler(err))
+        return res.status(500).json(errorHandler(err));
       }
   })
 }
@@ -65,47 +63,28 @@ module.exports.setPaymentReceive = (req, res) => {
 async function setCreditLedgerReport (body) {
   try {
 
-    let list = await LedgerReport.find({customerId: body.customerId}).sort({ createdAt: -1 }).limit(1)
+    let list = await LedgerReport.find({customerId: body.customerId}).sort({ createdAt: -1 }).limit(1);
 
-    let newObj = {
-      balance: (list.length ? list[0].balance : 0) + body.amount,
-      description: body.description,
-      debit: 0,
-      date: body.date,
-      customerId: body.customerId,
-      credit: (list.length ? list[0].credit : 0) + body.amount
-    }
+    let newObj = {balance: list[0].balance + body.amount,description: body.description,debit: 0,date: body.date,customerId: body.customerId,credit: list[0].credit + body.amount};
 
-    let updated = await LedgerReport.create(newObj)
+    let updated = await LedgerReport.create(newObj);
     
-    return updated
+    return updated;
 
   } catch (err) {
-    throw new Error(err)
+    throw new Error(err);
   }
 }
 
 async function setLedgerReport (receivedPayment) {
 
-  let list = await LedgerReport.find({ customerId: receivedPayment.customerId })
-    .sort({ createdAt: -1 })
-    .limit(1)
+  let list = await LedgerReport.find({ customerId: receivedPayment.customerId }).sort({ createdAt: -1 }).limit(1);
 
-  let newObj = {
-    balance: 0,
-    description: receivedPayment.description,
-    debit: receivedPayment.amount,
-    date: receivedPayment.date,
-    customerId: receivedPayment.customerId,
-    bankId: receivedPayment.bankId,
-    paymentId: receivedPayment._id
-  }
+  let newObj = {balance: 0,description: receivedPayment.description,debit: receivedPayment.amount,date: receivedPayment.date,customerId: receivedPayment.customerId,bankId: receivedPayment.bankId,paymentId: receivedPayment._id};
 
-  if (list.length) {
-    newObj['balance'] = list[0].balance - receivedPayment.amount
-  }
+  if (list.length) {newObj['balance'] = list[0].balance - receivedPayment.amount};
 
-  let updated = await LedgerReport.create(newObj)
+  let updated = await LedgerReport.create(newObj);
 
   return updated
 }
@@ -114,16 +93,16 @@ module.exports.getTransactionId = (req, res) => {
   jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {
     try{
 
-      if(err) return res.send(401).send({ message: 'not authentic user' })
+      if(err) return res.send(401).send({ message: 'not authentic user' });
 
       let length = await  PaymentReceive.count();
 
-      let id = sixDigits((length + 1).toString())
+      let id = sixDigits((length + 1).toString());
 
-      return res.status(200).send({ trasactionsId: id })
+      return res.status(200).send({ trasactionsId: id });
 
     }catch(err){
-      return res.status(500).json(errorHandler(err))
+      return res.status(500).json(errorHandler(err));
     }
   })
 }
@@ -134,17 +113,14 @@ module.exports.getPaymentDetailById = (req, res) => {
       
       if (err) return res.send(401).send({ message: 'not authentic user' });
 
-      let bank = await PaymentReceive.findById(
-        { _id: req.params.id, status: true },
-        { __v: 0, createdAt: 0, updatedAt: 0 }
-      )
+      let bank = await PaymentReceive.findById({ _id: req.params.id, status: true },{ __v: 0, createdAt: 0, updatedAt: 0 });
 
-      if(!bank) return res.status(404).send({ message: 'Payment detail not found' })
+      if(!bank) return res.status(404).send({ message: 'Payment detail not found' });
 
       return res.status(200).send(bank);
       
     } catch (err) {
-      return res.status(500).json(errorHandler(err))
+      return res.status(500).json(errorHandler(err));
     }
 
   })
@@ -219,31 +195,25 @@ module.exports.getPaymentDetailById = (req, res) => {
 }*/
 
 module.exports.getLedgerReport = (req, res) => {
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
     try {
 
     if (err) return res.send(401).send({ message: 'not authentic user' })
 
-      let result = await LedgerReport.find()
-        .sort({ createdAt: -1 })
-        .populate('customerId', 'companyName')
-        .populate('bankId', 'name')
-        .lean()
+      let result = await LedgerReport.find().sort({ createdAt: -1 }).populate('customerId', 'companyName').populate('bankId', 'name').lean()
 
-      if (!result.length)
-        return res.status(404).send({ message: 'ledger not found' })
+      if (!result.length) return res.status(404).send({ message: 'ledger not found' })
 
       await Promise.all(
         result.map((report, i) => {
           result[i]['companyName'] = report.customerId.companyName
           result[i]['customerId'] = report.customerId._id
+        
           if (result[i].bankId) {
             result[i]['bankName'] = report.bankId.name
             result[i]['bankId'] = report.bankId._id
           }
+        
         })
       )
 

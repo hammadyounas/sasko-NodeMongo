@@ -4,12 +4,19 @@ const ObjectId = require('mongodb').ObjectID;
 
 module.exports.getHistory = async (req,res)=>{
     try{
+        
         let day = req.query.toDate ?  parseInt(req.query.toDate.slice(8,10))+1 : '';
+        
         let toDate = req.query.toDate ? `${req.query.toDate.slice(0,7)}-${day.toString()}` : '';
+        
         let query = {};
+        
         (req.query.userId) ? (query.userId = ObjectId(req.query.userId)) : '';
+        
         (req.query.toDate && !req.query.fromDate)  ? (query.createdAt = {$lte: new Date(toDate).toISOString()}) : '';
+        
         (!req.query.toDate && req.query.fromDate)  ? (query.createdAt = {$gte: new Date(req.query.fromDate).toISOString()}) : '';
+        
         (req.query.toDate && req.query.fromDate)  ? (query.createdAt = {$gte:new Date(req.query.fromDate).toISOString(), $lte:new Date(toDate).toISOString()}) : '';
 
         let data = await History.find(query).sort({ createdAt: -1 }).skip(parseInt(req.query.skip)).limit(parseInt( 15));
@@ -24,13 +31,10 @@ module.exports.getHistory = async (req,res)=>{
 }
 
 async function addHistory(obj, payload, feature, type,counter) {
-    let newobj = {
-        userId: payload._id,
-        description: '',
-        isType:'',
-        changes: obj
-      }
-      switch(type){
+    
+    let newobj = {userId: payload._id,description: '',isType:'',changes: obj}
+    
+    switch(type){
         case 'update':
             newobj['description'] = `${payload.userName} has updated in ${feature}`,
             newobj['isType'] = 'update';
@@ -56,7 +60,9 @@ async function addHistory(obj, payload, feature, type,counter) {
             newobj['isType'] = 'update';
             break;
       }
+
       let upadted = await History.create(newobj);
+      
       return upadted;
 };
 

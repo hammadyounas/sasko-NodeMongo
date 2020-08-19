@@ -5,10 +5,7 @@ const historyController = require('./history.controller')
 const jwt = require('jsonwebtoken')
 
 module.exports.getBank = (req, res) => {
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
     try{
       
       if(err) return res.status(401).send({ message: 'not authentic user' })
@@ -26,10 +23,7 @@ module.exports.getBank = (req, res) => {
 }
 
 module.exports.getBankListing = (req, res) => {
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
       try{
 
         if(err) return res.status(401).send({ message: 'not authentic user' })
@@ -54,23 +48,14 @@ module.exports.getBankListing = (req, res) => {
 }
 
 module.exports.setBank = (req, res) => {
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
       try {
 
         if(err) return res.status(401).send({ message: 'not authentic user' })
 
         await Bank.create(req.body)
 
-        await historyController.addHistory(
-          req.body.history,
-          payload,
-          'Bank',
-          'add',
-          0
-        )
+        await historyController.addHistory(req.body.history,payload,'Bank','add',0)
 
         let banks = await Bank.find({ status: true })
 
@@ -85,26 +70,14 @@ module.exports.setBank = (req, res) => {
 }
 
 module.exports.editBank = (req, res) => {
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
       try {
 
         if(err) return res.status(401).send({ message: 'not authentic user' })
 
-        await Bank.findByIdAndUpdate(
-          { _id: req.body._id, status: true },
-          req.body
-        )
+        await Bank.findByIdAndUpdate({ _id: req.body._id, status: true },req.body)
 
-        await historyController.addHistory(
-          req.body.history,
-          payload,
-          'Bank',
-          'update',
-          0
-        )
+        await historyController.addHistory(req.body.history,payload,'Bank','update',0)
 
         let banks = await Bank.find({ status: true })
 
@@ -119,10 +92,7 @@ module.exports.editBank = (req, res) => {
 }
 
 module.exports.getBankById = (req, res) => {
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
     try{
 
       if(err) return res.status(401).send({ message: 'not authentic user' });
@@ -140,19 +110,12 @@ module.exports.getBankById = (req, res) => {
 }
 
 module.exports.deleteBank = (req, res) => {
-
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
     try{
 
       if(err) return res.status(401).send({ message: 'not authentic user' });
 
-      await Bank.findByIdAndUpdate(
-        { _id: req.params.id, status: true },
-        { $set: { status: false } }
-      )
+      await Bank.findByIdAndUpdate({ _id: req.params.id, status: true },{ $set: { status: false } })
 
       return res.status(200).send({message:'Bank deleted succuessfully'})
 

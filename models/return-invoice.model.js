@@ -5,6 +5,7 @@ const returnInvoice = new Schema(
   {
     date: { type: Date, required: [true, "Please add return invoice date"] },
     invoiceDetailId: { type: Schema.Types.ObjectId, ref: 'invoiceDetails' },
+    invoiceId:{type: Schema.Types.ObjectId, ref: 'invoice'},
     returnInvoiceNo: { type: String },
     returnQty: { type: Number, required: [true, "Please add return quantity"] },
     damageQty: { type: Number, required: [true, "Please add damage quantity"] },

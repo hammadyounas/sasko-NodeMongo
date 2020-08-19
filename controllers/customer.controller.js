@@ -40,14 +40,10 @@ module.exports.getCustomerById = (req, res) => {
 }
 
 module.exports.setCustomer = (req, res) => {
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
       try{
+
+        if (err) return res.send(401).send({ message: 'not authentic user' })
 
         let result = await Customer.findOne({clientName: req.body.clientName,companyName: req.body.companyName});
 
@@ -64,15 +60,11 @@ module.exports.setCustomer = (req, res) => {
       }catch(err){
         return res.status(500).json(errorHandler(err))
       }
-    }
   })
 }
 
 module.exports.editCustomer = (req, res) => {
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
     try{
 
       if(err) return res.status(401).send({ message: 'not authentic user' });
@@ -83,11 +75,11 @@ module.exports.editCustomer = (req, res) => {
 
       await Customer.findByIdAndUpdate({ _id: req.body._id, status: true },req.body);
 
-      let customer = await Customer.findById({ _id: req.body._id });
-
       await historyController.addHistory(req.body.history,payload,'Customer','update',0);
 
-      return res.status(200).send(customer);
+      let customers = await Customer.find({ status: true });
+
+      return res.status(200).send(customers);
 
     }catch(err){
       return res.status(500).json(errorHandler(err))

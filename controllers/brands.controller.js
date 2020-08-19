@@ -6,10 +6,7 @@ const jwt = require('jsonwebtoken')
 const errorHandler = require('../utils/errorHandler')
 
 module.exports.getBrandsWithItems = async (req, res) => {
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
     try{
 
       if(err) return res.send(401).send({ message: 'not authentic user' });
@@ -19,17 +16,15 @@ module.exports.getBrandsWithItems = async (req, res) => {
       let arr = []
 
       await  Promise.all(
+
         brands.map(async obj => {
-          let item = await Items.findOne({ _id: obj.itemId })
-          let tempObj = {
-            brandName: obj.brandName,
-            _id: obj._id,
-            itemId: obj.itemId,
-            createdAt: obj.createdAt,
-            updatedAt: obj.updatedAt,
-            itemName: item.name
-          }
-          arr.push(tempObj)
+
+        let item = await Items.findOne({ _id: obj.itemId })
+        
+        let tempObj = {brandName: obj.brandName,_id: obj._id,itemId: obj.itemId,createdAt: obj.createdAt,updatedAt: obj.updatedAt,itemName: item.name}
+        
+        arr.push(tempObj)
+        
         })
       )
 
@@ -42,10 +37,7 @@ module.exports.getBrandsWithItems = async (req, res) => {
 }
 
 module.exports.getBrands = async (req, res) => {
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
       try {
         
         if(err) return res.send(401).send({ message: 'not authentic user' });
@@ -64,28 +56,21 @@ module.exports.getBrands = async (req, res) => {
 }
 
 module.exports.addBrands = (req, res) => {
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
-    if (err) {
-      res.send(401).send({ message: 'not authentic user' })
-    } else {
-      try{
-
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
+    try{
+        if (err) return res.send(401).send({ message: 'not authentic user' })
+      
         let brands = req.body.brands;
 
         let addBrands = [];
 
         await Promise.all(
           brands.map(async obj => {
-            let resp = await Brands.findOne({
-              itemId: obj.itemId,
-              brandName: obj.brandName
-            })
-            if (!resp) {
-              addBrands.push(obj)
-            }
+
+            let resp = await Brands.findOne({itemId: obj.itemId,brandName: obj.brandName})
+    
+            if (!resp) {addBrands.push(obj) }
+          
           })
         )
               
@@ -102,17 +87,11 @@ module.exports.addBrands = (req, res) => {
       }catch(err){
         return res.status(500).json(errorHandler(err))
       }
-     
-      
-    }
   })
 }
 
 module.exports.editBrands = async (req, res) => {
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
     try{
 
       if(err) return  res.send(401).send({ message: 'not authentic user' })
@@ -121,22 +100,11 @@ module.exports.editBrands = async (req, res) => {
 
       if(resp) return res.status(409).send({ message: 'conflict with same item name and brand name' })
 
-      let doc = await Brands.findByIdAndUpdate(
-        { _id: req.body._id },
-        { brandName: req.body.brandName, itemId: req.body.itemId._id },
-        { new: true }
-      ).exec();
+      let doc = await Brands.findByIdAndUpdate({ _id: req.body._id },{ brandName: req.body.brandName, itemId: req.body.itemId._id },{ new: true }).exec();
 
-      await historyController.addHistory(
-        req.body.history,
-        payload,
-        'Brand',
-        'update',
-        0
-      );
+      await historyController.addHistory(req.body.history,payload,'Brand','update',0);
 
       return res.status(200).send(doc)
-
 
     }catch(err){
       return res.status(500).json(errorHandler(error))
@@ -154,7 +122,6 @@ module.exports.deleteBrands = async (req, res) => {
 
       return res.status(200).send(brands)
 
-
     }catch(err){
       return res.status(500).json(errorHandler(error))
     }
@@ -162,10 +129,7 @@ module.exports.deleteBrands = async (req, res) => {
 }
 
 module.exports.getItemBrands = async (req, res) => {
-  jwt.verify(req.query.token, process.env.login_key, async function (
-    err,
-    payload
-  ) {
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload  ) {
     try{
 
       if(err) return res.send(401).send({ message: 'not authentic user' })
