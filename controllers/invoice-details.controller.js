@@ -69,26 +69,22 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
 
         if(err) return res.send(401).send({ message: 'not authentic user' })
 
-        let invoiceDetailsArray, invoiceVar;
+        // let invoiceDetailsArray, invoiceVar;
 
         req.body.invoice['_id'] = new mongoose.Types.ObjectId();
 
         let invoiceHistory = req.body.invoice.history;
 
-        delete req.body.invoice['history'];
-                
-        let result = await Invoice(req.body.invoice).save();
+        delete req.body.invoice['history'];               
 
-        invoiceVar = result;
-
-        await addLedgerReport(result)
-
-        req.body.invoiceDetails.map((x, i) => {
+        await Promise.all(
+          req.body.invoiceDetails.map((x, i) => {
           
-          historyController.addHistory(x.history,payload,'invoice','addInvoiceDetail',req.body.invoiceDetails.length - i);
+          historyController.addHistory(x.history,payload,'invoice','addInvoiceDetail',(req.body.invoiceDetails.length - i));
+          
           x['invoiceId'] = req.body.invoice._id;
-
-          })
+        
+        }))
 
         await Promise.all(
           req.body.invoiceDetails.map(async detail => {
@@ -132,22 +128,31 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
             )
           })
         )
-         const promise = InvoiceDetails.insertMany(req.body.invoiceDetails)
-            .then(data => {
-                historyController.addHistory(invoiceHistory,payload,'invoice','add',0)
-                invoiceDetailsArray = data
-              })
-              .catch(err => {
-                res.status(500).json(errorHandler(err))
-              })
-          
-          Promise.all([promise]).then(() => {
-          
-          return res.status(200).send({invoice: invoiceVar,invoiceDetails: invoiceDetailsArray});
 
-        })
+        let data = await InvoiceDetails.insertMany(req.body.invoiceDetails)
+
+        let result = await Invoice(req.body.invoice).save();
+
+        // invoiceVar = result;
+
+        await addLedgerReport(result)
+
+            // .then(data => {
+                
+            //   })
+            //   .catch(err => {
+            //     res.status(500).json(errorHandler(err))
+            //   })
+        historyController.addHistory(invoiceHistory,payload,'invoice','add',0)
+          
+          // invoiceDetailsArray = data;
+          // await Promise.all([promise]).then(() => {
+          
+        return res.status(200).send({invoice: result,invoiceDetails: data});
+        // })
+      
       } catch (err) {
-        res.status(500).json(errorHandler(err))
+        return res.status(500).json(errorHandler(err))
       }
   })
 }

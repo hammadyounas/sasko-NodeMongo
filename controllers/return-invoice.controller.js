@@ -179,9 +179,9 @@ module.exports.returnWholeInvoice = async (req, res) => {
 async function updateLedger (invoiceDetail){
   let ledger = await LedgerReport.find({ customerId: invoiceDetail.customerId }).sort({ createdAt: -1 }).limit(1).lean();
   
-  let newObj = {balance: 0,debit: invoiceDetail.debit,date: Date(),description: '',customerId: invoiceDetail.customerId,invoiceId: invoiceDetail._id};
+  let newObj = {balance: 0,debit: invoiceDetail.debit ? invoiceDetail.debit : 0 ,date: Date(),description: '',customerId: invoiceDetail.customerId,invoiceId: invoiceDetail._id};
 
-  if (!ledger.length) newObj['balance'] = invoiceDetail.debit;
+  if (!ledger.length) newObj['balance'] = invoiceDetail.debit ? invoiceDetail.debit : 0 ;
 
   newObj['balance'] = ledger[0].balance - invoiceDetail.debit;
 
