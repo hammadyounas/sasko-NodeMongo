@@ -183,7 +183,7 @@ async function updateLedger (invoiceDetail){
 
   if (!ledger.length) newObj['balance'] = invoiceDetail.debit ? invoiceDetail.debit : 0 ;
 
-  newObj['balance'] = ledger[0].balance - invoiceDetail.debit;
+  newObj['balance'] = ledger[0].balance - invoiceDetail.debit ? invoiceDetail.debit : 0;
 
   let updated = await LedgerReport.create(newObj);
 
