@@ -67,9 +67,19 @@ module.exports.setReturnInvoice = async (req, res) => {
 
       if (err) return res.status(401).send({ message: 'not authentic user' });
 
-      let invoice =  await Invoice.findOne({_id:req.body.invoiceId}).lean();
+      if(req.body.returnQty == 0 && req.body.damageQty == 0) return res.status(400).send({message: 'return quantity and damage quantity is not given in return invoice'}); 
+
+      let invoice =  await Invoice.findOne({_id:req.body.invoiceId}).populate('customerId', 'companyName').lean();
 
       if(invoice.postedStatus) return res.status(405).send({ message: 'You can not return this invoice, this invoice posted status is true.' });
+
+      let discription = '';
+
+      if(req.body.returnQty > 0 && req.body.damageQty == 0) discription = `${invoice.customerId.companyName} return ${req.body.returnQty} items of the invoice ${invoice.invoiceNo}`;
+
+      if(req.body.returnQty == 0 && req.body.damageQty > 0) discription = `${invoice.customerId.companyName} return ${req.body.damageQty} damage items of the invoice ${invoice.invoiceNo}`;
+
+      if(req.body.returnQty > 0 && req.body.damageQty > 0) discription = `${invoice.customerId.companyName} return ${req.body.returnQty} items and ${req.body.damageQty} damage items of the invoice ${invoice.invoiceNo}`;
 
       let invoiceDetail = await InvoiceDetails.findOne({_id: req.body.invoiceDetailId}).lean();
 
@@ -91,7 +101,7 @@ module.exports.setReturnInvoice = async (req, res) => {
 
       let createdReturnInvoice = await ReturnInvoiceDetail.create(req.body);
 
-      await addLedgerReport(createdReturnInvoice);
+      await returnInvoiceAddLedgerReport(createdReturnInvoice,discription);
 
       await checkReturnDetails(req.body.invoiceId);
 
@@ -105,11 +115,11 @@ module.exports.setReturnInvoice = async (req, res) => {
   })
 }
 
-async function addLedgerReport (invoiceDetail) {
+async function returnInvoiceAddLedgerReport (invoiceDetail,discription) {
  
   let ledger = await LedgerReport.find({ customerId: invoiceDetail.customerId }).sort({ createdAt: -1 }).limit(1);
   
-  let newObj = {balance: 0,debit: invoiceDetail.returnAmmount,date: invoiceDetail.date,description: '',customerId: invoiceDetail.customerId,invoiceId: invoiceDetail._id};
+  let newObj = {balance: 0,debit: invoiceDetail.returnAmmount,date: invoiceDetail.date,description: discription,customerId: invoiceDetail.customerId,invoiceId: invoiceDetail._id};
 
   if (!ledger.length) newObj['balance'] = invoiceDetail.returnAmmount;
 
@@ -145,11 +155,12 @@ module.exports.returnWholeInvoice = async (req, res) => {
 
           stockDetails.sort(function (a, b) {return new Date(a.date) - new Date(b.date)});
 
+          //first subtract already returned quantity from piece quantity
           await decreaseSoldQtyStockDetails(stockDetails, (detail.pieceQty-detail.returnQty));
         })
       )
 
-      let debitAmount = invoiceDetails.reduce((acc,cur)=>{return acc + ((cur.afterDiscount/cur.pieceQty) * (cur.pieceQty - cur.returnQty))},0)
+      let debitAmount = invoiceDetails.reduce((acc,cur) => {return acc + ((cur.afterDiscount/cur.pieceQty) * (cur.pieceQty - cur.returnQty))},0)
 
       await updateLedger({...invoice,debit:debitAmount})
 
@@ -179,11 +190,11 @@ module.exports.returnWholeInvoice = async (req, res) => {
 async function updateLedger (invoiceDetail){
   let ledger = await LedgerReport.find({ customerId: invoiceDetail.customerId }).sort({ createdAt: -1 }).limit(1).lean();
   
-  let newObj = {balance: 0,debit: invoiceDetail.debit ? invoiceDetail.debit : 0 ,date: Date(),description: '',customerId: invoiceDetail.customerId,invoiceId: invoiceDetail._id};
+  let newObj = {balance: 0,debit: invoiceDetail.debit ? invoiceDetail.debit : 0 ,date: Date(),description: `${invoiceDetail.invoiceNo} invoice complete returned`,customerId: invoiceDetail.customerId,invoiceId: invoiceDetail._id};
 
   if (!ledger.length) newObj['balance'] = invoiceDetail.debit ? invoiceDetail.debit : 0 ;
 
-  newObj['balance'] = ledger[0].balance - invoiceDetail.debit ? invoiceDetail.debit : 0;
+  newObj['balance'] = ledger[0].balance - invoiceDetail.debit;
 
   let updated = await LedgerReport.create(newObj);
 

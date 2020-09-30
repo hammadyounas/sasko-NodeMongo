@@ -67,7 +67,9 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
   jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
       try {
 
-        if(err) return res.send(401).send({ message: 'not authentic user' })
+        if(err) return res.status(401).send({ message: 'not authentic user' })
+
+        if(!req.body.invoiceDetails.length) return res.status(404).send({message:'without any invoice detail invoice could not be created'});
 
         // let invoiceDetailsArray, invoiceVar;
 
@@ -75,7 +77,7 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
 
         let invoiceHistory = req.body.invoice.history;
 
-        delete req.body.invoice['history'];               
+        delete req.body.invoice['history'];        
 
         await Promise.all(
           req.body.invoiceDetails.map((x, i) => {
@@ -135,7 +137,7 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
 
         // invoiceVar = result;
 
-        await addLedgerReport(result)
+        await addLedgerReport(result,`${req.body.invoice.totalQty} items sold on this invoice ${req.body.invoice.invoiceNo}`)
 
             // .then(data => {
                 
@@ -157,11 +159,11 @@ module.exports.addInvoiceDetailsWithInvoice = (req, res) => {
   })
 }
 
-async function addLedgerReport (invoiceDetail,type) {
+async function addLedgerReport (invoiceDetail,discription) {
 
       let ledger = await LedgerReport.find({ customerId: invoiceDetail.customerId }).sort({ createdAt: -1 }).limit(1);
   
-      let newObj = {balance: 0,credit: invoiceDetail.totalNetCost,date: invoiceDetail.date,description: '',customerId: invoiceDetail.customerId,invoiceId: invoiceDetail._id};
+      let newObj = {balance: 0,credit: invoiceDetail.totalNetCost,date: invoiceDetail.date,description: discription,customerId: invoiceDetail.customerId,invoiceId: invoiceDetail._id};
   
       (!ledger.length) ? newObj['balance'] = invoiceDetail.totalNetCost : newObj['balance'] = invoiceDetail.totalNetCost + ledger[0].balance;
   
@@ -178,9 +180,13 @@ async function updateLedgerOnEditInvoice(oldInvoice,newInvoice){
 
   if(oldInvoice.totalNetCost == newInvoice.totalNetCost) return true;
 
+  let description = '';
+
+  oldInvoice.totalQty >= newInvoice.totalQty ? description = `${ oldInvoice.totalQty - newInvoice.totalQty} items changes on invoice ${oldInvoice.invoiceNo}` : description = `${newInvoice.totalQty - oldInvoice.totalQty} items changes on invoice ${oldInvoice.invoiceNo}`
+
   let newObj = {balance: 0,date: newInvoice.date,description: '',customerId: newInvoice.customerId,invoiceId: newInvoice._id};
 
-  newObj = oldInvoice.totalNetCost >= newInvoice.totalNetCost ? {...newObj,balance: ledger[0].balance - (oldInvoice.totalNetCost - newInvoice.totalNetCost),debit:oldInvoice.totalNetCost - newInvoice.totalNetCost,description:'invoice updated customer decrease items quantity'} : {...newObj, balance:ledger[0].balance + (newInvoice.totalNetCost - oldInvoice.totalNetCost ),credit:(newInvoice.totalNetCost - oldInvoice.totalNetCost ),description:'invoice updated customer increase items quantity'};
+  newObj = oldInvoice.totalNetCost >= newInvoice.totalNetCost ? {...newObj,balance: ledger[0].balance - (oldInvoice.totalNetCost - newInvoice.totalNetCost),debit:oldInvoice.totalNetCost - newInvoice.totalNetCost,description:description} : {...newObj, balance:ledger[0].balance + (newInvoice.totalNetCost - oldInvoice.totalNetCost ),credit:(newInvoice.totalNetCost - oldInvoice.totalNetCost ),description:description};
 
   let updated = await LedgerReport.create(newObj);
   
@@ -196,13 +202,15 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
 
         if (req.body.invoice.postedStatus) return res.status(404).send({ message: 'can not edit this invoice detail' });
 
+        if(!req.body.invoiceDetails.length) return res.status(404).send({message:'can not update invoice without any invoice detail, please return whole invoice if you want to remove all details'});
+
         let invoiceHistory = req.body.invoice.history;
 
         delete req.body.invoice['history'];
 
-        const invoice = await Invoice.findByIdAndUpdate({ _id: req.body.invoice._id },req.body.invoice).lean()
+        const invoice = await Invoice.findByIdAndUpdate({ _id: req.body.invoice._id },req.body.invoice).lean();
 
-        await updateLedgerOnEditInvoice(invoice,req.body.invoice )
+        await updateLedgerOnEditInvoice(invoice,req.body.invoice );
 
         await Promise.all(
             
@@ -212,17 +220,18 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
               
             if (invoiceDetail._id) {
                 
-              let oldInvoiceDetail = await InvoiceDetails.findOne({_id: invoiceDetail._id})
+              let oldInvoiceDetail = await InvoiceDetails.findOne({_id: invoiceDetail._id});
                 
               if (invoiceDetail.itemId != oldInvoiceDetail.itemId || invoiceDetail.brandId != oldInvoiceDetail.brandId || invoiceDetail.modelNumber != oldInvoiceDetail.modelNumber || invoiceDetail.color != oldInvoiceDetail.color) {
                 
-                let pieceQty = oldInvoiceDetail.pieceQty
+                let pieceQty = oldInvoiceDetail.pieceQty;
                 
-                let oldStockDetails = await StockDetails.find({itemId: oldInvoiceDetail.itemId,brandId: oldInvoiceDetail.brandId,modelNumber: oldInvoiceDetail.modelNumber,color: oldInvoiceDetail.color},{ actualQty: 1, soldQty: 1, date: 1 })
+                let oldStockDetails = await StockDetails.find({itemId: oldInvoiceDetail.itemId,brandId: oldInvoiceDetail.brandId,modelNumber: oldInvoiceDetail.modelNumber,color: oldInvoiceDetail.color},{ actualQty: 1, soldQty: 1, date: 1 });
                   
-                await decreaseSoldQtyStockDetails(oldStockDetails,pieceQty)
+                await decreaseSoldQtyStockDetails(oldStockDetails,pieceQty);
                 
               }
+
               if (oldInvoiceDetail.pieceQty > invoiceDetail.pieceQty) {
 
                 let pieceQty = oldInvoiceDetail.pieceQty - invoiceDetail.pieceQty;
@@ -241,17 +250,19 @@ module.exports.editInvoiceDetailsWithInvoice = async (req, res) => {
                 
                 let pieceQty = invoiceDetail.pieceQty;
                 
-                await increaseSoldQtyStockDetails(stockDetails,pieceQty)
+                await increaseSoldQtyStockDetails(stockDetails,pieceQty);
                 
                 invoiceDetail['invoiceId'] = invoice._id;
                 
-                await InvoiceDetails(invoiceDetail).save()
+                await InvoiceDetails(invoiceDetail).save();
+              
               }
               
-              await historyController.addHistory(invoiceDetail.history,payload,'stock','updateInvoiceDetail',req.body.invoiceDetails.length - i)
+              if(invoiceDetail.history) await historyController.addHistory(invoiceDetail.history,payload,'stock','updateInvoiceDetail',req.body.invoiceDetails.length - i)
             
             })
           )
+
           await historyController.addHistory(invoiceHistory,payload,'invoice','update',0)
           
           return res.status(200).send({ message: 'invoice updated' })
@@ -371,7 +382,7 @@ module.exports.modelColorWiseSale = async (req, res) => {
 
       if (err) return res.send(401).send({ message: 'not authentic user' })
       
-      let invoiceDetails =  await InvoiceDetails.find({ status: true },{ modelNumber: 1, color: 1, rate: 1, totalCost: 1 , afterDiscount:1 , avgCost:1,discount:1}).populate('itemId', 'name').populate('brandId', 'brandName').populate({path: 'invoiceId',select: 'invoiceNo totalQty date',match:{ status: true , returnStatus:false },populate: { path: 'customerId', select: 'companyName' }}).lean()
+      let invoiceDetails =  await InvoiceDetails.find({ status: true },{ modelNumber: 1, color: 1, rate: 1, totalCost: 1 , afterDiscount:1 , avgCost:1, discount:1, pieceQty:1,returnQty:1}).populate('itemId', 'name').populate('brandId', 'brandName').populate({path: 'invoiceId',select: 'invoiceNo totalQty date',match:{ status: true , returnStatus:false },populate: { path: 'customerId', select: 'companyName' }}).lean()
 
       if (!invoiceDetails.length) return res.status(404).send({ message: 'invoice details not found' })
 

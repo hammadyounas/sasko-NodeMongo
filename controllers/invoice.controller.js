@@ -142,7 +142,7 @@ module.exports.getInvoiceById = (req, res) => {
   jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
     try{
 
-      let invoice = Invoice.findById({ _id: req.params.id, status: true,returnStatus:false });
+      let invoice = await Invoice.findById({ _id: req.params.id, status: true,returnStatus:false });
 
       return res.status(200).send(invoice);
 

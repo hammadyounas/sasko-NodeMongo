@@ -106,7 +106,7 @@ module.exports.updatePettyCash = (req, res) => {
 
       let updatePettyCash = await PettyCash.findById({ _id: req.body._id });
     
-      await historyController.addHistory(req.body.history,payload,'Payment Recieve','update',0);
+      await historyController.addHistory(req.body.history,payload,'patty cash','update',0);
 
       return res.status(200).send(updatePettyCash);
 

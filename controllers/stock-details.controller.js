@@ -349,7 +349,7 @@ module.exports.getStockOfColorModelItemAndBrand = (req, res) => {
 
       if (err) return res.send(401).send({ message: 'not authentic user' });
 
-      let result = await StockDetails.find({itemId: req.body.itemId,brandId: req.body.brandId,modelNumber: req.body.modelNumber,color: req.body.color,actualQty: { $gte: 1 }},{ actualQty: 1, totalCost: 1, initialQty: 1, unitCost: 1, date: 1 }).sort('date').exec();
+      let result = await StockDetails.find({itemId: req.body.itemId,brandId: req.body.brandId,modelNumber: req.body.modelNumber,color: req.body.color,actualQty: { $gte: 0 }},{ actualQty: 1, totalCost: 1, initialQty: 1, unitCost: 1, date: 1 }).sort('date').exec();
 
       if(!result.length) return res.status(404).send({ message: 'Stock quantity is zero of this details' });
 

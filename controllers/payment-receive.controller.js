@@ -82,7 +82,7 @@ async function setLedgerReport (receivedPayment) {
 
   let newObj = {balance: 0,description: receivedPayment.description,debit: receivedPayment.amount,date: receivedPayment.date,customerId: receivedPayment.customerId,bankId: receivedPayment.bankId,paymentId: receivedPayment._id};
 
-  if (list.length) {newObj['balance'] = list[0].balance - receivedPayment.amount};
+  newObj['balance'] = list.length ? list[0].balance - receivedPayment.amount : -receivedPayment.amount;
 
   let updated = await LedgerReport.create(newObj);
 
