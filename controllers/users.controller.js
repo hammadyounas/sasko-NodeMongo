@@ -10,7 +10,7 @@ module.exports.setUser = async (req, res) => {
   // jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
     try{
 
-      if(err) return res.send(401).send({ message: 'not authentic user' });
+      // if(err) return res.send(401).send({ message: 'not authentic user' });
 
       let userExist = await User.findOne({ userName: req.body.userName });
 
