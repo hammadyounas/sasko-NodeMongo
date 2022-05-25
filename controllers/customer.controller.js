@@ -10,25 +10,7 @@ module.exports.getCustomer = (req, res) => {
     async function (err, payload) {
       try {
         if (err) return res.status(401).send({ message: 'not authentic user' })
-        // let customers = await Customer.find({ status: true })
-        //   .skip(Number(req.query.skip))
-        //   .limit(1)
-
-        let customers = await Customer.aggregate([
-          {
-            $facet: {
-              data: [
-                { $match: { status: true } },
-                { $skip: Number(req.query.skip) },
-                { $limit: 10 },
-              ],
-              count: [{ $count: 'count' }],
-            },
-          },
-          {
-            $unwind: '$count',
-          },
-        ])
+        let customers = await Customer.find({ status: true })
 
         if (!customers.length)
           return res.status(404).send({ message: 'No Customers Found' })

@@ -15,7 +15,7 @@ module.exports.getReturnInvoice = (req, res) => {
 
         if(err) return res.send(401).send({ message: 'not authentic user' });
         
-        let invoices = await ReturnInvoice.find({ status: true }).populate({path: 'invoiceDetailId',populate: {path: 'invoiceId',select: 'invoiceNo manualBookNo  date'}}).populate('customerId', 'companyName').populate('itemId', 'name').populate('brandId', 'brandName').lean();
+        let invoices = await ReturnInvoice.find({ status: true }).populate({path: 'invoiceDetailId', populate: {path: 'invoiceId',select: 'invoiceNo manualBookNo  date'}}).populate('customerId', 'companyName').populate('itemId', 'name').populate('brandId', 'brandName').lean();
 
         if (!invoices.length) return res.status(404).send({ message: 'return invoices not found' });
 
