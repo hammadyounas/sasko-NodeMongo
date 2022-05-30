@@ -6,147 +6,120 @@ const errorHandler = require('../utils/errorHandler')
 const adminAccess = require('../utils/adminAccess')
 
 module.exports.setUser = async (req, res) => {
-  jwt.verify(
-    req.query.token,
-    process.env.login_key,
-    async function (err, payload) {
-      try {
-        if (err) return res.send(401).send({ message: 'not authentic user' })
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
+    try{
 
-        let userExist = await User.findOne({ userName: req.body.userName })
+      if(err) return res.send(401).send({ message: 'not authentic user' });
 
-        if (userExist)
-          return res
-            .status(409)
-            .send({ message: 'user with this user name already exists' })
+      let userExist = await User.findOne({ userName: req.body.userName });
 
-        let obj = { password: req.body.password }
+      if(userExist) return res.status(409).send({ message: 'user with this user name already exists' });
 
-        const hash = bcryptService().password(obj)
+      let obj = { password: req.body.password };
 
-        req.body['password'] = hash
+      const hash = bcryptService().password(obj);
 
-        let rolesCreated =
-          req.body.role === 'admin'
-            ? await UserRoles.create(adminAccess)
-            : await UserRoles.create({})
+      req.body['password'] = hash;
 
-        req.body['userRoles'] = rolesCreated._id
+      let rolesCreated =  req.body.role === 'admin' ? await UserRoles.create(adminAccess) : await UserRoles.create({});
 
-        await User.create(req.body)
+      req.body['userRoles'] = rolesCreated._id;
 
-        return res.status(200).json({ success: 'New user has been created' })
-      } catch (err) {
-        return res.status(500).json(errorHandler(err))
-      }
+      await User.create(req.body);
+
+      return res.status(200).json({success: 'New user has been created'});
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err));
     }
-  )
+  })
 }
 
 module.exports.getUser = (req, res) => {
-  jwt.verify(
-    req.query.token,
-    process.env.login_key,
-    async function (err, payload) {
-      try {
-        if (err) return res.send(401).send({ message: 'not authentic user' })
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
+    try{
 
-        let user = await User.find({ status: true }, { password: 0 })
+      if(err) return res.send(401).send({ message: 'not authentic user' });
 
-        if (!user)
-          return res.status(404).send({ message: 'Users data not found' })
+      let user = await User.find({ status: true }, { password: 0 });
 
-        return res.status(200).send(user)
-      } catch (err) {
-        return res.status(500).json(errorHandler(err))
-      }
+      if(!user) return res.status(404).send({ message: 'Users data not found' });
+
+      return res.status(200).send(user);
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err));
     }
-  )
+  })
 }
 
 module.exports.getUserNameList = (req, res) => {
-  jwt.verify(
-    req.query.token,
-    process.env.login_key,
-    async function (err, payload) {
-      try {
-        if (err) return res.send(401).send({ message: 'not authentic user' })
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
+    try{
 
-        let user = await User.find({ status: true }, { userName: 1 })
+      if(err) return res.send(401).send({ message: 'not authentic user' });
 
-        if (!user)
-          return res.status(404).send({ message: 'Users name not found' })
+      let user = await User.find({ status: true }, { userName: 1 });
 
-        return res.status(200).send(user)
-      } catch (err) {
-        return res.status(500).json(errorHandler(err))
-      }
+      if(!user) return res.status(404).send({ message: 'Users name not found' });
+
+      return res.status(200).send(user);
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err));
     }
-  )
+  })
 }
 
 module.exports.updateUser = (req, res) => {
-  jwt.verify(
-    req.query.token,
-    process.env.login_key,
-    async function (err, payload) {
-      try {
-        if (err) return res.status(401).send({ message: 'not authentic user' })
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
+    try{
 
-        let user = await User.findOne({ _id: req.body._id, status: true })
+      if(err) return res.status(401).send({ message: 'not authentic user' });
 
-        if (user && req.body.password && req.body.password != '') {
-          let obj = { password: req.body.password }
+      let user = await User.findOne({ _id: req.body._id,status:true });
 
-          const hash = bcryptService().password(obj)
+      if (user && req.body.password && req.body.password != '' ) {
 
-          req.body['password'] = hash
+        let obj = { password: req.body.password };
 
-          let updatedUserPassword = await User.findOneAndUpdate(
-            { _id: req.body._id },
-            req.body
-          )
+        const hash = bcryptService().password(obj);
 
-          return res.status(200).send(updatedUserPassword)
-        } else {
-          let updatedUser = await User.findOneAndUpdate(
-            { _id: req.body._id },
-            req.body
-          )
+        req.body['password'] = hash;
 
-          return res.status(200).send(updatedUser)
-        }
-      } catch (err) {
-        return res.status(500).json(errorHandler(err))
+        let updatedUserPassword = await User.findOneAndUpdate({ _id: req.body._id }, req.body);
+
+        return res.status(200).send(updatedUserPassword);
+
+      }else{
+        let updatedUser = await User.findOneAndUpdate({ _id: req.body._id }, req.body);
+
+        return res.status(200).send(updatedUser);
       }
+    }catch(err){
+      return res.status(500).json(errorHandler(err));
     }
-  )
+  })
 }
 
 module.exports.deleteUser = (req, res) => {
-  jwt.verify(
-    req.query.token,
-    process.env.login_key,
-    async function (err, payload) {
-      try {
-        if (err) return res.status(401).send({ message: 'not authentic user' })
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
+    try{
 
-        if (payload.role != 'admin')
-          return res
-            .status(404)
-            .send({ message: 'You have no permission to delete the user' })
+      if(err) return res.status(401).send({ message: 'not authentic user' });
 
-        await User.findOneAndUpdate({ _id: req.body.userId }, { status: false })
+      if (payload.role != 'admin') return res.status(404).send({ message: 'You have no permission to delete the user' });
 
-        let users = await User.find({ status: true }, { password: 0 })
+      await User.findOneAndUpdate({ _id: req.body.userId },{status:false});
 
-        if (!users)
-          return res.status(404).send({ message: 'Users data not found' })
+      let users = await User.find({ status: true }, { password: 0 });
 
-        return res.status(200).send(users)
-      } catch (err) {
-        return res.status(500).json(errorHandler(err))
-      }
+      if(!users) return res.status(404).send({ message: 'Users data not found' });
+
+      return res.status(200).send(users);
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
-  )
+  })
 }

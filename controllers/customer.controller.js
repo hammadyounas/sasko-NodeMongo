@@ -4,140 +4,103 @@ const historyController = require('./history.controller')
 const jwt = require('jsonwebtoken')
 
 module.exports.getCustomer = (req, res) => {
-  jwt.verify(
-    req.query.token,
-    process.env.login_key,
-    async function (err, payload) {
-      try {
-        if (err) return res.status(401).send({ message: 'not authentic user' })
-        let customers = await Customer.find({ status: true })
+  jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {
+    try{
 
-        if (!customers.length)
-          return res.status(404).send({ message: 'No Customers Found' })
+      if(err) return res.status(401).send({ message: 'not authentic user' })
 
-        return res.status(200).send(customers)
-      } catch (err) {
-        return res.status(500).json(errorHandler(err))
-      }
+      let customers = await Customer.find({ status: true })
+
+      if(!customers.length) return res.status(404).send({ message: 'No Customers Found' })
+
+      return res.status(200).send(customers)
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
-  )
+  })
 }
 
 module.exports.getCustomerById = (req, res) => {
-  jwt.verify(
-    req.query.token,
-    process.env.login_key,
-    async function (err, payload) {
-      try {
-        if (err) return res.status(401).send({ message: 'not authentic user' })
+  jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {
+    try{
 
-        let customer = await Customer.findById({
-          _id: req.params.id,
-          status: true,
-        })
+      if(err) return res.status(401).send({ message: 'not authentic user' })
 
-        if (!customer)
-          return res.status(404).send({ message: 'No customer Found' })
+      let customer = await Customer.findById({ _id: req.params.id, status: true })
 
-        return res.status(200).send(customer)
-      } catch (err) {
-        return res.status(500).json(errorHandler(err))
-      }
+      if(!customer) return res.status(404).send({ message: 'No customer Found' })
+
+      return res.status(200).send(customer)
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
-  )
+  })
 }
 
 module.exports.setCustomer = (req, res) => {
-  jwt.verify(
-    req.query.token,
-    process.env.login_key,
-    async function (err, payload) {
-      try {
-        if (err) return res.send(401).send({ message: 'not authentic user' })
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
+    try{
 
-        let result = await Customer.findOne({
-          clientName: req.body.clientName,
-          companyName: req.body.companyName,
-        })
+      if (err) return res.send(401).send({ message: 'not authentic user' })
 
-        if (result)
-          return res.status(409).send({ message: 'customer already exist' })
+      let result = await Customer.findOne({clientName: req.body.clientName,companyName: req.body.companyName});
 
-        await Customer.create(req.body)
+      if(result) return res.status(409).send({ message: 'customer already exist' });
 
-        await historyController.addHistory(
-          req.body.history,
-          payload,
-          'Customer',
-          'add',
-          0
-        )
+      await Customer.create(req.body);
 
-        let customers = await Customer.find({ status: true })
+      await historyController.addHistory(req.body.history,payload,'Customer','add',0);
 
-        return res.status(200).send(customers)
-      } catch (err) {
-        return res.status(500).json(errorHandler(err))
-      }
+      let customers = await Customer.find({ status: true });
+
+      return res.status(200).send(customers);
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
-  )
+  })
 }
 
 module.exports.editCustomer = (req, res) => {
-  jwt.verify(
-    req.query.token,
-    process.env.login_key,
-    async function (err, payload) {
-      try {
-        if (err) return res.status(401).send({ message: 'not authentic user' })
+  jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
+    try{
 
-        let result = await Customer.findById({ _id: req.body._id })
+      if(err) return res.status(401).send({ message: 'not authentic user' });
 
-        if (!result)
-          return res.status(409).send({ message: 'customer not exist' })
+      let result = await Customer.findById({ _id: req.body._id });
 
-        await Customer.findByIdAndUpdate(
-          { _id: req.body._id, status: true },
-          req.body
-        )
+      if(!result) return res.status(409).send({ message: 'customer not exist' });
 
-        await historyController.addHistory(
-          req.body.history,
-          payload,
-          'Customer',
-          'update',
-          0
-        )
+      await Customer.findByIdAndUpdate({ _id: req.body._id, status: true },req.body);
 
-        let customers = await Customer.find({ status: true })
+      await historyController.addHistory(req.body.history,payload,'Customer','update',0);
 
-        return res.status(200).send(customers)
-      } catch (err) {
-        return res.status(500).json(errorHandler(err))
-      }
+      let customers = await Customer.find({ status: true });
+
+      return res.status(200).send(customers);
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
-  )
+  })
 }
 
 module.exports.deleteCustomer = (req, res) => {
-  jwt.verify(
-    req.query.token,
-    process.env.login_key,
-    async function (err, payload) {
-      try {
-        if (err) return res.send(401).send({ message: 'not authentic user' })
+  jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {
+    try{
 
-        await Customer.findByIdAndUpdate(
-          { _id: req.params.id, status: true },
-          { $set: { status: false } }
-        )
+      if(err) return res.send(401).send({ message: 'not authentic user' })
 
-        let customer = await Customer.findById({ _id: req.params.id })
+      await Customer.findByIdAndUpdate({ _id: req.params.id, status: true },{ $set: { status: false } });
 
-        return res.status(200).send(customer)
-      } catch (err) {
-        return res.status(500).json(errorHandler(err))
-      }
+      let customer = await  Customer.findById({ _id: req.params.id });
+
+      return res.status(200).send(customer);
+
+    }catch(err){
+      return res.status(500).json(errorHandler(err))
     }
-  )
+  })
 }
