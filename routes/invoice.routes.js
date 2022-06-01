@@ -4,7 +4,6 @@ const routes = express.Router();
 const invoiceController = require('../controllers/invoice.controller');
 
 routes.get('/', invoiceController.getInvoice);
-// routes.get('/getInvoicesSummery',invoiceController.getInvoicesSummery);
 routes.post('/getSummeryDetails',invoiceController.getSummeryDetails)
 routes.get('/getInvoiceId', invoiceController.getInvoiceId);
 routes.get('/:id', invoiceController.getInvoiceById);

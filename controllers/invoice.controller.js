@@ -12,12 +12,17 @@ module.exports.getInvoice = (req, res) => {
 
         if (err) return res.send(401).send({ message: 'not authentic user' })
 
-        let invoices = await Invoice.find({ status: true , returnStatus:false},{status:0,returnStatus:0}).populate('customerId', 'companyName').lean().exec();
+        let invoices = await Invoice.find({ status: true , returnStatus: false },  { status: 0, returnStatus: 0 }).populate('customerId', 'companyName').lean().exec();
 
-        if(!invoices.length) return res.status(404).send({ message: 'Invoices data not found' });
+        if (!invoices.length) return res.status(404).send({ message: 'Invoices data not found' });
 
         await Promise.all(
-          invoices.map((invoice,i) =>{
+          invoices.map(async (invoice, i) => {
+              const invoiceDetails = await InvoiceDetails.find({invoiceId: invoice._id}).populate('itemId', 'name').populate('brandId', 'brandName').lean().exec();
+              
+              const cost = invoiceDetails.reduce((acc, cur) => { return acc += (cur.avgCost * cur.pieceQty) }, 0);
+              
+              invoice['buyCost'] = cost;
               invoices[i]['companyName'] = invoice.customerId.companyName;
               invoices[i]['customerId'] = invoice.customerId._id;
           })
@@ -36,13 +41,10 @@ module.exports.getSummeryDetails = async (req,res) => {
     
     try{
 
-        
     let detailQuery = {};
     
     let invoiceQuery = {};
-    
-    let matchQuery = {}
-      
+          
     req.body.itemId ? (detailQuery['itemId'] = req.body.itemId ) : "";
     
     req.body.brandId ? (detailQuery['brandId'] = req.body.brandId ) : "";
@@ -142,7 +144,7 @@ module.exports.getInvoiceById = (req, res) => {
   jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
     try{
 
-      let invoice = await Invoice.findById({ _id: req.params.id, status: true,returnStatus:false });
+      let invoice = await Invoice.findById({ _id: req.params.id, status: true, returnStatus:false });
 
       return res.status(200).send(invoice);
 

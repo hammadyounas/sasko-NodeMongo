@@ -5,7 +5,6 @@ const UserRoles = require('./../models/user-roles.model')
 const errorHandler = require('../utils/errorHandler')
 const adminAccess = require('../utils/adminAccess')
 
-
 module.exports.setUser = async (req, res) => {
   jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
     try{
@@ -15,9 +14,9 @@ module.exports.setUser = async (req, res) => {
       let userExist = await User.findOne({ userName: req.body.userName });
 
       if(userExist) return res.status(409).send({ message: 'user with this user name already exists' });
-      
+
       let obj = { password: req.body.password };
-      
+
       const hash = bcryptService().password(obj);
 
       req.body['password'] = hash;
@@ -81,15 +80,15 @@ module.exports.updateUser = (req, res) => {
       let user = await User.findOne({ _id: req.body._id,status:true });
 
       if (user && req.body.password && req.body.password != '' ) {
-        
+
         let obj = { password: req.body.password };
-        
+
         const hash = bcryptService().password(obj);
-        
+
         req.body['password'] = hash;
-        
+
         let updatedUserPassword = await User.findOneAndUpdate({ _id: req.body._id }, req.body);
-        
+
         return res.status(200).send(updatedUserPassword);
 
       }else{
@@ -124,4 +123,3 @@ module.exports.deleteUser = (req, res) => {
     }
   })
 }
-
