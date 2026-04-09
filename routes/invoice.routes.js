@@ -5,6 +5,7 @@ const invoiceController = require('../controllers/invoice.controller');
 
 routes.get('/', invoiceController.getInvoice);
 routes.post('/getSummeryDetails',invoiceController.getSummeryDetails)
+routes.post('/listReport', invoiceController.getInvoiceReportPage)
 routes.get('/getInvoiceId', invoiceController.getInvoiceId);
 routes.get('/:id', invoiceController.getInvoiceById);
 routes.get('/getInvoiceWithInvoiceDetails/:id', invoiceController.getInvoiceWithInvoiceDetails);

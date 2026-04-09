@@ -1,10 +1,111 @@
 const mongoose = require('mongoose')
 const StockDetails = require('../models/stock-details.model')
 const Stock = require('../models/stock.model')
+const Item = require('../models/item.model')
+const Brand = require('../models/brand.model')
 const historyController = require('./history.controller')
 const jwt = require('jsonwebtoken')
 const errorHandler = require('../utils/errorHandler')
 
+function escapeRegex(s) {
+  return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+async function buildStockReportFilter(body) {
+  const filter = {}
+  let impossible = false
+  const fd = body.fromDate ? String(body.fromDate).slice(0, 10) : null
+  const td = body.toDate ? String(body.toDate).slice(0, 10) : null
+  if (fd && td) {
+    filter.date = { $gte: fd, $lte: td }
+  } else if (fd) {
+    filter.date = { $gte: fd }
+  } else if (td) {
+    filter.date = { $lte: td }
+  }
+  if (body.modelNumber) {
+    filter.modelNumber = new RegExp(escapeRegex(body.modelNumber), 'i')
+  }
+  if (body.color) {
+    filter.color = new RegExp(escapeRegex(body.color), 'i')
+  }
+  if (body.itemName) {
+    const items = await Item.find({ name: new RegExp(escapeRegex(String(body.itemName)), 'i') })
+      .select('_id')
+      .lean()
+    if (!items.length) impossible = true
+    else filter.itemId = { $in: items.map((i) => i._id) }
+  }
+  if (body.brandName) {
+    const brands = await Brand.find({ brandName: new RegExp(escapeRegex(String(body.brandName)), 'i') })
+      .select('_id')
+      .lean()
+    if (!brands.length) impossible = true
+    else filter.brandId = { $in: brands.map((b) => b._id) }
+  }
+  if (body.remainingOnly === true) {
+    filter.actualQty = { $gt: 0 }
+  }
+  if (impossible) {
+    filter._id = { $in: [] }
+  }
+  return filter
+}
+
+module.exports.getStockReportPage = (req, res) => {
+  jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {
+    try {
+      if (err) return res.status(401).send({ message: 'not authentic user' })
+      const body = req.body || {}
+      const page = Math.max(1, parseInt(body.page, 10) || 1)
+      const rawLimit = parseInt(body.pageSize, 10) || 25
+      const pageSize = Math.min(200, Math.max(1, rawLimit))
+      const skip = (page - 1) * pageSize
+
+      const filter = await buildStockReportFilter(body)
+
+      const [total, details, summaryResult] = await Promise.all([
+        StockDetails.countDocuments(filter),
+        StockDetails.find(filter)
+          .populate('itemId', 'name')
+          .populate('brandId', 'brandName')
+          .populate('stock', 'stockId')
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(pageSize)
+          .lean(),
+        StockDetails.aggregate([
+          { $match: filter },
+          {
+            $group: {
+              _id: null,
+              totalQty: { $sum: '$initialQty' },
+              totalDamageQty: { $sum: '$damageQty' },
+              netQty: { $sum: '$actualQty' },
+              totalNetCost: { $sum: { $multiply: ['$unitCost', '$actualQty'] } }
+            }
+          }
+        ])
+      ])
+
+      const s = summaryResult[0] || {}
+      return res.status(200).send({
+        data: details,
+        total,
+        page,
+        pageSize,
+        summary: {
+          totalQty: s.totalQty || 0,
+          totalDamageQty: s.totalDamageQty || 0,
+          netQty: s.netQty || 0,
+          totalNetCost: s.totalNetCost || 0
+        }
+      })
+    } catch (err) {
+      return res.status(500).json(errorHandler(err))
+    }
+  })
+}
 
 module.exports.getStockDetails = (req, res) => {
   jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {

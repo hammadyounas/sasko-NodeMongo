@@ -6,6 +6,108 @@ const errorHandler = require('../utils/errorHandler')
 const sixDigits = require('../utils/sixDigits')
 const jwt = require('jsonwebtoken')
 
+function buildReportFilters(body) {
+  const detailQuery = {}
+  const invoiceQuery = {}
+  if (body.itemId) detailQuery.itemId = body.itemId
+  if (body.brandId) detailQuery.brandId = body.brandId
+  if (body.modelNumber) detailQuery.modelNumber = body.modelNumber
+  if (body.color) detailQuery.color = body.color
+  if (body.fromDate) invoiceQuery.date = { $gte: new Date(body.fromDate) }
+  if (body.toDate) invoiceQuery.date = { $gte: new Date(body.toDate) }
+  if (body.fromDate && body.toDate) {
+    invoiceQuery.date = { $gte: new Date(body.fromDate), $lte: new Date(body.toDate) }
+  }
+  if (body.customerId) invoiceQuery.customerId = body.customerId
+  if (body.invoiceNo) invoiceQuery.invoiceNo = body.invoiceNo
+  if (body.manualBookNo) invoiceQuery.manualBookNo = body.manualBookNo
+  invoiceQuery.status = true
+  invoiceQuery.returnStatus = false
+  if (body.postedOnly === true) invoiceQuery.postedStatus = true
+  const hasDetailFilters = !!(body.itemId || body.brandId || body.modelNumber || body.color)
+  return { detailQuery, invoiceQuery, hasDetailFilters }
+}
+
+async function enrichInvoicesWithBuyCost(invoices) {
+  await Promise.all(
+    invoices.map(async (invoice, i) => {
+      const invoiceDetails = await InvoiceDetails.find({ invoiceId: invoice._id })
+        .populate('itemId', 'name')
+        .populate('brandId', 'brandName')
+        .lean()
+        .exec()
+      const cost = invoiceDetails.reduce((acc, cur) => acc + cur.avgCost * cur.pieceQty, 0)
+      invoices[i].buyCost = cost
+      if (invoice.customerId && invoice.customerId.companyName) {
+        invoices[i].companyName = invoice.customerId.companyName
+        invoices[i].customerId = invoice.customerId._id
+      }
+    })
+  )
+}
+
+module.exports.getInvoiceReportPage = (req, res) => {
+  jwt.verify(req.query.token, process.env.login_key, async function (err, payload) {
+    try {
+      if (err) return res.status(401).send({ message: 'not authentic user' })
+      const body = req.body || {}
+      const page = Math.max(1, parseInt(body.page, 10) || 1)
+      const rawLimit = parseInt(body.pageSize, 10) || 25
+      const pageSize = Math.min(200, Math.max(1, rawLimit))
+      const skip = (page - 1) * pageSize
+      const { detailQuery, invoiceQuery, hasDetailFilters } = buildReportFilters(body)
+
+      let invoices = []
+      let total = 0
+
+      if (!hasDetailFilters) {
+        total = await Invoice.countDocuments(invoiceQuery)
+        invoices = await Invoice.find(invoiceQuery)
+          .select({ status: 0, returnStatus: 0 })
+          .populate('customerId', 'companyName')
+          .sort({ date: -1, createdAt: -1 })
+          .skip(skip)
+          .limit(pageSize)
+          .lean()
+          .exec()
+      } else {
+        const details = await InvoiceDetails.find(detailQuery)
+          .populate({ path: 'invoiceId', match: invoiceQuery })
+          .lean()
+        const seen = new Map()
+        for (const d of details) {
+          if (d.invoiceId && d.invoiceId._id) {
+            const idStr = d.invoiceId._id.toString()
+            if (!seen.has(idStr)) seen.set(idStr, d.invoiceId)
+          }
+        }
+        const invList = Array.from(seen.values())
+        invList.sort((a, b) => {
+          const da = new Date(a.date || a.createdAt || 0).getTime()
+          const db = new Date(b.date || b.createdAt || 0).getTime()
+          return db - da
+        })
+        total = invList.length
+        const pageSlice = invList.slice(skip, skip + pageSize)
+        const ids = pageSlice.map((inv) => inv._id)
+        if (ids.length) {
+          invoices = await Invoice.find({ _id: { $in: ids } })
+            .select({ status: 0, returnStatus: 0 })
+            .populate('customerId', 'companyName')
+            .lean()
+          const order = new Map(ids.map((id, idx) => [id.toString(), idx]))
+          invoices.sort((a, b) => order.get(a._id.toString()) - order.get(b._id.toString()))
+        }
+      }
+
+      await enrichInvoicesWithBuyCost(invoices)
+      return res.status(200).send({ data: invoices, total, page, pageSize })
+    } catch (err) {
+      return res.status(500).json(errorHandler(err))
+    }
+  })
+}
+
 module.exports.getInvoice = (req, res) => {
   jwt.verify(req.query.token, process.env.login_key, async function (err,payload) {
       try{

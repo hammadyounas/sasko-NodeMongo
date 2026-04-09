@@ -8,8 +8,8 @@ node_modules/
 /tmp
 /out-tsc
 
-# credentials
-/.env
+# Local environment (secrets, DB URL) — use .env.example as a template
+.env
 
 # Only exists if Bazel was run
 /bazel-out

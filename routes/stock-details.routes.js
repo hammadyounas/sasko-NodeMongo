@@ -4,6 +4,7 @@ const routes = express.Router()
 const stockDetails = require('../controllers/stock-details.controller')
 
 routes.get('/', stockDetails.getStockDetails);
+routes.post('/listReport', stockDetails.getStockReportPage);
 routes.post('/', stockDetails.addStockDetailsWithStock);
 routes.delete('/:id', stockDetails.deleteStockDetails);
 routes.put('/', stockDetails.editStockDetails);
